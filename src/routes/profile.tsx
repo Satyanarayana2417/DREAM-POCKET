@@ -2,8 +2,9 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { LogOut, User, Mail, Calendar, Shield, Edit2, Check, X } from "lucide-react";
 import { format } from "date-fns";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { Download, CheckCircle2 } from "lucide-react";
 
 import { useAuth } from "@/lib/auth";
 import { updateUserDoc } from "@/lib/data";
@@ -58,11 +59,37 @@ function ProfileRoute() {
   });
 
   const saveName = () => {
-    if (editName.trim().length < 2) {
-      toast.error("Name must be at least 2 characters");
+    if (!editName.trim()) return;
+    if (editName === profile?.username) {
+      setIsEditingName(false);
       return;
     }
     updateNameMutation.mutate(editName.trim());
+  };
+
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [isInstalled, setIsInstalled] = useState(false);
+
+  useEffect(() => {
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setIsInstalled(true);
+    }
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setIsInstalled(true);
+      setInstallPrompt(null);
+    }
   };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -239,6 +266,36 @@ function ProfileRoute() {
               <p className="text-sm font-medium">Member Since</p>
               <p className="text-sm text-muted-foreground">{format(joinDate, "MMMM yyyy")}</p>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">App Settings</CardTitle>
+          <CardDescription>Preferences and installation</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-xl">
+            <div>
+              <p className="font-semibold text-slate-900">Install Application</p>
+              <p className="text-sm text-slate-500">Get the best experience on your device</p>
+            </div>
+            {isInstalled ? (
+              <div className="flex items-center gap-1.5 text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full text-sm font-semibold border border-emerald-100">
+                <CheckCircle2 className="size-4" /> Installed
+              </div>
+            ) : installPrompt ? (
+              <Button onClick={handleInstallClick} className="bg-emerald-600 hover:bg-emerald-700">
+                <Download className="size-4 mr-2" /> Install App
+              </Button>
+            ) : (
+              <p className="text-xs font-medium text-slate-400 max-w-[120px] text-right">
+                {navigator.userAgent.match(/iphone|ipad|ipod/i) 
+                  ? "Tap Share -> Add to Home Screen" 
+                  : "Not supported or already installed"}
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>

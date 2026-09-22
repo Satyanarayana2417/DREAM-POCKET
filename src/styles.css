@@ -215,3 +215,5 @@
 @utility pb-safe {
   padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
 }
+@keyframes splash-pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } }
+.animate-splash { animation: splash-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }

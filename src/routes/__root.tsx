@@ -6,6 +6,7 @@ import {
   useRouter,
 } from "@tanstack/react-router";
 import { AuthProvider } from "../lib/auth";
+import { PWAPrompt } from "../components/PWAPrompt";
 
 function NotFoundComponent() {
   return (
@@ -74,6 +75,7 @@ function RootComponent() {
   return (
     <AuthProvider>
       <Outlet />
+      <PWAPrompt />
     </AuthProvider>
   );
 }
