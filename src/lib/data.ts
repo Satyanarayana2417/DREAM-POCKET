@@ -30,9 +30,9 @@ export async function upsertUserDoc(input: {
   const existing = await getDoc(ref);
   if (existing.exists()) {
     await updateDoc(ref, {
-      username: input.username || existing.data().username || "",
+      username: input.username || existing.data()['username'] || "",
       email: input.email,
-      photoURL: input.photoURL ?? existing.data().photoURL ?? null,
+      photoURL: input.photoURL ?? existing.data()['photoURL'] ?? null,
       updatedAt: serverTimestamp(),
     });
   } else {
@@ -131,7 +131,7 @@ export async function saveBudget(userId: string, month: string, amount: number) 
       userId,
       month,
       budget: amount,
-      createdAt: existing.exists() ? existing.data().createdAt : serverTimestamp(),
+      createdAt: existing.exists() ? existing.data()['createdAt'] : serverTimestamp(),
       updatedAt: serverTimestamp(),
     },
     { merge: true },
