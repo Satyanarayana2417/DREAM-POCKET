@@ -128,7 +128,7 @@ export function Avatar({
   name,
   size = 36,
 }: {
-  photoURL?: string | null;
+  photoURL?: string | null | undefined;
   name: string;
   size?: number;
 }) {
