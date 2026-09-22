@@ -1,4 +1,4 @@
-@import "tailwindcss" source(none);
+@import "tailwindcss";
 @source "../src";
 @import "tw-animate-css";
 
@@ -70,11 +70,10 @@
   --shadow-card: var(--shadow-card);
 }
 
-
 :root {
   --radius: 1rem;
-  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Poppins", ui-sans-serif, system-ui, sans-serif;
 
   --background: oklch(0.985 0.008 150);
   --foreground: oklch(0.26 0.03 170);
@@ -118,7 +117,6 @@
   --sidebar-border: oklch(0.915 0.015 165);
   --sidebar-ring: oklch(0.62 0.12 172);
 }
-
 
 .dark {
   --background: oklch(0.129 0.042 264.695);
@@ -172,6 +170,16 @@
   }
   body {
     font-family: var(--font-body);
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
   }
   h1,
   h2,

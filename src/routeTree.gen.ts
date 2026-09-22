@@ -10,13 +10,36 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AddExpenseRouteImport } from './routes/add-expense'
+import { Route as BudgetRouteImport } from './routes/budget'
+import { Route as ExpensesRouteImport } from './routes/expenses'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as EditExpenseIdRouteImport } from './routes/edit-expense.$id'
+import { Route as FamilyBudgetIndexRouteImport } from './routes/family-budget/index'
+import { Route as FamilyBudgetFamilyIdRouteImport } from './routes/family-budget/$familyId'
+import { Route as FamilyBudgetFamilyIdMemberMemberIdRouteImport } from './routes/family-budget_.$familyId_.member.$memberId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AddExpenseRoute = AddExpenseRouteImport.update({
+  id: '/add-expense',
+  path: '/add-expense',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BudgetRoute = BudgetRouteImport.update({
+  id: '/budget',
+  path: '/budget',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExpensesRoute = ExpensesRouteImport.update({
+  id: '/expenses',
+  path: '/expenses',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -29,44 +52,139 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EditExpenseIdRoute = EditExpenseIdRouteImport.update({
+  id: '/edit-expense/$id',
+  path: '/edit-expense/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FamilyBudgetIndexRoute = FamilyBudgetIndexRouteImport.update({
+  id: '/family-budget/',
+  path: '/family-budget/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FamilyBudgetFamilyIdRoute = FamilyBudgetFamilyIdRouteImport.update({
+  id: '/family-budget/$familyId',
+  path: '/family-budget/$familyId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FamilyBudgetFamilyIdMemberMemberIdRoute =
+  FamilyBudgetFamilyIdMemberMemberIdRouteImport.update({
+    id: '/family-budget_/$familyId_/member/$memberId',
+    path: '/family-budget/$familyId/member/$memberId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/add-expense': typeof AddExpenseRoute
+  '/budget': typeof BudgetRoute
+  '/expenses': typeof ExpensesRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/signup': typeof SignupRoute
+  '/edit-expense/$id': typeof EditExpenseIdRoute
+  '/family-budget/$familyId': typeof FamilyBudgetFamilyIdRoute
+  '/family-budget/': typeof FamilyBudgetIndexRoute
+  '/family-budget/$familyId/member/$memberId': typeof FamilyBudgetFamilyIdMemberMemberIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/add-expense': typeof AddExpenseRoute
+  '/budget': typeof BudgetRoute
+  '/expenses': typeof ExpensesRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/signup': typeof SignupRoute
+  '/edit-expense/$id': typeof EditExpenseIdRoute
+  '/family-budget/$familyId': typeof FamilyBudgetFamilyIdRoute
+  '/family-budget': typeof FamilyBudgetIndexRoute
+  '/family-budget/$familyId/member/$memberId': typeof FamilyBudgetFamilyIdMemberMemberIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/add-expense': typeof AddExpenseRoute
+  '/budget': typeof BudgetRoute
+  '/expenses': typeof ExpensesRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/signup': typeof SignupRoute
+  '/edit-expense/$id': typeof EditExpenseIdRoute
+  '/family-budget/$familyId': typeof FamilyBudgetFamilyIdRoute
+  '/family-budget/': typeof FamilyBudgetIndexRoute
+  '/family-budget_/$familyId_/member/$memberId': typeof FamilyBudgetFamilyIdMemberMemberIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/forgot-password' | '/login' | '/signup'
+  fullPaths:
+    | '/'
+    | '/add-expense'
+    | '/budget'
+    | '/expenses'
+    | '/forgot-password'
+    | '/login'
+    | '/profile'
+    | '/signup'
+    | '/edit-expense/$id'
+    | '/family-budget/$familyId'
+    | '/family-budget/'
+    | '/family-budget/$familyId/member/$memberId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/forgot-password' | '/login' | '/signup'
-  id: '__root__' | '/' | '/forgot-password' | '/login' | '/signup'
+  to:
+    | '/'
+    | '/add-expense'
+    | '/budget'
+    | '/expenses'
+    | '/forgot-password'
+    | '/login'
+    | '/profile'
+    | '/signup'
+    | '/edit-expense/$id'
+    | '/family-budget/$familyId'
+    | '/family-budget'
+    | '/family-budget/$familyId/member/$memberId'
+  id:
+    | '__root__'
+    | '/'
+    | '/add-expense'
+    | '/budget'
+    | '/expenses'
+    | '/forgot-password'
+    | '/login'
+    | '/profile'
+    | '/signup'
+    | '/edit-expense/$id'
+    | '/family-budget/$familyId'
+    | '/family-budget/'
+    | '/family-budget_/$familyId_/member/$memberId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AddExpenseRoute: typeof AddExpenseRoute
+  BudgetRoute: typeof BudgetRoute
+  ExpensesRoute: typeof ExpensesRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
+  ProfileRoute: typeof ProfileRoute
   SignupRoute: typeof SignupRoute
+  EditExpenseIdRoute: typeof EditExpenseIdRoute
+  FamilyBudgetFamilyIdRoute: typeof FamilyBudgetFamilyIdRoute
+  FamilyBudgetIndexRoute: typeof FamilyBudgetIndexRoute
+  FamilyBudgetFamilyIdMemberMemberIdRoute: typeof FamilyBudgetFamilyIdMemberMemberIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -76,6 +194,27 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/add-expense': {
+      id: '/add-expense'
+      path: '/add-expense'
+      fullPath: '/add-expense'
+      preLoaderRoute: typeof AddExpenseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/budget': {
+      id: '/budget'
+      path: '/budget'
+      fullPath: '/budget'
+      preLoaderRoute: typeof BudgetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/expenses': {
+      id: '/expenses'
+      path: '/expenses'
+      fullPath: '/expenses'
+      preLoaderRoute: typeof ExpensesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -92,6 +231,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
@@ -99,25 +245,52 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/edit-expense/$id': {
+      id: '/edit-expense/$id'
+      path: '/edit-expense/$id'
+      fullPath: '/edit-expense/$id'
+      preLoaderRoute: typeof EditExpenseIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/family-budget/': {
+      id: '/family-budget/'
+      path: '/family-budget'
+      fullPath: '/family-budget/'
+      preLoaderRoute: typeof FamilyBudgetIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/family-budget/$familyId': {
+      id: '/family-budget/$familyId'
+      path: '/family-budget/$familyId'
+      fullPath: '/family-budget/$familyId'
+      preLoaderRoute: typeof FamilyBudgetFamilyIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/family-budget_/$familyId_/member/$memberId': {
+      id: '/family-budget_/$familyId_/member/$memberId'
+      path: '/family-budget/$familyId/member/$memberId'
+      fullPath: '/family-budget/$familyId/member/$memberId'
+      preLoaderRoute: typeof FamilyBudgetFamilyIdMemberMemberIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AddExpenseRoute: AddExpenseRoute,
+  BudgetRoute: BudgetRoute,
+  ExpensesRoute: ExpensesRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
+  ProfileRoute: ProfileRoute,
   SignupRoute: SignupRoute,
+  EditExpenseIdRoute: EditExpenseIdRoute,
+  FamilyBudgetFamilyIdRoute: FamilyBudgetFamilyIdRoute,
+  FamilyBudgetIndexRoute: FamilyBudgetIndexRoute,
+  FamilyBudgetFamilyIdMemberMemberIdRoute:
+    FamilyBudgetFamilyIdMemberMemberIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -56,7 +56,12 @@ export function friendlyAuthError(err: unknown) {
   };
   if (map[code]) return map[code];
   const message = (err as Error)?.message ?? "";
-  return message.replace("Firebase: ", "").replace(/\(auth.*\)\.?/, "").trim() || "Something went wrong.";
+  return (
+    message
+      .replace("Firebase: ", "")
+      .replace(/\(auth.*\)\.?/, "")
+      .trim() || "Something went wrong."
+  );
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -126,21 +131,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user]);
 
-  const signUpWithEmail = useCallback(
-    async (username: string, email: string, password: string) => {
-      const { auth } = initFirebase(await getFirebaseConfig());
-      const cred = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(cred.user, { displayName: username });
-      await upsertUserDoc({
-        uid: cred.user.uid,
-        username,
-        email,
-        photoURL: null,
-        provider: "email",
-      });
-    },
-    [],
-  );
+  const signUpWithEmail = useCallback(async (username: string, email: string, password: string) => {
+    const { auth } = initFirebase(await getFirebaseConfig());
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    await updateProfile(cred.user, { displayName: username });
+    await upsertUserDoc({
+      uid: cred.user.uid,
+      username,
+      email,
+      photoURL: null,
+      provider: "email",
+    });
+  }, []);
 
   const loginWithEmail = useCallback(async (email: string, password: string) => {
     const { auth } = initFirebase(await getFirebaseConfig());

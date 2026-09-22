@@ -10,7 +10,10 @@ export const Route = createFileRoute("/forgot-password")({
   head: () => ({
     meta: [
       { title: "Reset password — HomeSpend Expense Manager" },
-      { name: "description", content: "Send yourself a password reset link for your HomeSpend account." },
+      {
+        name: "description",
+        content: "Send yourself a password reset link for your HomeSpend account.",
+      },
       { property: "og:title", content: "Reset password — HomeSpend Expense Manager" },
       { property: "og:description", content: "Get back into your HomeSpend expense dashboard." },
     ],
@@ -74,7 +77,9 @@ function ForgotPasswordPage() {
             />
           </Field>
           {error && (
-            <p className="rounded-xl bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>
+            <p className="rounded-xl bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {error}
+            </p>
           )}
           <button type="submit" disabled={busy} className={primaryButtonClass}>
             {busy ? "Sending…" : "Send reset link"}

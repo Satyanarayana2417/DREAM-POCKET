@@ -8,16 +8,16 @@ The application must be **mobile-first, fully responsive, professional, clean, a
 
 Use:
 
-* React
-* Vite
-* JavaScript
-* React Router
-* Firebase Authentication
-* Firebase Firestore
-* Cloudinary
-* CSS / modern responsive CSS
-* Lucide React or another clean icon library
-* Chart.js or Recharts for charts
+- React
+- Vite
+- JavaScript
+- React Router
+- Firebase Authentication
+- Firebase Firestore
+- Cloudinary
+- CSS / modern responsive CSS
+- Lucide React or another clean icon library
+- Chart.js or Recharts for charts
 
 Do NOT use Next.js.
 
@@ -25,10 +25,10 @@ Do not use unnecessary libraries.
 
 The application must work perfectly on:
 
-* Mobile phones
-* Tablets
-* Laptops
-* Desktop screens
+- Mobile phones
+- Tablets
+- Laptops
+- Desktop screens
 
 The mobile experience is the highest priority.
 
@@ -46,7 +46,7 @@ const firebaseConfig = {
   storageBucket: "expensemanager-36736.firebasestorage.app",
   messagingSenderId: "1060457615492",
   appId: "1:1060457615492:web:2f171aa91a3e86a23c32d1",
-  measurementId: "@secret:GOOGLE_ANALYTICS_MEASUREMENT_ID "
+  measurementId: "@secret:GOOGLE_ANALYTICS_MEASUREMENT_ID ",
 };
 ```
 
@@ -54,8 +54,8 @@ Firebase Authentication is already enabled.
 
 Enable/support:
 
-* Email + Password authentication
-* Google authentication
+- Email + Password authentication
+- Google authentication
 
 ---
 
@@ -90,11 +90,11 @@ Only store the Cloudinary URL.
 
 Handle:
 
-* Upload progress
-* Upload failure
-* Image preview
-* Remove/change selected image
-* Successful upload
+- Upload progress
+- Upload failure
+- Image preview
+- Remove/change selected image
+- Successful upload
 
 Images should be optimized for mobile loading.
 
@@ -108,10 +108,10 @@ Create a professional authentication system.
 
 Signup fields:
 
-* Username
-* Email
-* Password
-* Confirm Password
+- Username
+- Email
+- Password
+- Confirm Password
 
 On signup:
 
@@ -138,12 +138,12 @@ Store:
 
 Validate:
 
-* Required fields
-* Valid email
-* Password minimum requirements
-* Password confirmation
-* Duplicate email
-* Firebase errors
+- Required fields
+- Valid email
+- Password minimum requirements
+- Password confirmation
+- Duplicate email
+- Firebase errors
 
 ---
 
@@ -155,17 +155,17 @@ Add:
 
 When a user logs in with Google:
 
-* Authenticate through Firebase
-* Get Google profile information
-* Create/update the corresponding `users/{uid}` document
-* Save:
+- Authenticate through Firebase
+- Get Google profile information
+- Create/update the corresponding `users/{uid}` document
+- Save:
 
-  * uid
-  * username/display name
-  * email
-  * photoURL
-  * provider
-  * createdAt
+  - uid
+  - username/display name
+  - email
+  - photoURL
+  - provider
+  - createdAt
 
 Do not create duplicate user documents.
 
@@ -175,12 +175,12 @@ Do not create duplicate user documents.
 
 Login page:
 
-* Email
-* Password
-* Login button
-* Google Login button
-* Link to Signup
-* Forgot Password
+- Email
+- Password
+- Login button
+- Google Login button
+- Link to Signup
+- Forgot Password
 
 After successful login:
 
@@ -207,26 +207,26 @@ Every expense and budget must belong to a specific Firebase user.
 Use:
 
 ```js
-userId: auth.currentUser.uid
+userId: auth.currentUser.uid;
 ```
 
 Every query must filter by the logged-in user's UID.
 
 A user must NEVER be able to see another user's:
 
-* Expenses
-* Budgets
-* Receipts
-* Profile information
+- Expenses
+- Budgets
+- Receipts
+- Profile information
 
 Create proper Firestore security rules.
 
 Users can:
 
-* Read their own user document
-* Update their own user document
-* Create/read/update/delete their own expenses
-* Create/read/update/delete their own budgets
+- Read their own user document
+- Update their own user document
+- Create/read/update/delete their own expenses
+- Create/read/update/delete their own budgets
 
 No public access to private expense data.
 
@@ -262,11 +262,11 @@ Design it as a professional financial dashboard.
 
 Show:
 
-* Greeting
-* User name
-* Profile picture
-* Notification/menu area if needed
-* Logout option
+- Greeting
+- User name
+- Profile picture
+- Notification/menu area if needed
+- Logout option
 
 Example:
 
@@ -291,8 +291,8 @@ Monthly Budget
 
 The user enters:
 
-* Month
-* Monthly budget amount
+- Month
+- Monthly budget amount
 
 Store:
 
@@ -366,9 +366,9 @@ Display a clean progress bar.
 
 Use different visual states:
 
-* Normal spending
-* Near budget limit
-* Budget exceeded
+- Normal spending
+- Near budget limit
+- Budget exceeded
 
 Do not allow the calculation to become negative incorrectly.
 
@@ -387,12 +387,12 @@ Expenses are the actual transactions.
 
 The same expense data should be used for:
 
-* Monthly budget calculations
-* Monthly expense reports
-* Past 7 days
-* Category analysis
-* Charts
-* Expense history
+- Monthly budget calculations
+- Monthly expense reports
+- Past 7 days
+- Category analysis
+- Charts
+- Expense history
 
 Do NOT create two separate databases for "budget expenses" and "normal expenses".
 
@@ -424,18 +424,18 @@ Example:
 
 Provide:
 
-* Food
-* Groceries
-* Travel
-* Shopping
-* Bills
-* Healthcare
-* Education
-* Entertainment
-* Home
-* EMI
-* Utilities
-* Other
+- Food
+- Groceries
+- Travel
+- Shopping
+- Bills
+- Healthcare
+- Education
+- Entertainment
+- Home
+- EMI
+- Utilities
+- Other
 
 Allow a clean category selector.
 
@@ -455,9 +455,9 @@ Optional.
 
 Allow:
 
-* Camera on mobile
-* Gallery upload
-* Desktop file upload
+- Camera on mobile
+- Gallery upload
+- Desktop file upload
 
 Show image preview.
 
@@ -505,7 +505,7 @@ Groceries
 
 If an image exists:
 
-* Show a small thumbnail.
+- Show a small thumbnail.
 
 Clicking an expense opens:
 
@@ -515,13 +515,13 @@ Expense Details
 
 Show:
 
-* Name
-* Amount
-* Category
-* Date
-* Description
-* Receipt
-* Created date
+- Name
+- Amount
+- Category
+- Date
+- Description
+- Receipt
+- Created date
 
 Actions:
 
@@ -561,9 +561,9 @@ Search
 
 Search by:
 
-* Expense name
-* Description
-* Category
+- Expense name
+- Description
+- Category
 
 Sorting:
 
@@ -592,11 +592,11 @@ show only expenses belonging to the current month.
 
 Calculate:
 
-* Total spent
-* Number of expenses
-* Category totals
-* Budget usage
-* Remaining budget
+- Total spent
+- Number of expenses
+- Category totals
+- Budget usage
+- Remaining budget
 
 ---
 
@@ -646,11 +646,11 @@ September 2026
 
 When selected:
 
-* Fetch that month's expenses
-* Fetch that month's budget
-* Calculate totals
-* Update charts
-* Update budget progress
+- Fetch that month's expenses
+- Fetch that month's budget
+- Calculate totals
+- Update charts
+- Update budget progress
 
 ---
 
@@ -789,23 +789,15 @@ Remaining
 
 Include:
 
-* Budget progress
-* Spending percentage
-* Budget status
-* Edit budget
-* Month selector
+- Budget progress
+- Spending percentage
+- Budget status
+- Edit budget
+- Month selector
 
 Also show previous
 
-This project was built with [Lovable](https://lovable.dev).
 
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/faee4721-5286-4f34-b106-0b87a8a3d553).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
 
 ## Development
 

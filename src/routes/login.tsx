@@ -1,17 +1,29 @@
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
-import { AuthLayout, Field, GoogleButton, inputClass, primaryButtonClass } from "@/components/AuthLayout";
+import {
+  AuthLayout,
+  Field,
+  GoogleButton,
+  inputClass,
+  primaryButtonClass,
+} from "@/components/AuthLayout";
 import { friendlyAuthError, useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/login")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Log in — HomeSpend Expense Manager" },
-      { name: "description", content: "Log in to HomeSpend to track your home expenses and monthly budgets." },
-      { property: "og:title", content: "Log in — HomeSpend Expense Manager" },
-      { property: "og:description", content: "Track home expenses and monthly budgets in one clean dashboard." },
+      { title: "Log in — DreamPocket" },
+      {
+        name: "description",
+        content: "Log in to DreamPocket to track your home expenses and monthly budgets.",
+      },
+      { property: "og:title", content: "Log in — DreamPocket" },
+      {
+        property: "og:description",
+        content: "Track home expenses and monthly budgets in one clean dashboard.",
+      },
     ],
   }),
   component: LoginPage,

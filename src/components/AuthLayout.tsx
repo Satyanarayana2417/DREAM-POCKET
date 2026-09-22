@@ -16,9 +16,10 @@ export function AuthLayout({
     <div className="bg-hero flex min-h-screen flex-col items-center justify-center px-4 py-10">
       <div className="w-full max-w-md">
         <div className="mb-6 flex flex-col items-center text-center">
-          <span className="bg-gradient-primary mb-3 grid size-12 place-items-center rounded-2xl text-primary-foreground shadow-soft">
-            <Wallet className="size-6" />
-          </span>
+          <div className="flex items-center gap-2 mb-4">
+            <img src="/logo.png" alt="DreamPocket Logo" className="size-10 object-contain" />
+            <img src="/logo-text.png" alt="DreamPocket" className="h-6 object-contain" />
+          </div>
           <h1 className="font-display text-2xl font-bold">{title}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
         </div>
@@ -71,7 +72,7 @@ export function Field({
   children,
 }: {
   label: string;
-  error?: string;
+  error?: string | null;
   children: ReactNode;
 }) {
   return (

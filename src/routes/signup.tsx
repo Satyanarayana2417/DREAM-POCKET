@@ -1,17 +1,29 @@
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
-import { AuthLayout, Field, GoogleButton, inputClass, primaryButtonClass } from "@/components/AuthLayout";
+import {
+  AuthLayout,
+  Field,
+  GoogleButton,
+  inputClass,
+  primaryButtonClass,
+} from "@/components/AuthLayout";
 import { friendlyAuthError, useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/signup")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Create account — HomeSpend Expense Manager" },
-      { name: "description", content: "Create a free HomeSpend account to track household spending and budgets." },
-      { property: "og:title", content: "Create account — HomeSpend Expense Manager" },
-      { property: "og:description", content: "Start tracking household spending and monthly budgets today." },
+      { title: "Create account — DreamPocket" },
+      {
+        name: "description",
+        content: "Create a free DreamPocket account to track household spending and budgets.",
+      },
+      { property: "og:title", content: "Create account — DreamPocket" },
+      {
+        property: "og:description",
+        content: "Start tracking household spending and monthly budgets today.",
+      },
     ],
   }),
   component: SignupPage,
@@ -91,7 +103,7 @@ function SignupPage() {
       }
     >
       <form onSubmit={submit} className="space-y-4">
-        <Field label="Username" error={errors.username}>
+        <Field label="Username" error={errors.username || null}>
           <input
             value={form.username}
             onChange={(e) => update("username", e.target.value)}
@@ -100,7 +112,7 @@ function SignupPage() {
             className={inputClass}
           />
         </Field>
-        <Field label="Email" error={errors.email}>
+        <Field label="Email" error={errors.email || null}>
           <input
             type="email"
             inputMode="email"
@@ -111,7 +123,7 @@ function SignupPage() {
             className={inputClass}
           />
         </Field>
-        <Field label="Password" error={errors.password}>
+        <Field label="Password" error={errors.password || null}>
           <input
             type="password"
             value={form.password}
@@ -121,7 +133,7 @@ function SignupPage() {
             className={inputClass}
           />
         </Field>
-        <Field label="Confirm password" error={errors.confirm}>
+        <Field label="Confirm password" error={errors.confirm || null}>
           <input
             type="password"
             value={form.confirm}
