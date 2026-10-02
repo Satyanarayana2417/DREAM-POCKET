@@ -59,13 +59,13 @@ export function AccountSettings() {
             icon={UserCircle}
             iconBg="bg-indigo-500"
             title="Login Provider"
-            value={<span className="text-sm font-medium text-muted-foreground">{isGoogle ? "Google" : "Email & Password"}</span>}
+            value={<span className="text-sm font-medium text-muted-foreground whitespace-nowrap text-right block">{isGoogle ? "Google" : "Email & Password"}</span>}
           />
           <SettingsRow
             icon={Key}
             iconBg="bg-amber-500"
             title="Password"
-            value={<span className="text-sm font-medium text-muted-foreground">{isGoogle ? "Managed by Google" : "Change Password"}</span>}
+            value={<span className="text-sm font-medium text-muted-foreground whitespace-nowrap text-right block">{isGoogle ? "Managed by Google" : "Change Password"}</span>}
             onClick={isGoogle ? undefined : () => navigate({ search: { view: 'account', subview: 'change-password' } })}
           />
         </SettingsGroup>
