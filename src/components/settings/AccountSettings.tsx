@@ -73,8 +73,9 @@ export function AccountSettings() {
         <SettingsGroup title="Account Actions">
           <SettingsRow
             icon={LogOut}
-            iconBg="bg-muted0"
+            iconBg="bg-transparent !text-red-500"
             title="Sign Out"
+            titleClass="text-red-500"
             onClick={handleLogout}
           />
           <SettingsRow

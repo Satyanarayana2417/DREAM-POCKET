@@ -14,6 +14,7 @@ export const SettingsRow = ({
   icon: Icon, 
   iconBg, 
   title, 
+  titleClass,
   description,
   value, 
   onClick, 
@@ -22,6 +23,7 @@ export const SettingsRow = ({
   icon: any, 
   iconBg: string, 
   title: string, 
+  titleClass?: string,
   description?: string,
   value?: string | React.ReactNode, 
   onClick?: () => void, 
@@ -36,7 +38,7 @@ export const SettingsRow = ({
         <Icon className="size-4" />
       </div>
       <div className="flex flex-col">
-        <span className="text-[16px] font-medium text-foreground leading-tight">{title}</span>
+        <span className={`text-[16px] font-medium leading-tight ${titleClass || 'text-foreground'}`}>{title}</span>
         {description && <span className="text-[12px] text-muted-foreground mt-0.5">{description}</span>}
       </div>
     </div>

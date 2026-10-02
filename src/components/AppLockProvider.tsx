@@ -210,59 +210,77 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
       {isLocked && (
         <div className="fixed inset-0 z-[9999] bg-background flex flex-col items-center justify-center animate-in fade-in duration-200">
           <div className="flex flex-col items-center w-full max-w-sm px-6">
-            <h2 className="text-2xl font-semibold mb-2 font-display">Enter App PIN</h2>
+            <h2 className="text-xl font-semibold mb-2 font-display text-foreground">
+              {isBiometricEnabled ? "Use PIN or Fingerprint" : "Enter App PIN"}
+            </h2>
             <p className="text-muted-foreground mb-8 text-center text-sm">
-              Please enter your 4-digit PIN to unlock
+              Please enter your 4-digit security PIN
             </p>
             
             {/* PIN Dots */}
-            <div className="flex gap-4 mb-12">
+            <div className="flex gap-4 mb-10">
               {[0, 1, 2, 3].map(i => (
                 <div 
                   key={i} 
                   className={cn(
-                    "w-4 h-4 rounded-full transition-all duration-200",
-                    i < pinInput.length ? "bg-primary scale-110" : "bg-muted"
+                    "w-3.5 h-3.5 rounded-full transition-all duration-200",
+                    i < pinInput.length 
+                      ? "bg-foreground border border-foreground scale-110" 
+                      : "bg-transparent border-[1.5px] border-muted-foreground/50"
                   )}
                 />
               ))}
             </div>
 
-            <p className="text-red-500 text-sm h-6 mb-4">{errorText}</p>
+            <p className="text-red-500 text-sm h-6 mb-2">{errorText}</p>
 
             {/* Keypad */}
-            <div className="grid grid-cols-3 gap-6 w-full max-w-[280px]">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+            <div className="grid grid-cols-3 gap-x-6 gap-y-4 w-full max-w-[280px]">
+              {[
+                { num: "1", sub: "" },
+                { num: "2", sub: "ABC" },
+                { num: "3", sub: "DEF" },
+                { num: "4", sub: "GHI" },
+                { num: "5", sub: "JKL" },
+                { num: "6", sub: "MNO" },
+                { num: "7", sub: "PQRS" },
+                { num: "8", sub: "TUV" },
+                { num: "9", sub: "WXYZ" }
+              ].map(k => (
                 <button
-                  key={num}
-                  onClick={() => handlePinDigit(num.toString())}
-                  className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-medium mx-auto hover:bg-muted/50 active:bg-muted transition-colors font-display"
+                  key={k.num}
+                  onClick={() => handlePinDigit(k.num)}
+                  className="w-[72px] h-[72px] rounded-full flex flex-col items-center justify-center transition-all mx-auto bg-card shadow-sm border border-border dark:border-primary dark:bg-transparent hover:bg-muted dark:hover:bg-primary/10 active:scale-95"
                 >
-                  {num}
+                  <span className="text-[26px] font-medium text-foreground leading-none">{k.num}</span>
+                  {k.sub && <span className="text-[9px] font-semibold text-muted-foreground dark:text-primary tracking-widest mt-1 uppercase">{k.sub}</span>}
                 </button>
               ))}
               
               <button
                 onClick={isBiometricEnabled ? triggerBiometric : undefined}
                 className={cn(
-                  "w-16 h-16 rounded-full flex items-center justify-center text-primary mx-auto transition-colors",
-                  isBiometricEnabled ? "hover:bg-muted/50 active:bg-muted cursor-pointer" : "opacity-0 cursor-default"
+                  "w-[72px] h-[72px] rounded-full flex flex-col items-center justify-center transition-all mx-auto",
+                  isBiometricEnabled 
+                    ? "bg-card shadow-sm border border-border dark:border-primary dark:bg-transparent hover:bg-muted dark:hover:bg-primary/10 active:scale-95 cursor-pointer text-foreground" 
+                    : "opacity-0 cursor-default"
                 )}
                 disabled={!isBiometricEnabled}
               >
-                <Fingerprint className="size-8" />
+                <Fingerprint className="size-7" />
               </button>
 
               <button
                 onClick={() => handlePinDigit("0")}
-                className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-medium mx-auto hover:bg-muted/50 active:bg-muted transition-colors font-display"
+                className="w-[72px] h-[72px] rounded-full flex flex-col items-center justify-center transition-all mx-auto bg-card shadow-sm border border-border dark:border-primary dark:bg-transparent hover:bg-muted dark:hover:bg-primary/10 active:scale-95"
               >
-                0
+                <span className="text-[26px] font-medium text-foreground leading-none">0</span>
+                <span className="text-[9px] font-semibold text-muted-foreground dark:text-primary tracking-widest mt-1 uppercase">+</span>
               </button>
 
               <button
                 onClick={handlePinDelete}
-                className="w-16 h-16 rounded-full flex items-center justify-center text-muted-foreground mx-auto hover:bg-muted/50 active:bg-muted transition-colors"
+                className="w-[72px] h-[72px] rounded-full flex flex-col items-center justify-center transition-all mx-auto bg-card shadow-sm border border-border dark:border-primary dark:bg-transparent hover:bg-muted dark:hover:bg-primary/10 active:scale-95 text-foreground"
               >
                 <Delete className="size-6" />
               </button>
