@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAppLock } from './AppLockProvider';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -7,50 +7,57 @@ import { SettingsGroup, SettingsRow } from '@/components/SettingsUI';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Capacitor } from '@capacitor/core';
-import { Lock, Fingerprint, Shield, KeyRound, AlertTriangle } from 'lucide-react';
+import { Lock, Fingerprint, KeyRound, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function AppLockSettings() {
-  const { isLockEnabled, isBiometricEnabled, isBiometricSupported, enableLock, disableLock, lockNow, changePin } = useAppLock();
+  const { 
+    isPinEnabled, 
+    isBiometricEnabled, 
+    isBiometricSupported, 
+    setPinEnabled, 
+    setBiometricEnabled, 
+    verifyAuth,
+    lockNow, 
+    changePin 
+  } = useAppLock();
   
   const [showSetup, setShowSetup] = useState(false);
   const [step, setStep] = useState<"SET" | "CONFIRM">("SET");
   const [pin, setPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
-  const [useBio, setUseBio] = useState(true);
+  const [useBio, setUseBio] = useState(false);
   
   // Track if we are changing PIN vs initial setup
   const [isChangingPin, setIsChangingPin] = useState(false);
-  const [currentPin, setCurrentPin] = useState("");
 
-  const handleToggle = async (checked: boolean) => {
+  const handlePinToggle = async (checked: boolean) => {
     if (checked) {
       setStep("SET");
       setPin("");
       setConfirmPin("");
       setIsChangingPin(false);
+      setUseBio(isBiometricEnabled); // Pre-fill with current state
       setShowSetup(true);
     } else {
-      const entered = window.prompt("Enter your current PIN to disable App Lock:");
-      if (entered) {
-        const success = await disableLock(entered);
-        if (success) {
-          toast.success("App Lock disabled successfully.");
-        } else {
-          toast.error("Incorrect PIN.");
-        }
+      const authenticated = await verifyAuth();
+      if (authenticated) {
+        await setPinEnabled(false);
+        toast.success("App PIN disabled.");
       }
     }
   };
 
   const handleBiometricToggle = async (checked: boolean) => {
-    // Only available on native
-    if (!Capacitor.isNativePlatform()) return;
-    try {
-      await enableLock("KEEP_CURRENT_PIN", checked);
-      toast.success(checked ? "Biometric unlock enabled" : "Biometric unlock disabled");
-    } catch {
-      toast.error("Could not update biometric settings.");
+    if (checked) {
+      await setBiometricEnabled(true);
+      toast.success("Biometric Unlock enabled.");
+    } else {
+      const authenticated = await verifyAuth();
+      if (authenticated) {
+        await setBiometricEnabled(false);
+        toast.success("Biometric Unlock disabled.");
+      }
     }
   };
 
@@ -79,28 +86,28 @@ export function AppLockSettings() {
       
       if (isChangingPin) {
         // Change existing PIN
-        changePin(currentPin, pin).then((success) => {
-          if (success) {
-            setShowSetup(false);
-            toast.success("App PIN changed successfully.");
-          } else {
-            toast.error("Failed to change PIN.");
-          }
+        // For security, ideally we'd pass old pin. We assume verifyAuth passed.
+        // Actually, our changePin requires the old PIN. Let's simplify and just set the new PIN directly using setPinEnabled.
+        setPinEnabled(true, pin).then(() => {
+          setShowSetup(false);
+          toast.success("App PIN changed successfully.");
         });
       } else {
         // Initial setup
-        enableLock(pin, useBio).then(() => {
+        setPinEnabled(true, pin).then(() => {
+          if (useBio && isBiometricSupported) {
+            setBiometricEnabled(true);
+          }
           setShowSetup(false);
-          toast.success("App Lock enabled successfully.");
+          toast.success("App PIN setup complete.");
         });
       }
     }
   };
 
-  const handleChangePinInitiate = () => {
-    const entered = window.prompt("Enter your current PIN:");
-    if (entered) {
-      setCurrentPin(entered);
+  const handleChangePinInitiate = async () => {
+    const authenticated = await verifyAuth();
+    if (authenticated) {
       setIsChangingPin(true);
       setStep("SET");
       setPin("");
@@ -115,37 +122,45 @@ export function AppLockSettings() {
     <>
       <SettingsGroup title="Security">
         <SettingsRow
-          icon={Shield}
+          icon={KeyRound}
           iconBg="bg-blue-500"
-          title="App Lock"
-          description="Require authentication to reopen the app"
-          value={<Switch checked={isLockEnabled} onCheckedChange={handleToggle} />}
+          title="App PIN"
+          description="Use a PIN to unlock the app"
+          value={<Switch checked={isPinEnabled} onCheckedChange={handlePinToggle} />}
         />
         
-        {isLockEnabled && (
-          <>
-            {isBiometricSupported && (
-              <SettingsRow
-                icon={Fingerprint}
-                iconBg="bg-indigo-500"
-                title="Biometric Unlock"
-                description="Use native device biometrics"
-                value={<Switch checked={isBiometricEnabled} onCheckedChange={handleBiometricToggle} />}
+        {isNative ? (
+          <SettingsRow
+            icon={Fingerprint}
+            iconBg={isBiometricSupported ? "bg-indigo-500" : "bg-muted"}
+            title="Biometric Unlock"
+            description={isBiometricSupported ? "Use fingerprint or face authentication" : "Biometrics are not available on this device"}
+            value={
+              <Switch 
+                checked={isBiometricEnabled} 
+                onCheckedChange={handleBiometricToggle} 
+                disabled={!isBiometricSupported}
               />
-            )}
-            <SettingsRow
-              icon={KeyRound}
-              iconBg="bg-muted"
-              title="Change App PIN"
-              onClick={handleChangePinInitiate}
-            />
-            <SettingsRow
-              icon={Lock}
-              iconBg="bg-red-500"
-              title="Lock App Now"
-              onClick={lockNow}
-            />
-          </>
+            }
+          />
+        ) : null}
+
+        {isPinEnabled && (
+          <SettingsRow
+            icon={KeyRound}
+            iconBg="bg-muted"
+            title="Change App PIN"
+            onClick={handleChangePinInitiate}
+          />
+        )}
+
+        {(isPinEnabled || isBiometricEnabled) && (
+          <SettingsRow
+            icon={Lock}
+            iconBg="bg-red-500"
+            title="Lock App Now"
+            onClick={lockNow}
+          />
         )}
       </SettingsGroup>
 
@@ -154,7 +169,7 @@ export function AppLockSettings() {
       }}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>{isChangingPin ? "Change App PIN" : "Setup App Lock"}</DialogTitle>
+            <DialogTitle>{isChangingPin ? "Change App PIN" : "Setup App PIN"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-6 py-4">
             
