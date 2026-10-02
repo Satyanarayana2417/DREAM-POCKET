@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 interface AppLockContextType {
   isLockEnabled: boolean;
   isBiometricEnabled: boolean;
+  isBiometricSupported: boolean;
   enableLock: (pin: string, useBiometric: boolean) => Promise<void>;
   disableLock: (currentPin: string) => Promise<boolean>;
   changePin: (oldPin: string, newPin: string) => Promise<boolean>;
@@ -61,10 +62,23 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const [isBiometricSupported, setIsBiometricSupported] = useState(false);
+
   // Load initial state
   useEffect(() => {
     const init = async () => {
       try {
+        let supportsBio = false;
+        if (Capacitor.isNativePlatform()) {
+          try {
+            const result = await NativeBiometric.isAvailable();
+            supportsBio = result.isAvailable;
+          } catch (e) {
+            supportsBio = false;
+          }
+        }
+        setIsBiometricSupported(supportsBio);
+
         const enabledValue = await getStorage('appLock_enabled');
         const enabled = enabledValue === 'true';
         setIsLockEnabled(enabled);
@@ -73,7 +87,7 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
           const pinValue = await getStorage('appLock_pin');
           setStoredPin(pinValue);
           
-          if (Capacitor.isNativePlatform()) {
+          if (supportsBio) {
             const bioValue = await getStorage('appLock_biometric');
             setIsBiometricEnabled(bioValue === 'true');
           } else {
@@ -198,7 +212,7 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AppLockContext.Provider value={{ isLockEnabled, isBiometricEnabled, enableLock, disableLock, changePin, lockNow }}>
+    <AppLockContext.Provider value={{ isLockEnabled, isBiometricEnabled, isBiometricSupported, enableLock, disableLock, changePin, lockNow }}>
       {children}
       
       {isChecking && (

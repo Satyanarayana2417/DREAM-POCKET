@@ -11,7 +11,7 @@ import { Lock, Fingerprint, Shield, KeyRound, AlertTriangle } from 'lucide-react
 import { toast } from 'sonner';
 
 export function AppLockSettings() {
-  const { isLockEnabled, isBiometricEnabled, enableLock, disableLock, lockNow, changePin } = useAppLock();
+  const { isLockEnabled, isBiometricEnabled, isBiometricSupported, enableLock, disableLock, lockNow, changePin } = useAppLock();
   
   const [showSetup, setShowSetup] = useState(false);
   const [step, setStep] = useState<"SET" | "CONFIRM">("SET");
@@ -124,7 +124,7 @@ export function AppLockSettings() {
         
         {isLockEnabled && (
           <>
-            {isNative && (
+            {isBiometricSupported && (
               <SettingsRow
                 icon={Fingerprint}
                 iconBg="bg-indigo-500"
@@ -181,7 +181,7 @@ export function AppLockSettings() {
               />
             </div>
             
-            {step === "SET" && !isChangingPin && isNative && (
+            {step === "SET" && !isChangingPin && isBiometricSupported && (
               <div className="flex items-center justify-between border-t pt-4 mt-2">
                 <div className="space-y-0.5">
                   <Label>Use Biometric Unlock</Label>
