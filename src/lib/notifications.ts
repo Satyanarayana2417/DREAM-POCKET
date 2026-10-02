@@ -49,7 +49,21 @@ export async function requestNotificationPermissionAndSaveToken(uid: string, pre
     }
 
     // Get the service worker registration explicitly to pass to getToken
-    const registration = await navigator.serviceWorker.getRegistration();
+    let registration = await navigator.serviceWorker.getRegistration();
+    if (!registration) {
+      console.warn("No default service worker registration found. Attempting to find any registration...");
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      if (registrations.length > 0) {
+        registration = registrations[0];
+      } else {
+        // Fallback to registering it manually if somehow missing
+        try {
+          registration = await navigator.serviceWorker.register('/sw.js');
+        } catch (e) {
+          console.error("Manual SW registration failed:", e);
+        }
+      }
+    }
 
     const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
     if (!vapidKey) {
@@ -79,9 +93,11 @@ export async function requestNotificationPermissionAndSaveToken(uid: string, pre
       toast.error("Failed to generate notification token.");
       return false;
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error getting notification permission or token", error);
-    toast.error("Failed to enable notifications.");
+    // Extract a more helpful error message from Firebase if available
+    const errorMessage = error?.message || "Unknown error";
+    toast.error(`Failed to enable notifications: ${errorMessage}`);
     return false;
   }
 }
