@@ -37,14 +37,18 @@ export const Route = createFileRoute("/budget")({
 });
 
 function BudgetRoute() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const queryClient = useQueryClient();
   const [selectedMonth, setSelectedMonth] = useState(currentMonthKey());
+
+  const joinDate = (profile as any)?.createdAt
+    ? new Date((profile as any).createdAt.seconds * 1000)
+    : undefined;
   const [isEditing, setIsEditing] = useState(false);
   const [editAmount, setEditAmount] = useState("");
   const [selectedExpense, setSelectedExpense] = useState<any | null>(null);
 
-  const months = monthOptions(12);
+  const months = monthOptions(joinDate);
 
   const { data: budgets = [], isLoading: isLoadingBudgets } = useQuery({
     queryKey: ["budgets", user?.uid],

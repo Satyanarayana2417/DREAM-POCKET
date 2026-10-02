@@ -43,8 +43,12 @@ export const Route = createFileRoute("/expenses")({
 });
 
 function ExpensesRoute() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const navigate = useNavigate();
+
+  const joinDate = (profile as any)?.createdAt
+    ? new Date((profile as any).createdAt.seconds * 1000)
+    : undefined;
 
   const { data: expenses = [], isLoading, isError, error } = useQuery({
     queryKey: ["expenses", user?.uid],
@@ -60,7 +64,7 @@ function ExpensesRoute() {
   const [sortOrder, setSortOrder] = useState("newest");
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
 
-  const months = monthOptions(12);
+  const months = monthOptions(joinDate);
 
   const filteredExpenses = useMemo(() => {
     let result = expenses.filter(e => !e.isBudgetExpense);

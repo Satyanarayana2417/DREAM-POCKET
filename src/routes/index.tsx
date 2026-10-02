@@ -50,6 +50,10 @@ function Index() {
   const [selectedMonth, setSelectedMonth] = useState(currentMonthKey());
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
 
+  const joinDate = (profile as any)?.createdAt
+    ? new Date((profile as any).createdAt.seconds * 1000)
+    : undefined;
+
   const { data: expenses = [] } = useQuery({
     queryKey: ["expenses", user?.uid],
     queryFn: () => fetchExpenses(user!.uid),
@@ -103,7 +107,7 @@ function Index() {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="max-h-[300px] overflow-y-auto">
-              {monthOptions(12).map((m) => (
+              {monthOptions(joinDate).map((m) => (
                 <DropdownMenuItem key={m} onClick={() => setSelectedMonth(m)}>
                   {monthLabel(m)}
                 </DropdownMenuItem>

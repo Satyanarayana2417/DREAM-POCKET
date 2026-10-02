@@ -220,20 +220,39 @@ export function budgetStatus(spent: number, budget: number) {
   return { percent, remaining, over, state };
 }
 
-export function monthOptions(count = 24) {
+export function monthOptions(startDate?: Date) {
   const out: string[] = [];
   const now = new Date();
   
-  // Include 3 future months so users can plan their budgets ahead
-  for (let i = -3; i < count; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    
-    // Stop generating if the date is before September 2026
-    if (d.getFullYear() < 2026 || (d.getFullYear() === 2026 && d.getMonth() < 8)) {
-      continue; // or break, but continue is safer if count is large
-    }
-    
-    out.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+  // Set a safe fallback if no startDate is provided (September 2026 as per original logic)
+  const safeStartDate = startDate instanceof Date && !isNaN(startDate.getTime()) 
+    ? startDate 
+    : new Date(2026, 8, 1); // September 2026 default fallback for very old data
+  
+  const startYear = safeStartDate.getFullYear();
+  const startMonth = safeStartDate.getMonth();
+
+  // We want to generate months starting from 3 months ahead of now
+  let currentYear = now.getFullYear();
+  let currentMonth = now.getMonth() + 3;
+  
+  // Normalize if currentMonth > 11
+  while (currentMonth > 11) {
+    currentMonth -= 12;
+    currentYear += 1;
   }
+  
+  // Keep generating backwards as long as we haven't passed the start date
+  while (currentYear > startYear || (currentYear === startYear && currentMonth >= startMonth)) {
+    const d = new Date(currentYear, currentMonth, 1);
+    out.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+    
+    currentMonth--;
+    if (currentMonth < 0) {
+      currentMonth = 11;
+      currentYear--;
+    }
+  }
+
   return out;
 }
