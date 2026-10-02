@@ -129,21 +129,19 @@ export function AppLockSettings() {
           value={<Switch checked={isPinEnabled} onCheckedChange={handlePinToggle} />}
         />
         
-        {isNative ? (
-          <SettingsRow
-            icon={Fingerprint}
-            iconBg={isBiometricSupported ? "bg-indigo-500" : "bg-muted"}
-            title="Biometric Unlock"
-            description={isBiometricSupported ? "Use fingerprint or face authentication" : "Biometrics are not available on this device"}
-            value={
-              <Switch 
-                checked={isBiometricEnabled} 
-                onCheckedChange={handleBiometricToggle} 
-                disabled={!isBiometricSupported}
-              />
-            }
-          />
-        ) : null}
+        <SettingsRow
+          icon={Fingerprint}
+          iconBg={isBiometricSupported ? "bg-indigo-500" : "bg-muted"}
+          title="Biometric Unlock"
+          description={isBiometricSupported ? "Use fingerprint or face authentication" : "Biometrics are not available on this device"}
+          value={
+            <Switch 
+              checked={isBiometricEnabled} 
+              onCheckedChange={handleBiometricToggle} 
+              disabled={!isBiometricSupported}
+            />
+          }
+        />
 
         {isPinEnabled && (
           <SettingsRow
