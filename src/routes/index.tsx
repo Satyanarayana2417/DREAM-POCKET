@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
 import { fetchExpenses, fetchIncomes, saveIncome } from "@/lib/data";
@@ -52,6 +52,7 @@ export const Route = createFileRoute("/")({
 function Index() {
   const { user, profile } = useAuth();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const name = profile?.username?.split(" ")[0] || "User";
   const [selectedMonth, setSelectedMonth] = useState(currentMonthKey());
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
@@ -167,7 +168,10 @@ function Index() {
             </CardContent>
           </Card>
           
-          <Card className="border-0 shadow-sm rounded-2xl">
+          <Card 
+            className="border-0 shadow-sm rounded-2xl cursor-pointer hover:bg-slate-50 transition-colors"
+            onClick={() => navigate({ to: "/expenses" })}
+          >
             <CardContent className="p-5 flex flex-col justify-center">
               <div className="flex items-center gap-3 mb-3">
                 <div className="bg-emerald-50 text-emerald-500 p-2.5 rounded-xl">
@@ -195,7 +199,10 @@ function Index() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-sm rounded-2xl">
+          <Card 
+            className="border-0 shadow-sm rounded-2xl cursor-pointer hover:bg-slate-50 transition-colors"
+            onClick={() => navigate({ to: "/expenses" })}
+          >
             <CardContent className="p-5 flex flex-col justify-center">
               <div className="flex items-center gap-3 mb-3">
                 <div className="bg-purple-50 text-purple-500 p-2.5 rounded-xl">
