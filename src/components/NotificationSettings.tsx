@@ -122,69 +122,78 @@ export function NotificationSettings() {
   return (
     <>
       <SettingsGroup>
+        <div onClickCapture={(e) => {
+          // Synchronous check to ensure browser doesn't block permission prompt
+          if (!isEnabled && "Notification" in window && Notification.permission !== "granted") {
+            Notification.requestPermission();
+          }
+        }}>
+          <SettingsRow
+            icon={Bell}
+            iconBg="bg-red-500"
+            title="Push Notifications"
+            description="Receive alerts for important activities"
+            value={
+              <Switch 
+                checked={isEnabled} 
+                onCheckedChange={handleToggle}
+                disabled={loading}
+              />
+            }
+          />
+        </div>
+      </SettingsGroup>
+
+      <SettingsGroup title="Notification Preferences">
         <SettingsRow
-          icon={Bell}
-          iconBg="bg-red-500"
-          title="Push Notifications"
-          description="Receive alerts for important activities"
+          icon={Target}
+          iconBg="bg-orange-500"
+          title="Expense Reminders"
           value={
             <Switch 
-              checked={isEnabled} 
-              onCheckedChange={handleToggle}
-              disabled={loading}
+              checked={preferences.expenseReminders} 
+              onCheckedChange={(c) => updatePreference('expenseReminders', c)} 
+              disabled={!isEnabled || loading}
+            />
+          }
+        />
+        <SettingsRow
+          icon={Activity}
+          iconBg="bg-green-500"
+          title="Income Reminders"
+          value={
+            <Switch 
+              checked={preferences.incomeReminders} 
+              onCheckedChange={(c) => updatePreference('incomeReminders', c)} 
+              disabled={!isEnabled || loading}
+            />
+          }
+        />
+        <SettingsRow
+          icon={Users}
+          iconBg="bg-blue-500"
+          title="Family Activity"
+          value={
+            <Switch 
+              checked={preferences.familyActivity} 
+              onCheckedChange={(c) => updatePreference('familyActivity', c)} 
+              disabled={!isEnabled || loading}
+            />
+          }
+        />
+        <SettingsRow
+          icon={PieChart}
+          iconBg="bg-purple-500"
+          title="Monthly Summary"
+          value={
+            <Switch 
+              checked={preferences.monthlySummary} 
+              onCheckedChange={(c) => updatePreference('monthlySummary', c)} 
+              disabled={!isEnabled || loading}
             />
           }
         />
       </SettingsGroup>
-
-      {isEnabled && (
-        <SettingsGroup title="Notification Preferences">
-          <SettingsRow
-            icon={Target}
-            iconBg="bg-orange-500"
-            title="Expense Reminders"
-            value={
-              <Switch 
-                checked={preferences.expenseReminders} 
-                onCheckedChange={(c) => updatePreference('expenseReminders', c)} 
-              />
-            }
-          />
-          <SettingsRow
-            icon={Activity}
-            iconBg="bg-green-500"
-            title="Income Reminders"
-            value={
-              <Switch 
-                checked={preferences.incomeReminders} 
-                onCheckedChange={(c) => updatePreference('incomeReminders', c)} 
-              />
-            }
-          />
-          <SettingsRow
-            icon={Users}
-            iconBg="bg-blue-500"
-            title="Family Activity"
-            value={
-              <Switch 
-                checked={preferences.familyActivity} 
-                onCheckedChange={(c) => updatePreference('familyActivity', c)} 
-              />
-            }
-          />
-          <SettingsRow
-            icon={PieChart}
-            iconBg="bg-purple-500"
-            title="Monthly Summary"
-            value={
-              <Switch 
-                checked={preferences.monthlySummary} 
-                onCheckedChange={(c) => updatePreference('monthlySummary', c)} 
-              />
-            }
-          />
-        </SettingsGroup>
-      )}
     </>
   );
 }
