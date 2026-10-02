@@ -63,6 +63,7 @@ export function AppLockSettings() {
           icon={Lock}
           iconBg="bg-blue-500"
           title="App Lock Security"
+          description="Require authentication when opening the app"
           value={<Switch checked={isLockEnabled} onCheckedChange={handleToggle} />}
         />
         {isLockEnabled && (

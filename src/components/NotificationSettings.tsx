@@ -111,22 +111,25 @@ export function NotificationSettings() {
   }
 
   return (
-    <SettingsGroup>
-      <SettingsRow
-        icon={Bell}
-        iconBg="bg-red-500"
-        title="Push Notifications"
-        value={
-          <Switch 
-            checked={isEnabled} 
-            onCheckedChange={handleToggle}
-            disabled={loading}
-          />
-        }
-      />
+    <>
+      <SettingsGroup>
+        <SettingsRow
+          icon={Bell}
+          iconBg="bg-red-500"
+          title="Push Notifications"
+          description="Receive alerts for important activities"
+          value={
+            <Switch 
+              checked={isEnabled} 
+              onCheckedChange={handleToggle}
+              disabled={loading}
+            />
+          }
+        />
+      </SettingsGroup>
 
       {isEnabled && (
-        <>
+        <SettingsGroup title="Notification Preferences">
           <SettingsRow
             icon={Target}
             iconBg="bg-orange-500"
@@ -171,8 +174,8 @@ export function NotificationSettings() {
               />
             }
           />
-        </>
+        </SettingsGroup>
       )}
-    </SettingsGroup>
+    </>
   );
 }
