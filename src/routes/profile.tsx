@@ -4,13 +4,14 @@ import { LogOut, User, Mail, Calendar, Shield, Edit2, Check, X } from "lucide-re
 import { format } from "date-fns";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Download, CheckCircle2 } from "lucide-react";
+import { Download, CheckCircle2, Share, PlusSquare } from "lucide-react";
 
 import { useAuth } from "@/lib/auth";
 import { updateUserDoc } from "@/lib/data";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { AppShell, Avatar } from "@/components/AppShell";
 import { ImageCropperDialog } from "@/components/ImageCropper";
 import { Camera, Loader2 } from "lucide-react";
@@ -69,6 +70,8 @@ function ProfileRoute() {
 
   const [installPrompt, setInstallPrompt] = useState<any>(null);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [showIOSInstructions, setShowIOSInstructions] = useState(false);
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
 
   useEffect(() => {
     if (window.matchMedia('(display-mode: standalone)').matches) {
@@ -289,17 +292,47 @@ function ProfileRoute() {
               <Button onClick={handleInstallClick} className="bg-emerald-600 hover:bg-emerald-700">
                 <Download className="size-4 mr-2" /> Install App
               </Button>
+            ) : isIOS ? (
+              <Button onClick={() => setShowIOSInstructions(true)} className="bg-emerald-600 hover:bg-emerald-700">
+                <Download className="size-4 mr-2" /> Install App
+              </Button>
             ) : (
               <p className="text-xs font-medium text-slate-400 max-w-[120px] text-right">
-                {navigator.userAgent.match(/iphone|ipad|ipod/i) 
-                  ? "Tap Share -> Add to Home Screen" 
-                  : "Not supported or already installed"}
+                Not supported or already installed
               </p>
             )}
           </div>
         </CardContent>
       </Card>
       </div>
+
+      <Dialog open={showIOSInstructions} onOpenChange={setShowIOSInstructions}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Install Home Expense Manager</DialogTitle>
+            <DialogDescription>
+              Install this application on your home screen for quick and easy access when you're on the go.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-4 py-4">
+            <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+              <div className="flex items-center justify-center size-8 rounded-full bg-slate-200 text-slate-700 font-semibold shrink-0">1</div>
+              <p className="text-sm text-slate-700">Tap the <Share className="inline size-5 mx-1 mb-1" /> <strong>Share</strong> button at the bottom of Safari.</p>
+            </div>
+            <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+              <div className="flex items-center justify-center size-8 rounded-full bg-slate-200 text-slate-700 font-semibold shrink-0">2</div>
+              <p className="text-sm text-slate-700">Scroll down and tap <PlusSquare className="inline size-5 mx-1 mb-1" /> <strong>Add to Home Screen</strong>.</p>
+            </div>
+            <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+              <div className="flex items-center justify-center size-8 rounded-full bg-slate-200 text-slate-700 font-semibold shrink-0">3</div>
+              <p className="text-sm text-slate-700">Tap <strong>Add</strong> in the top right corner.</p>
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={() => setShowIOSInstructions(false)}>Got it</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
       {selectedImage && (
         <ImageCropperDialog
           isOpen={!!selectedImage}
