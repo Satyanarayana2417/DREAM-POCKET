@@ -156,15 +156,21 @@ function Index() {
               setIsIncomeModalOpen(true);
             }}
           >
-            <CardContent className="p-5 flex flex-col justify-center">
-              <div className="flex items-center gap-3 mb-3">
+            <CardContent className="p-4 sm:p-5 flex flex-col items-center sm:items-start justify-center">
+              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 mb-2 sm:mb-3 w-full justify-center sm:justify-start">
                 <div className="bg-blue-50 text-blue-500 p-2.5 rounded-xl">
                   <Calendar className="size-5" />
                 </div>
-                <span className="text-sm font-medium text-muted-foreground whitespace-nowrap truncate">Monthly Income</span>
-                <Edit2 className="size-3 text-muted-foreground/50 ml-auto" />
+                <span className="hidden sm:inline-flex items-center text-sm font-medium text-muted-foreground whitespace-nowrap truncate w-full">
+                  Monthly Income
+                  <Edit2 className="size-3 text-muted-foreground/50 ml-auto" />
+                </span>
               </div>
-              <div className="text-2xl font-normal font-display">{formatINR(currentIncome, true)}</div>
+              <div className="text-xl sm:text-2xl font-normal font-display mb-1 sm:mb-0 text-center sm:text-left">{formatINR(currentIncome, true)}</div>
+              <div className="sm:hidden flex items-center justify-center gap-1 mt-1 text-center w-full">
+                <span className="text-xs font-medium text-muted-foreground whitespace-normal leading-tight">Monthly Income</span>
+                <Edit2 className="size-3 text-muted-foreground/50" />
+              </div>
             </CardContent>
           </Card>
           
@@ -172,29 +178,35 @@ function Index() {
             className="border-0 shadow-sm rounded-2xl cursor-pointer hover:bg-slate-50 transition-colors"
             onClick={() => navigate({ to: "/expenses" })}
           >
-            <CardContent className="p-5 flex flex-col justify-center">
-              <div className="flex items-center gap-3 mb-3">
+            <CardContent className="p-4 sm:p-5 flex flex-col items-center sm:items-start justify-center">
+              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 mb-2 sm:mb-3 w-full justify-center sm:justify-start">
                 <div className="bg-emerald-50 text-emerald-500 p-2.5 rounded-xl">
                   <TrendingUp className="size-5" />
                 </div>
-                <span className="text-sm font-medium text-muted-foreground whitespace-nowrap truncate">Total Spent</span>
+                <span className="hidden sm:block text-sm font-medium text-muted-foreground whitespace-nowrap truncate">Total Spent</span>
               </div>
-              <div className="text-2xl font-normal font-display">{formatINR(mainSpent, true)}</div>
+              <div className="text-xl sm:text-2xl font-normal font-display mb-1 sm:mb-0 text-center sm:text-left">{formatINR(mainSpent, true)}</div>
+              <div className="sm:hidden text-center w-full mt-1">
+                <span className="text-xs font-medium text-muted-foreground whitespace-normal leading-tight">Total Spent</span>
+              </div>
             </CardContent>
           </Card>
 
           <Card className="border-0 shadow-sm rounded-2xl">
-            <CardContent className="p-5 flex flex-col justify-center">
-              <div className="flex items-center gap-3 mb-3">
+            <CardContent className="p-4 sm:p-5 flex flex-col items-center sm:items-start justify-center">
+              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 mb-2 sm:mb-3 w-full justify-center sm:justify-start">
                 <div className="bg-orange-50 text-orange-500 p-2.5 rounded-xl">
                   <Wallet className="size-5" />
                 </div>
-                <span className="text-sm font-medium text-muted-foreground whitespace-nowrap truncate">Remaining</span>
+                <span className="hidden sm:block text-sm font-medium text-muted-foreground whitespace-nowrap truncate">Remaining</span>
               </div>
-              <div className={`text-2xl font-normal font-display ${status.remaining < 0 ? 'text-red-600 text-lg sm:text-xl' : ''}`}>
+              <div className={`text-xl sm:text-2xl font-normal font-display mb-1 sm:mb-0 text-center sm:text-left ${status.remaining < 0 ? 'text-red-600 text-lg sm:text-xl' : ''}`}>
                 {status.remaining < 0 
                   ? `${formatINR(Math.abs(status.remaining), true)} over income` 
                   : formatINR(status.remaining, true)}
+              </div>
+              <div className="sm:hidden text-center w-full mt-1">
+                <span className="text-xs font-medium text-muted-foreground whitespace-normal leading-tight">Remaining</span>
               </div>
             </CardContent>
           </Card>
@@ -203,14 +215,17 @@ function Index() {
             className="border-0 shadow-sm rounded-2xl cursor-pointer hover:bg-slate-50 transition-colors"
             onClick={() => navigate({ to: "/expenses" })}
           >
-            <CardContent className="p-5 flex flex-col justify-center">
-              <div className="flex items-center gap-3 mb-3">
+            <CardContent className="p-4 sm:p-5 flex flex-col items-center sm:items-start justify-center">
+              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 mb-2 sm:mb-3 w-full justify-center sm:justify-start">
                 <div className="bg-purple-50 text-purple-500 p-2.5 rounded-xl">
                   <ReceiptText className="size-5" />
                 </div>
-                <span className="text-sm font-medium text-muted-foreground whitespace-nowrap truncate">Expenses</span>
+                <span className="hidden sm:block text-sm font-medium text-muted-foreground whitespace-nowrap truncate">Expenses</span>
               </div>
-              <div className="text-2xl font-normal font-display">{mainMonthExpenses.length}</div>
+              <div className="text-xl sm:text-2xl font-normal font-display mb-1 sm:mb-0 text-center sm:text-left">{mainMonthExpenses.length}</div>
+              <div className="sm:hidden text-center w-full mt-1">
+                <span className="text-xs font-medium text-muted-foreground whitespace-normal leading-tight">Expenses</span>
+              </div>
             </CardContent>
           </Card>
         </div>
