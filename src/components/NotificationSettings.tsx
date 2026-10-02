@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Bell, Activity, Target, PieChart, Users } from "lucide-react";
+import { Bell, Activity, Target, PieChart, Users, Sliders } from "lucide-react";
 import { SettingsGroup, SettingsRow } from "@/components/SettingsUI";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/lib/auth";
 import { requestNotificationPermissionAndSaveToken, disableNotifications, defaultPreferences, type NotificationPreferences } from "@/lib/notifications";
 import { doc, onSnapshot } from "firebase/firestore";
@@ -135,57 +136,77 @@ export function NotificationSettings() {
             />
           }
         />
-      </SettingsGroup>
-
-      <SettingsGroup title="Notification Preferences">
-        <SettingsRow
-          icon={Target}
-          iconBg="bg-orange-500"
-          title="Expense Reminders"
-          value={
-            <Switch 
-              checked={preferences.expenseReminders} 
-              onCheckedChange={(c) => updatePreference('expenseReminders', c)} 
-              disabled={!isEnabled || loading}
-            />
-          }
-        />
-        <SettingsRow
-          icon={Activity}
-          iconBg="bg-green-500"
-          title="Income Reminders"
-          value={
-            <Switch 
-              checked={preferences.incomeReminders} 
-              onCheckedChange={(c) => updatePreference('incomeReminders', c)} 
-              disabled={!isEnabled || loading}
-            />
-          }
-        />
-        <SettingsRow
-          icon={Users}
-          iconBg="bg-blue-500"
-          title="Family Activity"
-          value={
-            <Switch 
-              checked={preferences.familyActivity} 
-              onCheckedChange={(c) => updatePreference('familyActivity', c)} 
-              disabled={!isEnabled || loading}
-            />
-          }
-        />
-        <SettingsRow
-          icon={PieChart}
-          iconBg="bg-purple-500"
-          title="Monthly Summary"
-          value={
-            <Switch 
-              checked={preferences.monthlySummary} 
-              onCheckedChange={(c) => updatePreference('monthlySummary', c)} 
-              disabled={!isEnabled || loading}
-            />
-          }
-        />
+        
+        {/* Notification Preferences Sub-page Trigger */}
+        <Sheet>
+          <SheetTrigger asChild>
+            <div>
+              <SettingsRow
+                icon={Sliders}
+                iconBg="bg-slate-500"
+                title="Notification Preferences"
+                onClick={() => {}} // This enables the right chevron (>) arrow
+              />
+            </div>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-full sm:w-[400px] p-0 bg-slate-50/50">
+            <SheetHeader className="p-6 pb-2 text-left bg-white border-b">
+              <SheetTitle>Notification Preferences</SheetTitle>
+            </SheetHeader>
+            <div className="p-4 sm:p-6">
+              <SettingsGroup>
+                <SettingsRow
+                  icon={Target}
+                  iconBg="bg-orange-500"
+                  title="Expense Reminders"
+                  value={
+                    <Switch 
+                      checked={preferences.expenseReminders} 
+                      onCheckedChange={(c) => updatePreference('expenseReminders', c)} 
+                      disabled={!isEnabled || loading}
+                    />
+                  }
+                />
+                <SettingsRow
+                  icon={Activity}
+                  iconBg="bg-green-500"
+                  title="Income Reminders"
+                  value={
+                    <Switch 
+                      checked={preferences.incomeReminders} 
+                      onCheckedChange={(c) => updatePreference('incomeReminders', c)} 
+                      disabled={!isEnabled || loading}
+                    />
+                  }
+                />
+                <SettingsRow
+                  icon={Users}
+                  iconBg="bg-blue-500"
+                  title="Family Activity"
+                  value={
+                    <Switch 
+                      checked={preferences.familyActivity} 
+                      onCheckedChange={(c) => updatePreference('familyActivity', c)} 
+                      disabled={!isEnabled || loading}
+                    />
+                  }
+                />
+                <SettingsRow
+                  icon={PieChart}
+                  iconBg="bg-purple-500"
+                  title="Monthly Summary"
+                  value={
+                    <Switch 
+                      checked={preferences.monthlySummary} 
+                      onCheckedChange={(c) => updatePreference('monthlySummary', c)} 
+                      disabled={!isEnabled || loading}
+                    />
+                  }
+                />
+              </SettingsGroup>
+            </div>
+          </SheetContent>
+        </Sheet>
       </SettingsGroup>
     </>
   );
