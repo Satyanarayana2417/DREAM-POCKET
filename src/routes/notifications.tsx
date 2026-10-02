@@ -18,6 +18,7 @@ import {
 } from "@/lib/notificationHistory";
 import { FullPageLoader } from "@/components/Loader";
 import { Button } from "@/components/ui/button";
+import { AppShell } from "@/components/AppShell";
 
 export const Route = createFileRoute("/notifications")({
   component: NotificationsRoute,
@@ -119,72 +120,74 @@ function NotificationsRoute() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto pb-20">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Notifications</h1>
+    <AppShell>
+      <div className="max-w-2xl mx-auto pb-20">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-slate-900">Notifications</h1>
+          {notifications.length > 0 && (
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={handleMarkAllRead} className="text-xs">
+                <CheckCircle2 className="size-4 mr-1.5" /> Mark all read
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleDeleteAll} className="text-xs text-destructive hover:bg-destructive/10 border-destructive/20">
+                <Trash2 className="size-4 mr-1.5" /> Delete all
+              </Button>
+            </div>
+          )}
+        </div>
+
         {notifications.length > 0 && (
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={handleMarkAllRead} className="text-xs">
-              <CheckCircle2 className="size-4 mr-1.5" /> Mark all read
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleDeleteAll} className="text-xs text-destructive hover:bg-destructive/10 border-destructive/20">
-              <Trash2 className="size-4 mr-1.5" /> Delete all
-            </Button>
+          <div className="flex items-center justify-between bg-white p-3 mb-4 rounded-xl shadow-sm border border-slate-100">
+            <div 
+              className="flex items-center gap-3 cursor-pointer select-none"
+              onClick={toggleSelectAll}
+            >
+              <div className={`flex items-center justify-center size-5 rounded-md border ${
+                allSelected ? "bg-emerald-600 border-emerald-600" : 
+                someSelected ? "bg-emerald-600 border-emerald-600" : "border-slate-300"
+              }`}>
+                {allSelected && <CheckCircle2 className="size-3.5 text-white" />}
+                {someSelected && <div className="w-2.5 h-0.5 bg-white rounded-full" />}
+              </div>
+              <span className="text-sm font-medium text-slate-700">
+                {selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}
+              </span>
+            </div>
+
+            {selectedIds.size > 0 && (
+              <Button variant="destructive" size="sm" onClick={handleDeleteSelected}>
+                Delete Selected
+              </Button>
+            )}
+          </div>
+        )}
+
+        {notifications.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="size-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+              <Bell className="size-8 text-slate-300" />
+            </div>
+            <h2 className="text-lg font-semibold text-slate-900">No notifications yet</h2>
+            <p className="text-sm text-slate-500 mt-1 max-w-[250px]">
+              Your notifications will appear here. We'll let you know when something important happens!
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {notifications.map(n => (
+              <NotificationCard 
+                key={n.id} 
+                notification={n}
+                isSelected={selectedIds.has(n.id)}
+                onToggleSelect={(e) => toggleSelect(n.id, e)}
+                onClick={() => handleNotificationClick(n)}
+                onDelete={() => deleteNotification(user.uid, n.id)}
+              />
+            ))}
           </div>
         )}
       </div>
-
-      {notifications.length > 0 && (
-        <div className="flex items-center justify-between bg-white p-3 mb-4 rounded-xl shadow-sm border border-slate-100">
-          <div 
-            className="flex items-center gap-3 cursor-pointer select-none"
-            onClick={toggleSelectAll}
-          >
-            <div className={`flex items-center justify-center size-5 rounded-md border ${
-              allSelected ? "bg-emerald-600 border-emerald-600" : 
-              someSelected ? "bg-emerald-600 border-emerald-600" : "border-slate-300"
-            }`}>
-              {allSelected && <CheckCircle2 className="size-3.5 text-white" />}
-              {someSelected && <div className="w-2.5 h-0.5 bg-white rounded-full" />}
-            </div>
-            <span className="text-sm font-medium text-slate-700">
-              {selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}
-            </span>
-          </div>
-
-          {selectedIds.size > 0 && (
-            <Button variant="destructive" size="sm" onClick={handleDeleteSelected}>
-              Delete Selected
-            </Button>
-          )}
-        </div>
-      )}
-
-      {notifications.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="size-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-            <Bell className="size-8 text-slate-300" />
-          </div>
-          <h2 className="text-lg font-semibold text-slate-900">No notifications yet</h2>
-          <p className="text-sm text-slate-500 mt-1 max-w-[250px]">
-            Your notifications will appear here. We'll let you know when something important happens!
-          </p>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {notifications.map(n => (
-            <NotificationCard 
-              key={n.id} 
-              notification={n}
-              isSelected={selectedIds.has(n.id)}
-              onToggleSelect={(e) => toggleSelect(n.id, e)}
-              onClick={() => handleNotificationClick(n)}
-              onDelete={() => deleteNotification(user.uid, n.id)}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+    </AppShell>
   );
 }
 
