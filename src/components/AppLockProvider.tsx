@@ -93,15 +93,13 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
 
   const triggerBiometric = async () => {
     try {
-      const result = await NativeBiometric.verifyIdentity({
+      await NativeBiometric.verifyIdentity({
         reason: "Unlock Expense Manager",
         title: "Unlock App",
         subtitle: "Use your fingerprint or face to unlock",
       });
-      if (result) {
-        setIsLocked(false);
-        setPinInput("");
-      }
+      setIsLocked(false);
+      setPinInput("");
     } catch (e) {
       console.log("Biometric error", e);
     }
