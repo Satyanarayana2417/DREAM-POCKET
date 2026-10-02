@@ -18,7 +18,7 @@ export default defineConfig({
         name: 'DreamPocket',
         short_name: 'DreamPocket',
         description: 'Simple personal and family expense manager',
-        theme_color: '#10b981',
+        theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait',
