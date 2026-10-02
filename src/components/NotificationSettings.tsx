@@ -122,26 +122,19 @@ export function NotificationSettings() {
   return (
     <>
       <SettingsGroup>
-        <div onClickCapture={(e) => {
-          // Synchronous check to ensure browser doesn't block permission prompt
-          if (!isEnabled && "Notification" in window && Notification.permission !== "granted") {
-            Notification.requestPermission();
+        <SettingsRow
+          icon={Bell}
+          iconBg="bg-red-500"
+          title="Push Notifications"
+          description="Receive alerts for important activities"
+          value={
+            <Switch 
+              checked={isEnabled} 
+              onCheckedChange={handleToggle}
+              disabled={loading}
+            />
           }
-        }}>
-          <SettingsRow
-            icon={Bell}
-            iconBg="bg-red-500"
-            title="Push Notifications"
-            description="Receive alerts for important activities"
-            value={
-              <Switch 
-                checked={isEnabled} 
-                onCheckedChange={handleToggle}
-                disabled={loading}
-              />
-            }
-          />
-        </div>
+        />
       </SettingsGroup>
 
       <SettingsGroup title="Notification Preferences">

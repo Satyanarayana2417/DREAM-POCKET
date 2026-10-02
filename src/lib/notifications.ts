@@ -48,21 +48,17 @@ export async function requestNotificationPermissionAndSaveToken(uid: string, pre
       return false;
     }
 
-    // Get the service worker registration explicitly to pass to getToken
-    let registration = await navigator.serviceWorker.getRegistration();
+    // Wait for the service worker to be ready to avoid missing registrations in dev mode
+    let registration;
+    try {
+      registration = await navigator.serviceWorker.ready;
+    } catch (e) {
+      console.error("Error waiting for service worker:", e);
+    }
+
     if (!registration) {
-      console.warn("No default service worker registration found. Attempting to find any registration...");
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      if (registrations.length > 0) {
-        registration = registrations[0];
-      } else {
-        // Fallback to registering it manually if somehow missing
-        try {
-          registration = await navigator.serviceWorker.register('/sw.js');
-        } catch (e) {
-          console.error("Manual SW registration failed:", e);
-        }
-      }
+      toast.error("Service worker not found. Please refresh the page and try again.");
+      return false;
     }
 
     const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
