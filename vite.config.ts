@@ -12,7 +12,7 @@ export default defineConfig({
     tailwindcss(),
     tsconfigPaths(),
     VitePWA({
-      registerType: 'prompt',
+      registerType: 'autoUpdate',
       includeAssets: ['logo.png', 'logo-text.png', 'apple-touch-icon.png'],
       manifest: {
         name: 'DreamPocket',
