@@ -1,3 +1,4 @@
+/// <reference types="vite-plugin-pwa/client" />
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -12,7 +13,7 @@ export function PWAPrompt() {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
   } = useRegisterSW({
-    onRegistered(r) {
+    onRegistered(r: ServiceWorkerRegistration | undefined) {
       console.log('SW Registered: ', r);
       if (r) {
         setInterval(() => {
@@ -20,7 +21,7 @@ export function PWAPrompt() {
         }, 60 * 60 * 1000); // Check for updates every hour
       }
     },
-    onRegisterError(error) {
+    onRegisterError(error: any) {
       console.log('SW registration error', error);
     },
   });
