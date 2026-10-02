@@ -2,10 +2,12 @@ import { Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { LayoutDashboard, ListOrdered, LogOut, Plus, Target, User, Wallet, PieChart, Users, Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useState, useEffect } from "react";
 
 import { FullPageLoader } from "./Loader";
 import { useAuth, useRequireAuth } from "@/lib/auth";
+
+import { setupForegroundMessageListener } from "@/lib/notifications";
 
 const NAV = [
   { to: "/", label: "Home", icon: LayoutDashboard },
@@ -26,6 +28,16 @@ export function AppShell({
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const location = useLocation();
+
+  useEffect(() => {
+    if (user) {
+      let unsub: () => void = () => {};
+      setupForegroundMessageListener().then((u) => {
+        if (typeof u === 'function') unsub = u;
+      });
+      return () => unsub();
+    }
+  }, [user]);
 
   const showFAB = location.pathname === "/" || location.pathname === "/expenses";
 

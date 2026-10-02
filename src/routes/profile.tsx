@@ -20,6 +20,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
 import { firebaseStorage } from "@/lib/firebase";
 import { AppLockSettings } from "@/components/AppLockSettings";
+import { NotificationSettings } from "@/components/NotificationSettings";
 
 export const Route = createFileRoute("/profile")({
   component: ProfileRoute,
@@ -275,6 +276,7 @@ function ProfileRoute() {
       </Card>
 
       <AppLockSettings />
+      <NotificationSettings />
 
       <Card className="mt-6">
         <CardHeader>

@@ -11,6 +11,11 @@ service cloud.firestore {
     // Users Collection
     match /users/{userId} {
       allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      
+      // FCM Tokens subcollection
+      match /fcmTokens/{token} {
+        allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      }
     }
 
     // Expenses Collection

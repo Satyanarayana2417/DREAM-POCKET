@@ -169,9 +169,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
+    if (user) {
+      const { disableNotifications } = await import("./notifications");
+      await disableNotifications(user.uid);
+    }
     const { auth } = initFirebase(await getFirebaseConfig());
     await signOut(auth);
-  }, []);
+  }, [user]);
 
   const value = useMemo(
     () => ({

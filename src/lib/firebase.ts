@@ -2,11 +2,13 @@ import { getApps, initializeApp, type FirebaseApp, type FirebaseOptions } from "
 import { getAuth, type Auth } from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
+import { getMessaging, type Messaging, isSupported } from "firebase/messaging";
 
 let app: FirebaseApp | null = null;
 let authInstance: Auth | null = null;
 let dbInstance: Firestore | null = null;
 let storageInstance: FirebaseStorage | null = null;
+let messagingInstance: Messaging | null = null;
 
 export function initFirebase(config: FirebaseOptions) {
   if (!config.apiKey) {
@@ -18,6 +20,11 @@ export function initFirebase(config: FirebaseOptions) {
     authInstance = getAuth(app);
     dbInstance = getFirestore(app);
     storageInstance = getStorage(app);
+    isSupported().then(supported => {
+      if (supported && app) {
+        messagingInstance = getMessaging(app);
+      }
+    });
   }
   return { auth: authInstance!, db: dbInstance!, storage: storageInstance! };
 }
@@ -39,4 +46,14 @@ export function firebaseStorage(): FirebaseStorage {
 
 export function isFirebaseReady() {
   return Boolean(authInstance && dbInstance);
+}
+
+export async function firebaseMessaging(): Promise<Messaging | null> {
+  const supported = await isSupported();
+  if (!supported) return null;
+  if (!messagingInstance) {
+    if (!app) return null;
+    messagingInstance = getMessaging(app);
+  }
+  return messagingInstance;
 }
