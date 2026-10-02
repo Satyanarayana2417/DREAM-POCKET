@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -12,6 +12,7 @@ import { useAuth } from "@/lib/auth";
 import { fetchExpense, saveExpense, removeExpense } from "@/lib/data";
 import { CATEGORY_NAMES } from "@/lib/expense-utils";
 import { uploadToCloudinary, optimizedImage } from "@/lib/cloudinary";
+import { BackButton } from "@/components/BackButton";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -66,6 +67,7 @@ function EditExpenseRoute() {
   const { id } = Route.useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -208,9 +210,12 @@ function EditExpenseRoute() {
       <div className="mx-auto max-w-2xl">
       <Card>
         <CardHeader className="flex flex-row items-start justify-between space-y-0">
-          <div>
-            <CardTitle className="text-2xl">Edit Expense</CardTitle>
-            <CardDescription>Update transaction details.</CardDescription>
+          <div className="flex items-start gap-2">
+            <BackButton fallback="/expenses" />
+            <div>
+              <CardTitle className="text-2xl">Edit Expense</CardTitle>
+              <CardDescription>Update transaction details.</CardDescription>
+            </div>
           </div>
           <AlertDialog>
             <AlertDialogTrigger asChild>
@@ -433,7 +438,14 @@ function EditExpenseRoute() {
                   type="button"
                   variant="outline"
                   className="w-full"
-                  onClick={() => navigate({ to: "/expenses" })}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (router.history.canGoBack()) {
+                      router.history.back();
+                    } else {
+                      navigate({ to: "/expenses" });
+                    }
+                  }}
                   disabled={updateMutation.isPending}
                 >
                   Cancel

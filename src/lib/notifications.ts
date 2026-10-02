@@ -2,6 +2,7 @@ import { getToken, onMessage } from "firebase/messaging";
 import { doc, setDoc, deleteDoc } from "firebase/firestore";
 import { firebaseMessaging, firebaseDb } from "./firebase";
 import { toast } from "sonner";
+import { router } from "@/main";
 
 // Define the preferences interface
 export interface NotificationPreferences {
@@ -121,7 +122,7 @@ export async function setupForegroundMessageListener(uid?: string) {
       action: url ? {
         label: "View",
         onClick: () => {
-          window.location.href = url;
+          router.navigate({ to: url });
         }
       } : undefined
     });

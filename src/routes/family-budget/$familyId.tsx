@@ -15,6 +15,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
 import { AddFamilyMemberDialog } from "@/components/AddFamilyMemberDialog";
 import { FamilyExpenseDetailsDialog } from "@/components/FamilyExpenseDetailsDialog";
+import { BackButton } from "@/components/BackButton";
 
 export const Route = createFileRoute("/family-budget/$familyId")({
   component: FamilyDetailsRoute,
@@ -135,21 +136,13 @@ function FamilyDetailsRoute() {
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" asChild className="h-8 w-8 -ml-2 text-slate-700 sm:hidden">
-              <Link to="/family-budget">
-                <ArrowLeft className="size-5" />
-              </Link>
-            </Button>
+            <BackButton fallback="/family-budget" className="h-8 w-8 -ml-2 sm:hidden" />
             <div className="bg-emerald-100 text-emerald-600 p-2 sm:p-2.5 rounded-2xl flex-shrink-0">
               <Users className="size-6" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" asChild className="h-6 w-6 -ml-2 text-slate-700 hidden sm:inline-flex">
-                  <Link to="/family-budget">
-                    <ArrowLeft className="size-4" />
-                  </Link>
-                </Button>
+                <BackButton fallback="/family-budget" className="h-6 w-6 -ml-2 hidden sm:inline-flex" iconClassName="size-4" />
                 <h1 className="text-xl sm:text-2xl font-bold text-slate-900 leading-tight">Family Budget</h1>
               </div>
               <p className="text-sm font-medium text-slate-500">Together for a better tomorrow</p>

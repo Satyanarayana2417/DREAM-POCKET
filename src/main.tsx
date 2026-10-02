@@ -7,7 +7,7 @@ import "./styles.css";
 
 const queryClient = new QueryClient();
 
-const router = createRouter({
+export const router = createRouter({
   routeTree,
   context: { queryClient },
   defaultPreload: "intent",

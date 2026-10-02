@@ -19,6 +19,7 @@ import {
 import { FullPageLoader } from "@/components/Loader";
 import { Button } from "@/components/ui/button";
 import { AppShell } from "@/components/AppShell";
+import { BackButton } from "@/components/BackButton";
 
 export const Route = createFileRoute("/notifications")({
   component: NotificationsRoute,
@@ -115,7 +116,7 @@ function NotificationsRoute() {
       await markNotificationAsRead(user.uid, n.id);
     }
     if (n.route) {
-      window.location.href = n.route;
+      navigate({ to: n.route });
     }
   };
 
@@ -123,7 +124,10 @@ function NotificationsRoute() {
     <AppShell>
       <div className="max-w-2xl mx-auto pb-20">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-slate-900">Notifications</h1>
+          <div className="flex items-center gap-2">
+            <BackButton fallback="/" />
+            <h1 className="text-2xl font-bold text-slate-900">Notifications</h1>
+          </div>
           {notifications.length > 0 && (
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={handleMarkAllRead} className="text-xs">

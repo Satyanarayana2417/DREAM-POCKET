@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Target, ArrowDownCircle, Info, Calendar, Plus } from "lucide-react";
 
 import { AppShell, Avatar } from "@/components/AppShell";
+import { BackButton } from "@/components/BackButton";
 import { useAuth } from "@/lib/auth";
 import { fetchFamilyById, fetchFamilyMembers, fetchFamilyBudgets, fetchFamilyExpenses, fetchUsersByIds } from "@/lib/data";
 import { currentMonthKey, categoryMeta, formatDisplayDate, formatINR, budgetStatus } from "@/lib/expense-utils";
@@ -102,11 +103,7 @@ function MemberProfileRoute() {
     <AppShell>
       <div className="space-y-6">
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" asChild className="h-8 w-8 -ml-2">
-            <Link to="/family-budget/$familyId" params={{ familyId }}>
-              <ArrowLeft className="size-5" />
-            </Link>
-          </Button>
+          <BackButton fallback={`/family-budget/${familyId}`} className="h-8 w-8 -ml-2" />
           <div className="flex-1" />
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
             <SelectTrigger className="w-[180px] bg-white h-9 shadow-sm border-slate-200">
