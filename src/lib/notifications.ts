@@ -20,9 +20,24 @@ export const defaultPreferences: NotificationPreferences = {
 
 export async function requestNotificationPermissionAndSaveToken(uid: string, preferences: NotificationPreferences = defaultPreferences) {
   try {
-    const permission = await Notification.requestPermission();
+    let permission = Notification.permission;
     if (permission !== "granted") {
-      toast.error("Notification permission denied");
+      try {
+        permission = await new Promise<NotificationPermission>((resolve, reject) => {
+          const promise = Notification.requestPermission((result) => {
+            resolve(result);
+          });
+          if (promise) {
+            promise.then(resolve).catch(reject);
+          }
+        });
+      } catch (err) {
+        console.error("Permission request error:", err);
+      }
+    }
+
+    if (permission !== "granted") {
+      toast.error("Notification permission denied by browser");
       return false;
     }
 

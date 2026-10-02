@@ -9,6 +9,7 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { firebaseDb, firebaseMessaging } from "@/lib/firebase";
 import { toast } from "sonner";
 import { getToken } from "firebase/messaging";
+import { Capacitor } from "@capacitor/core";
 
 export function NotificationSettings() {
   const { user } = useAuth();
@@ -69,6 +70,12 @@ export function NotificationSettings() {
   const handleToggle = async (checked: boolean) => {
     if (!user) return;
     
+    if (Capacitor.isNativePlatform()) {
+      toast.error("Web push is not supported in the native app yet. Please use the website.");
+      setIsEnabled(false);
+      return;
+    }
+
     setLoading(true);
     if (checked) {
       const success = await requestNotificationPermissionAndSaveToken(user.uid, preferences);
