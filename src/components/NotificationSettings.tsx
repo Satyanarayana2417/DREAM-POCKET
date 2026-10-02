@@ -72,25 +72,34 @@ export function NotificationSettings() {
     
     if (Capacitor.isNativePlatform()) {
       toast.error("Web push is not supported in the native app yet. Please use the website.");
-      setIsEnabled(false);
       return;
     }
 
+    // Optimistic UI update for immediate tactile feedback
+    const previousState = isEnabled;
+    setIsEnabled(checked);
     setLoading(true);
-    if (checked) {
-      const success = await requestNotificationPermissionAndSaveToken(user.uid, preferences);
-      if (success) {
-        setIsEnabled(true);
-        toast.success("Push notifications enabled!");
+
+    try {
+      if (checked) {
+        const success = await requestNotificationPermissionAndSaveToken(user.uid, preferences);
+        if (success) {
+          toast.success("Push notifications enabled!");
+        } else {
+          // Revert if failed
+          setIsEnabled(previousState);
+          toast.error("Could not enable notifications. Please check your browser permissions.");
+        }
       } else {
-        setIsEnabled(false);
+        await disableNotifications(user.uid);
+        toast.success("Push notifications disabled.");
       }
-    } else {
-      await disableNotifications(user.uid);
-      setIsEnabled(false);
-      toast.success("Push notifications disabled.");
+    } catch (err) {
+      setIsEnabled(previousState);
+      toast.error("An error occurred while changing settings.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const updatePreference = async (key: keyof NotificationPreferences, checked: boolean) => {
