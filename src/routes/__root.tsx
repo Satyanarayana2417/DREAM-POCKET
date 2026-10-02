@@ -8,6 +8,7 @@ import {
 import { AuthProvider } from "../lib/auth";
 import { PWAPrompt } from "../components/PWAPrompt";
 import { AppLockProvider } from "../components/AppLockProvider";
+import { ThemeProvider } from "../components/theme-provider";
 
 function NotFoundComponent() {
   return (
@@ -74,11 +75,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootComponent() {
   return (
-    <AuthProvider>
-      <AppLockProvider>
-        <Outlet />
-        <PWAPrompt />
-      </AppLockProvider>
-    </AuthProvider>
+    <ThemeProvider defaultTheme="light" storageKey="expense-harmony-theme">
+      <AuthProvider>
+        <AppLockProvider>
+          <Outlet />
+          <PWAPrompt />
+        </AppLockProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

@@ -147,7 +147,8 @@ export async function setupForegroundMessageListener(uid?: string) {
         type: "system",
         read: false,
         route: url || undefined,
-        data: payload.data
+        data: payload.data,
+        createdAt: new Date().toISOString()
       });
     }
   });

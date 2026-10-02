@@ -106,8 +106,8 @@ function MemberProfileRoute() {
           <BackButton fallback={`/family-budget/${familyId}`} className="h-8 w-8 -ml-2" />
           <div className="flex-1" />
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="w-[180px] bg-white h-9 shadow-sm border-slate-200">
-              <Calendar className="mr-2 size-4 text-slate-500" />
+            <SelectTrigger className="w-[180px] bg-card h-9 shadow-sm border-border">
+              <Calendar className="mr-2 size-4 text-muted-foreground" />
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -118,10 +118,10 @@ function MemberProfileRoute() {
           </Select>
         </div>
 
-        <div className="flex items-center gap-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+        <div className="flex items-center gap-4 bg-card p-5 rounded-2xl shadow-sm border border-border">
           <Avatar name={userInfo["username"] || "User"} photoURL={userInfo["photoURL"]} size={64} />
           <div className="flex-1">
-            <h1 className="text-xl font-bold text-slate-900">{userInfo["username"]}</h1>
+            <h1 className="text-xl font-bold text-foreground">{userInfo["username"]}</h1>
             <p className="text-sm font-medium text-emerald-600 uppercase tracking-wider">{memberInfo.role}</p>
           </div>
           {isMe && (
@@ -129,40 +129,40 @@ function MemberProfileRoute() {
           )}
         </div>
 
-        <Card className="border-0 shadow-sm overflow-hidden bg-white">
+        <Card className="border-0 shadow-sm overflow-hidden bg-card">
           <div className="p-6 pb-0">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-slate-900">{selectedMonthLabel} Overview</h2>
+              <h2 className="text-lg font-semibold text-foreground">{selectedMonthLabel} Overview</h2>
             </div>
           </div>
           <CardContent className="p-6">
             <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-                <p className="text-sm text-slate-500 font-medium flex items-center gap-1.5 mb-1">
+              <div className="p-4 rounded-xl bg-muted border border-border">
+                <p className="text-sm text-muted-foreground font-medium flex items-center gap-1.5 mb-1">
                   <Target className="size-4" /> My Budget
                 </p>
-                <p className="text-2xl font-semibold sm:font-bold text-slate-900">{formatINR(memberBudgetAmount)}</p>
+                <p className="text-2xl font-semibold sm:font-bold text-foreground">{formatINR(memberBudgetAmount)}</p>
               </div>
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-                <p className="text-sm text-slate-500 font-medium flex items-center gap-1.5 mb-1">
+              <div className="p-4 rounded-xl bg-muted border border-border">
+                <p className="text-sm text-muted-foreground font-medium flex items-center gap-1.5 mb-1">
                   <ArrowDownCircle className="size-4" /> Total Spent
                 </p>
-                <p className="text-2xl font-semibold sm:font-bold text-slate-900">{formatINR(totalSpent)}</p>
+                <p className="text-2xl font-semibold sm:font-bold text-foreground">{formatINR(totalSpent)}</p>
               </div>
             </div>
 
             <div>
               <div className="flex items-end justify-between mb-2">
                 <div>
-                  <p className="text-sm font-medium text-slate-500">Remaining</p>
+                  <p className="text-sm font-medium text-muted-foreground">Remaining</p>
                   <p className={`text-2xl font-semibold sm:font-bold ${statusColor}`}>{formatINR(status.remaining)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-semibold sm:font-bold text-slate-900">{status.percent.toFixed(1)}%</p>
-                  <p className="text-xs text-slate-500 uppercase font-medium">Used</p>
+                  <p className="text-sm font-semibold sm:font-bold text-foreground">{status.percent.toFixed(1)}%</p>
+                  <p className="text-xs text-muted-foreground uppercase font-medium">Used</p>
                 </div>
               </div>
-              <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-2.5 w-full bg-muted rounded-full overflow-hidden">
                 <div
                   className={`h-full ${statusBg} rounded-full transition-all duration-500 ease-out`}
                   style={{ width: `${Math.min(status.percent, 100)}%` }}
@@ -180,11 +180,11 @@ function MemberProfileRoute() {
 
         <div>
           <div className="flex items-center justify-between mb-3 ml-1">
-            <h2 className="text-lg font-semibold text-slate-900">{userInfo["username"]}'s Expenses</h2>
+            <h2 className="text-lg font-semibold text-foreground">{userInfo["username"]}'s Expenses</h2>
           </div>
           
           {monthExpenses.length === 0 ? (
-            <div className="text-center py-10 bg-white rounded-xl border border-slate-100 shadow-sm">
+            <div className="text-center py-10 bg-card rounded-xl border border-border shadow-sm">
               <p className="text-muted-foreground">No expenses added by {userInfo["username"]} for this month.</p>
             </div>
           ) : (
@@ -193,14 +193,14 @@ function MemberProfileRoute() {
                 const meta = categoryMeta(exp.category);
                 return (
                   <FamilyExpenseDetailsDialog key={exp.id} expense={exp} username={userInfo["username"] || "Member"}>
-                    <div className="flex items-center justify-between p-4 bg-white rounded-xl shadow-sm border border-slate-100 hover:border-emerald-200 hover:shadow-md transition-all">
+                    <div className="flex items-center justify-between p-4 bg-card rounded-xl shadow-sm border border-border hover:border-emerald-200 hover:shadow-md transition-all">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-50 border border-slate-100 group-hover:bg-emerald-50">
-                          <meta.icon className="h-5 w-5 text-slate-600" />
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted border border-border group-hover:bg-emerald-50">
+                          <meta.icon className="h-5 w-5 text-muted-foreground" />
                         </div>
                         <div className="text-left">
-                          <p className="font-semibold text-slate-900">{exp.title}</p>
-                          <p className="text-xs font-medium text-slate-500">
+                          <p className="font-semibold text-foreground">{exp.title}</p>
+                          <p className="text-xs font-medium text-muted-foreground">
                             {exp.category} • {formatDisplayDate(exp.date)}
                           </p>
                           <p className="text-[11px] font-medium text-emerald-600 mt-0.5">
@@ -208,7 +208,7 @@ function MemberProfileRoute() {
                           </p>
                         </div>
                       </div>
-                      <p className="font-semibold sm:font-bold text-slate-900 text-right">{formatINR(exp.amount)}</p>
+                      <p className="font-semibold sm:font-bold text-foreground text-right">{formatINR(exp.amount)}</p>
                     </div>
                   </FamilyExpenseDetailsDialog>
                 );

@@ -63,14 +63,14 @@ export function PWAPrompt() {
 
       {/* Update Available Prompt */}
       {needRefresh && (
-        <div className="fixed bottom-24 left-4 right-4 sm:left-auto sm:right-4 sm:w-96 z-50 bg-white border border-slate-200 px-4 py-4 rounded-2xl shadow-xl flex flex-col gap-3 pointer-events-auto">
+        <div className="fixed bottom-24 left-4 right-4 sm:left-auto sm:right-4 sm:w-96 z-50 bg-card border border-border px-4 py-4 rounded-2xl shadow-xl flex flex-col gap-3 pointer-events-auto">
           <div className="flex items-start gap-3">
             <div className="bg-emerald-100 p-2 rounded-full shrink-0">
               <Download className="size-5 text-emerald-600" />
             </div>
             <div className="flex-1">
-              <p className="font-semibold text-sm text-slate-900">New version available</p>
-              <p className="text-xs text-slate-500 mt-0.5">Update to get the latest features and fixes.</p>
+              <p className="font-semibold text-sm text-foreground">New version available</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Update to get the latest features and fixes.</p>
             </div>
           </div>
           <div className="flex gap-2 justify-end mt-1">

@@ -150,7 +150,7 @@ function Index() {
         {/* Summary Cards */}
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           <Card 
-            className="border-0 shadow-sm rounded-2xl cursor-pointer hover:bg-slate-50 transition-colors"
+            className="border-0 shadow-sm rounded-2xl cursor-pointer hover:bg-muted transition-colors"
             onClick={() => {
               setIncomeInput(currentIncome > 0 ? String(currentIncome) : "");
               setIsIncomeModalOpen(true);
@@ -158,7 +158,7 @@ function Index() {
           >
             <CardContent className="p-4 sm:p-5 flex flex-col items-center sm:items-start justify-center">
               <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 mb-2 sm:mb-3 w-full justify-center sm:justify-start">
-                <div className="bg-blue-50 text-blue-500 p-2.5 rounded-xl">
+                <div className="bg-blue-500/10 text-blue-500 p-2.5 rounded-xl">
                   <Calendar className="size-5" />
                 </div>
                 <span className="hidden sm:inline-flex items-center text-sm font-medium text-muted-foreground whitespace-nowrap truncate w-full">
@@ -175,12 +175,12 @@ function Index() {
           </Card>
           
           <Card 
-            className="border-0 shadow-sm rounded-2xl cursor-pointer hover:bg-slate-50 transition-colors"
+            className="border-0 shadow-sm rounded-2xl cursor-pointer hover:bg-muted transition-colors"
             onClick={() => navigate({ to: "/expenses" })}
           >
             <CardContent className="p-4 sm:p-5 flex flex-col items-center sm:items-start justify-center">
               <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 mb-2 sm:mb-3 w-full justify-center sm:justify-start">
-                <div className="bg-emerald-50 text-emerald-500 p-2.5 rounded-xl">
+                <div className="bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 p-2.5 rounded-xl">
                   <TrendingUp className="size-5" />
                 </div>
                 <span className="hidden sm:block text-sm font-medium text-muted-foreground whitespace-nowrap truncate">Total Spent</span>
@@ -195,7 +195,7 @@ function Index() {
           <Card className="border-0 shadow-sm rounded-2xl">
             <CardContent className="p-4 sm:p-5 flex flex-col items-center sm:items-start justify-center">
               <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 mb-2 sm:mb-3 w-full justify-center sm:justify-start">
-                <div className="bg-orange-50 text-orange-500 p-2.5 rounded-xl">
+                <div className="bg-orange-500/10 text-orange-500 dark:text-orange-400 p-2.5 rounded-xl">
                   <Wallet className="size-5" />
                 </div>
                 <span className="hidden sm:block text-sm font-medium text-muted-foreground whitespace-nowrap truncate">Remaining</span>
@@ -212,12 +212,12 @@ function Index() {
           </Card>
 
           <Card 
-            className="border-0 shadow-sm rounded-2xl cursor-pointer hover:bg-slate-50 transition-colors"
+            className="border-0 shadow-sm rounded-2xl cursor-pointer hover:bg-muted transition-colors"
             onClick={() => navigate({ to: "/expenses" })}
           >
             <CardContent className="p-4 sm:p-5 flex flex-col items-center sm:items-start justify-center">
               <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 mb-2 sm:mb-3 w-full justify-center sm:justify-start">
-                <div className="bg-purple-50 text-purple-500 p-2.5 rounded-xl">
+                <div className="bg-purple-500/10 text-purple-500 dark:text-purple-400 p-2.5 rounded-xl">
                   <ReceiptText className="size-5" />
                 </div>
                 <span className="hidden sm:block text-sm font-medium text-muted-foreground whitespace-nowrap truncate">Expenses</span>
@@ -239,17 +239,17 @@ function Index() {
                 <h3 className="font-semibold text-lg font-display">Income Overview</h3>
                 <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
                   status.state === "exceeded" 
-                    ? "bg-red-50 text-red-600" 
+                    ? "bg-red-500/10 text-red-600 dark:text-red-400" 
                     : status.state === "near" 
-                      ? "bg-orange-50 text-orange-600" 
-                      : "bg-emerald-50 text-emerald-600"
+                      ? "bg-orange-500/10 text-orange-600 dark:text-orange-400" 
+                      : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                 }`}>
                   {status.state === "exceeded" ? "Exceeded" : status.state === "near" ? "Nearing Limit" : "On Track"}
                 </span>
               </div>
               
               <div className="flex justify-between items-end mb-3">
-                <div className="text-2xl font-bold">
+                <div className={currentIncome > 0 ? "text-2xl font-bold" : "text-base font-normal text-muted-foreground"}>
                   {currentIncome > 0 ? `${status.percent.toFixed(1)}% spent` : "No income added"}
                 </div>
                 <div className="text-sm font-medium text-muted-foreground">Income: {formatINR(currentIncome)}</div>
@@ -310,8 +310,10 @@ function Index() {
                           formatter={(value: number) => formatINR(value)}
                           contentStyle={{
                             borderRadius: "12px",
-                            border: "none",
-                            boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                            border: "1px solid var(--color-border)",
+                            boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                            backgroundColor: "var(--color-card)",
+                            color: "var(--color-foreground)",
                           }}
                         />
                       </PieChart>
@@ -413,45 +415,53 @@ function Index() {
           <Card className="border-0 shadow-sm rounded-2xl">
             <CardContent className="p-6">
               <h3 className="font-semibold text-lg font-display mb-6">Monthly Spending</h3>
-              <div className="h-[220px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={dTotals} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
-                    <XAxis
-                      dataKey="day"
-                      tickLine={false}
-                      axisLine={false}
-                      tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
-                      tickFormatter={(value) =>
-                        Number(value) % 7 === 1 ? `${value} ${monthName.split(" ")[0]!.slice(0,3)}` : ""
-                      }
-                    />
-                    <YAxis 
-                      hide={false}
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
-                      tickFormatter={(value) => value > 0 ? `${value / 1000}k` : '0'}
-                    />
-                    <RechartsTooltip
-                      cursor={{ fill: "hsl(var(--muted)/0.4)" }}
-                      formatter={(value: number) => [formatINR(value), "Spent"]}
-                      labelFormatter={(label) => `Day ${label}`}
-                      contentStyle={{
-                        borderRadius: "12px",
-                        border: "none",
-                        boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-                        fontSize: "12px",
-                      }}
-                    />
-                    <Bar 
-                      dataKey="amount" 
-                      fill="#3b82f6" 
-                      radius={[2, 2, 0, 0]} 
-                      maxBarSize={40}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+              {mainMonthExpenses.length > 0 ? (
+                <div className="h-[220px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={dTotals} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+                      <XAxis
+                        dataKey="day"
+                        tickLine={false}
+                        axisLine={false}
+                        tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                        tickFormatter={(value) =>
+                          Number(value) % 7 === 1 ? `${value} ${monthName.split(" ")[0]!.slice(0,3)}` : ""
+                        }
+                      />
+                      <YAxis 
+                        hide={false}
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                        tickFormatter={(value) => value > 0 ? `${value / 1000}k` : '0'}
+                      />
+                      <RechartsTooltip
+                        cursor={{ fill: "var(--color-muted)" }}
+                        formatter={(value: number) => [formatINR(value), "Spent"]}
+                        labelFormatter={(label) => `Day ${label}`}
+                        contentStyle={{
+                          borderRadius: "12px",
+                          border: "1px solid var(--color-border)",
+                          boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                          backgroundColor: "var(--color-card)",
+                          color: "var(--color-foreground)",
+                          fontSize: "12px",
+                        }}
+                      />
+                      <Bar 
+                        dataKey="amount" 
+                        fill="#3b82f6" 
+                        radius={[2, 2, 0, 0]} 
+                        maxBarSize={40}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <div className="flex h-[220px] items-center justify-center text-sm text-muted-foreground bg-muted/20 rounded-xl">
+                  No expenses added
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

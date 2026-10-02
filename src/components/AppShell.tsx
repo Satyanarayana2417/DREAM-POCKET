@@ -51,6 +51,7 @@ export function AppShell({
   }, [user]);
 
   const showFAB = location.pathname === "/" || location.pathname === "/expenses";
+  const hideBottomNav = location.pathname.startsWith("/settings") || location.pathname.startsWith("/profile");
 
   if (loading || !user) return <FullPageLoader label="Getting things ready…" />;
 
@@ -73,7 +74,7 @@ export function AppShell({
   ];
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] md:pl-[260px] overflow-x-hidden">
+    <div className="min-h-screen bg-background md:pl-[260px] overflow-x-hidden">
       {/* Mobile Header */}
       <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-border/50 bg-card px-4 shadow-sm md:hidden">
         <div className="flex items-center gap-3">
@@ -201,7 +202,8 @@ export function AppShell({
       </main>
 
       {/* Mobile bottom nav + floating add button */}
-      <div className="fixed bottom-0 left-4 right-4 z-50 md:hidden pointer-events-none pb-[env(safe-area-inset-bottom)] pb-2">
+      {!hideBottomNav && (
+        <div className="fixed bottom-0 left-4 right-4 z-50 md:hidden pointer-events-none pb-[env(safe-area-inset-bottom)] pb-2">
         
         {/* Floating Action Button (Original Position - Add Expense) */}
         {showFAB && (
@@ -219,11 +221,11 @@ export function AppShell({
           
           {/* Dynamic SVG Background Layer */}
           <div className="absolute inset-0 flex pointer-events-none">
-            <div className="flex-1 bg-white rounded-l-[34px]"></div>
-            <svg width="84" height="68" viewBox="0 0 84 68" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
-              <path d="M 0 0 C 5 0, 5 10, 12 20 A 36 36 0 0 0 72 20 C 79 10, 79 0, 84 0 L 84 68 L 0 68 Z" fill="white" />
+            <div className="flex-1 bg-card rounded-l-[34px]"></div>
+            <svg width="84" height="68" viewBox="0 0 84 68" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-card shrink-0">
+              <path d="M 0 0 C 5 0, 5 10, 12 20 A 36 36 0 0 0 72 20 C 79 10, 79 0, 84 0 L 84 68 L 0 68 Z" fill="currentColor" />
             </svg>
-            <div className="flex-1 bg-white rounded-r-[34px]"></div>
+            <div className="flex-1 bg-card rounded-r-[34px]"></div>
           </div>
 
           {/* Central Cutout Floating Button (Budget) */}
@@ -242,7 +244,7 @@ export function AppShell({
                 key={item.to}
                 to={item.to}
                 activeOptions={{ exact: item.to === "/" }}
-                className="flex flex-col items-center justify-center gap-1 py-1 px-1.5 text-[10px] font-medium text-slate-400 transition-colors data-[status=active]:text-emerald-600 w-12"
+                className="flex flex-col items-center justify-center gap-1 py-1 px-1.5 text-[10px] font-medium text-muted-foreground transition-colors data-[status=active]:text-emerald-600 w-12"
               >
                 <item.icon className="size-5" />
                 <span className="truncate w-full text-center">{item.label}</span>
@@ -260,7 +262,7 @@ export function AppShell({
                 key={item.to}
                 to={item.to}
                 activeOptions={{ exact: item.to === "/" }}
-                className="flex flex-col items-center justify-center gap-1 py-1 px-1.5 text-[10px] font-medium text-slate-400 transition-colors data-[status=active]:text-emerald-600 w-12"
+                className="flex flex-col items-center justify-center gap-1 py-1 px-1.5 text-[10px] font-medium text-muted-foreground transition-colors data-[status=active]:text-emerald-600 w-12"
               >
                 <item.icon className="size-5" />
                 <span className="truncate w-full text-center">{item.label}</span>
@@ -270,6 +272,7 @@ export function AppShell({
 
         </nav>
       </div>
+      )}
     </div>
   );
 }

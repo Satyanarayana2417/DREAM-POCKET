@@ -26,7 +26,7 @@ export function BackButton({ fallback = "/", className = "", iconClassName = "si
       variant="ghost" 
       size="icon" 
       onClick={handleBack} 
-      className={`text-slate-700 hover:bg-slate-100 rounded-full transition-colors active:scale-95 ${className}`}
+      className={`text-foreground hover:bg-muted rounded-full transition-colors active:scale-95 ${className}`}
       aria-label="Go back"
     >
       <ArrowLeft className={iconClassName} />

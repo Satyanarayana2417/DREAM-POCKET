@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
-import { LogOut, User, Mail, Calendar, Shield, Edit2, Check, X } from "lucide-react";
+import { LogOut, User, Mail, Calendar, Shield, Edit2, Check, X, ChevronRight, ChevronLeft, Settings as SettingsIcon, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -25,6 +25,15 @@ import { NotificationSettings } from "@/components/NotificationSettings";
 export const Route = createFileRoute("/profile")({
   component: ProfileRoute,
 });
+
+const GoogleLogo = () => (
+  <svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+  </svg>
+);
 
 function ProfileRoute() {
   const { user, profile, logout, refreshProfile } = useAuth();
@@ -145,132 +154,149 @@ function ProfileRoute() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-xl space-y-6">
-      <h1 className="text-2xl font-bold sm:text-3xl px-2">Settings</h1>
-
-      <SettingsGroup className="mt-4">
-        <div className="flex items-center gap-4 p-4 bg-white cursor-pointer active:bg-slate-50 transition-colors" onClick={() => fileInputRef.current?.click()}>
-          <div className="relative">
-            <input 
-              type="file" 
-              accept="image/*" 
-              className="hidden" 
-              ref={fileInputRef} 
-              onChange={handleFileChange} 
-            />
-            {isUploading ? (
-              <div className="flex size-[60px] items-center justify-center rounded-full bg-slate-100">
-                <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
-              </div>
-            ) : (
-              <Avatar photoURL={profile.photoURL} name={profile.username || "User"} size={60} />
-            )}
-          </div>
-          <div className="flex-1 flex justify-between items-center">
-             <div>
-               <h2 className="text-xl font-semibold text-slate-900 leading-tight">
-                 {isEditingName ? (
-                   <Input 
-                     value={editName}
-                     onChange={(e) => setEditName(e.target.value)}
-                     className="max-w-[200px] h-8"
-                     placeholder="Enter full name"
-                     autoFocus
-                     onClick={(e) => e.stopPropagation()}
-                     onBlur={saveName}
-                     onKeyDown={(e) => e.key === 'Enter' && saveName()}
-                   />
-                 ) : (
-                   profile.username
-                 )}
-               </h2>
-               <p className="text-[13px] text-slate-500 mt-0.5">{profile.email}</p>
-             </div>
-             <div className="flex items-center gap-2">
-                {!isEditingName && (
-                  <Button size="icon" variant="ghost" onClick={(e) => { e.stopPropagation(); startEditing(); }} className="size-8 text-slate-400">
-                    <Edit2 className="size-4" />
-                  </Button>
-                )}
-             </div>
-          </div>
-        </div>
-      </SettingsGroup>
-
-      <SettingsGroup>
-        <SettingsRow
-          icon={Calendar}
-          iconBg="bg-blue-500"
-          title="Member Since"
-          value={format(joinDate, "MMMM yyyy")}
-        />
-        <SettingsRow
-          icon={Mail}
-          iconBg="bg-indigo-500"
-          title="Account Provider"
-          value={profile.provider === "google.com" || profile.provider === "google" ? "Google" : "Email"}
-        />
-      </SettingsGroup>
-
-      <AppLockSettings />
-      <NotificationSettings />
-
-      <SettingsGroup>
-        <SettingsRow
-          icon={Download}
-          iconBg="bg-emerald-500"
-          title="Install Application"
-          value={
-            isInstalled ? (
-              <span className="text-[#00C853] font-medium">Installed</span>
-            ) : installPrompt || isIOS ? (
-              <Button size="sm" variant="ghost" className="h-7 text-[#00C853] font-semibold text-[15px] hover:text-[#00E676] hover:bg-green-50 px-2" onClick={installPrompt ? handleInstallClick : () => setShowIOSInstructions(true)}>
-                Install
-              </Button>
-            ) : (
-              <span className="text-slate-400 text-sm">Not Supported</span>
-            )
-          }
-        />
-      </SettingsGroup>
-
-      <SettingsGroup>
-        <SettingsRow
-          icon={LogOut}
-          iconBg="bg-red-500"
-          title="Sign Out"
-          onClick={handleLogout}
-        />
-      </SettingsGroup>
+      {/* Fixed background to ensure full screen expansion and fix iOS bg-fixed bugs */}
+      <div className="fixed inset-0 w-full h-full z-0">
+        <img src="/tropical-bg.png" alt="" className="w-full h-full object-cover dark:opacity-20" />
+        <div className="absolute inset-0 bg-[#F9F7F2]/40 dark:bg-background/80 backdrop-blur-[2px]"></div>
       </div>
+      
+      <div className="mx-auto max-w-xl min-h-screen pb-20 relative z-10">
+          {/* Header */}
+          <div className="relative flex items-center justify-center px-4 py-4 pt-2">
+            <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="absolute left-4 hover:bg-black/5 dark:hover:bg-white/10 rounded-full text-foreground">
+              <ArrowLeft className="size-6" strokeWidth={2.5} />
+            </Button>
+            <h1 className="text-[22px] font-bold text-foreground tracking-tight">Profile</h1>
+          </div>
 
-      <Dialog open={showIOSInstructions} onOpenChange={setShowIOSInstructions}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Install Home Expense Manager</DialogTitle>
-            <DialogDescription>
-              Install this application on your home screen for quick and easy access when you're on the go.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col gap-4 py-4">
-            <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
-              <div className="flex items-center justify-center size-8 rounded-full bg-slate-200 text-slate-700 font-semibold shrink-0">1</div>
-              <p className="text-sm text-slate-700">Tap the <Share className="inline size-5 mx-1 mb-1" /> <strong>Share</strong> button at the bottom of Safari.</p>
+          {/* Profile Info Header */}
+          <div className="flex flex-col items-center mt-2 mb-6 px-4">
+            <div className="relative cursor-pointer group mb-2" onClick={() => fileInputRef.current?.click()}>
+              <input 
+                type="file" 
+                accept="image/*" 
+                className="hidden" 
+                ref={fileInputRef} 
+                onChange={handleFileChange} 
+              />
+              {/* Pink Glow Behind Avatar */}
+              <div className="absolute inset-0 bg-pink-500/50 dark:bg-pink-500/20 blur-[30px] rounded-full transform scale-110"></div>
+              
+              {isUploading ? (
+                <div className="flex size-[120px] items-center justify-center rounded-full bg-muted shadow-sm border-[4px] border-card relative z-10">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : (
+                <>
+                  <div className="rounded-full shadow-lg border-[4px] border-card relative overflow-hidden group-active:scale-95 transition-transform z-10">
+                    <Avatar photoURL={profile.photoURL} name={profile.username || "User"} size={120} />
+                  </div>
+                  <div className="absolute bottom-0 right-0 bg-card rounded-full p-2 shadow-md border border-border z-20 transition-transform group-active:scale-95">
+                    <Camera className="text-foreground size-5" strokeWidth={2} />
+                  </div>
+                </>
+              )}
             </div>
-            <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
-              <div className="flex items-center justify-center size-8 rounded-full bg-slate-200 text-slate-700 font-semibold shrink-0">2</div>
-              <p className="text-sm text-slate-700">Scroll down and tap <PlusSquare className="inline size-5 mx-1 mb-1" /> <strong>Add to Home Screen</strong>.</p>
-            </div>
-            <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
-              <div className="flex items-center justify-center size-8 rounded-full bg-slate-200 text-slate-700 font-semibold shrink-0">3</div>
-              <p className="text-sm text-slate-700">Tap <strong>Add</strong> in the top right corner.</p>
-            </div>
+            
+            <h2 className="text-[24px] font-bold text-foreground tracking-tight relative z-10 drop-shadow-sm">
+              {profile.username}
+            </h2>
+            <p className="text-[15px] text-muted-foreground mt-1 relative z-10 font-medium drop-shadow-sm">{profile.email}</p>
           </div>
-          <div className="flex justify-end">
-            <Button onClick={() => setShowIOSInstructions(false)}>Got it</Button>
+
+          {/* Info Cards */}
+          {/* Info Cards */}
+          <div className="px-5 space-y-1.5">
+            
+            {/* Name Row */}
+            <div className="bg-white/30 dark:bg-card/40 backdrop-blur-2xl rounded-[32px] px-4 py-3 flex items-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.5),0_4px_12px_rgba(0,0,0,0.03)] dark:shadow-none border border-white/40 dark:border-white/10">
+              <div className="flex items-center justify-center size-[52px] rounded-full bg-white/40 dark:bg-white/10 text-foreground shrink-0 mr-4 border border-white/50 dark:border-white/5 shadow-[inset_0_2px_4px_rgba(255,255,255,0.6)] dark:shadow-none">
+                <User className="size-6" strokeWidth={1.5} />
+              </div>
+              <div className="flex-1 min-w-0 pr-2">
+                <p className="text-[15px] font-bold text-foreground mb-0.5">Name</p>
+                {isEditingName ? (
+                  <Input 
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    className="h-6 px-0 border-0 shadow-none text-[15px] text-foreground focus-visible:ring-0 w-full p-0 bg-transparent placeholder:text-muted-foreground/50"
+                    placeholder="Enter full name"
+                    autoFocus
+                    onBlur={saveName}
+                    onKeyDown={(e) => e.key === 'Enter' && saveName()}
+                  />
+                ) : (
+                  <p className="text-[15px] font-medium text-muted-foreground truncate">{profile.username}</p>
+                )}
+              </div>
+              {!isEditingName ? (
+                <Button size="icon" variant="ghost" onClick={startEditing} className="size-10 text-foreground/70 hover:bg-white/20 dark:hover:bg-white/5 rounded-full shrink-0 -mr-2">
+                  <Edit2 className="size-5" strokeWidth={2} />
+                </Button>
+              ) : (
+                <Button size="icon" variant="ghost" onClick={saveName} className="size-10 text-emerald-600 hover:bg-white/20 dark:hover:bg-white/5 rounded-full shrink-0 -mr-2">
+                  <Check className="size-6" strokeWidth={2.5} />
+                </Button>
+              )}
+            </div>
+
+            {/* Email Row */}
+            <div className="bg-white/30 dark:bg-card/40 backdrop-blur-2xl rounded-[32px] px-4 py-3 flex items-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.5),0_4px_12px_rgba(0,0,0,0.03)] dark:shadow-none border border-white/40 dark:border-white/10">
+              <div className="flex items-center justify-center size-[52px] rounded-full bg-white/40 dark:bg-white/10 text-foreground shrink-0 mr-4 border border-white/50 dark:border-white/5 shadow-[inset_0_2px_4px_rgba(255,255,255,0.6)] dark:shadow-none">
+                <Mail className="size-6" strokeWidth={1.5} />
+              </div>
+              <div className="flex-1 min-w-0 pr-2">
+                <p className="text-[15px] font-bold text-foreground mb-0.5">Email</p>
+                <p className="text-[15px] font-medium text-muted-foreground truncate">{profile.email}</p>
+              </div>
+              <ChevronRight className="size-5 text-foreground/40 shrink-0" strokeWidth={1.5} />
+            </div>
+
+            {/* Member Since Row */}
+            <div className="bg-white/30 dark:bg-card/40 backdrop-blur-2xl rounded-[32px] px-4 py-3 flex items-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.5),0_4px_12px_rgba(0,0,0,0.03)] dark:shadow-none border border-white/40 dark:border-white/10">
+              <div className="flex items-center justify-center size-[52px] rounded-full bg-white/40 dark:bg-white/10 text-foreground shrink-0 mr-4 border border-white/50 dark:border-white/5 shadow-[inset_0_2px_4px_rgba(255,255,255,0.6)] dark:shadow-none">
+                <Calendar className="size-6" strokeWidth={1.5} />
+              </div>
+              <div className="flex-1 min-w-0 pr-2">
+                <p className="text-[15px] font-bold text-foreground mb-0.5">Member Since</p>
+                <p className="text-[15px] font-medium text-muted-foreground truncate">{format(joinDate, "MMMM yyyy")}</p>
+              </div>
+              <ChevronRight className="size-5 text-foreground/40 shrink-0" strokeWidth={1.5} />
+            </div>
+
+            {/* Account Provider Row */}
+            <div className="bg-white/30 dark:bg-card/40 backdrop-blur-2xl rounded-[32px] px-4 py-3 flex items-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.5),0_4px_12px_rgba(0,0,0,0.03)] dark:shadow-none border border-white/40 dark:border-white/10">
+              <div className="flex items-center justify-center size-[52px] rounded-full bg-white/40 dark:bg-white/10 shrink-0 mr-4 border border-white/50 dark:border-white/5 shadow-[inset_0_2px_4px_rgba(255,255,255,0.6)] dark:shadow-none">
+                {(profile.provider === "google.com" || profile.provider === "google") ? (
+                  <GoogleLogo />
+                ) : (
+                  <Shield className="size-6 text-foreground" strokeWidth={1.5} />
+                )}
+              </div>
+              <div className="flex-1 min-w-0 pr-2">
+                <p className="text-[15px] font-bold text-foreground mb-0.5">Account Provider</p>
+                <p className="text-[15px] font-medium text-muted-foreground truncate">{profile.provider === "google.com" || profile.provider === "google" ? "Google" : "Email"}</p>
+              </div>
+              <ChevronRight className="size-5 text-foreground/40 shrink-0" strokeWidth={1.5} />
+            </div>
+
+            {/* Settings Row */}
+            <div 
+              className="bg-white/30 dark:bg-card/40 backdrop-blur-2xl rounded-[32px] px-4 py-3 flex items-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.5),0_4px_12px_rgba(0,0,0,0.03)] dark:shadow-none border border-white/40 dark:border-white/10 mb-6 cursor-pointer active:scale-[0.98] transition-transform mt-6"
+              onClick={() => navigate({ to: "/settings" })}
+            >
+              <div className="flex items-center justify-center size-[52px] rounded-full bg-white/40 dark:bg-white/10 text-foreground shrink-0 mr-4 border border-white/50 dark:border-white/5 shadow-[inset_0_2px_4px_rgba(255,255,255,0.6)] dark:shadow-none">
+                <SettingsIcon className="size-6" strokeWidth={1.5} />
+              </div>
+              <div className="flex-1 min-w-0 pr-2">
+                <p className="text-[15px] font-bold text-foreground">Settings</p>
+              </div>
+              <ChevronRight className="size-5 text-foreground/40 shrink-0" strokeWidth={1.5} />
+            </div>
+            
+            <div className="pb-8"></div>
           </div>
-        </DialogContent>
-      </Dialog>
+      </div>
       {selectedImage && (
         <ImageCropperDialog
           isOpen={!!selectedImage}

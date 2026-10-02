@@ -12,6 +12,7 @@ interface AppLockContextType {
   enableLock: (pin: string, useBiometric: boolean) => Promise<void>;
   disableLock: (currentPin: string) => Promise<boolean>;
   changePin: (oldPin: string, newPin: string) => Promise<boolean>;
+  lockNow: () => void;
 }
 
 const AppLockContext = createContext<AppLockContextType | null>(null);
@@ -33,26 +34,49 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
   const [errorText, setErrorText] = useState("");
   const [isChecking, setIsChecking] = useState(true);
 
+  // Universal storage helpers
+  const getStorage = async (key: string) => {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const res = await SecureStoragePlugin.get({ key });
+        return res.value;
+      } catch { return null; }
+    }
+    return localStorage.getItem(key);
+  };
+
+  const setStorage = async (key: string, value: string) => {
+    if (Capacitor.isNativePlatform()) {
+      await SecureStoragePlugin.set({ key, value });
+    } else {
+      localStorage.setItem(key, value);
+    }
+  };
+
+  const removeStorage = async (key: string) => {
+    if (Capacitor.isNativePlatform()) {
+      try { await SecureStoragePlugin.remove({ key }); } catch {}
+    } else {
+      localStorage.removeItem(key);
+    }
+  };
+
   // Load initial state
   useEffect(() => {
     const init = async () => {
-      if (!Capacitor.isNativePlatform()) {
-        setIsChecking(false);
-        return;
-      }
       try {
-        const enabledResult = await SecureStoragePlugin.get({ key: 'appLock_enabled' });
-        const enabled = enabledResult.value === 'true';
+        const enabledValue = await getStorage('appLock_enabled');
+        const enabled = enabledValue === 'true';
         setIsLockEnabled(enabled);
 
         if (enabled) {
-          const pinResult = await SecureStoragePlugin.get({ key: 'appLock_pin' });
-          setStoredPin(pinResult.value);
+          const pinValue = await getStorage('appLock_pin');
+          setStoredPin(pinValue);
           
-          try {
-            const bioResult = await SecureStoragePlugin.get({ key: 'appLock_biometric' });
-            setIsBiometricEnabled(bioResult.value === 'true');
-          } catch (e) {
+          if (Capacitor.isNativePlatform()) {
+            const bioValue = await getStorage('appLock_biometric');
+            setIsBiometricEnabled(bioValue === 'true');
+          } else {
             setIsBiometricEnabled(false);
           }
           
@@ -86,12 +110,13 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
 
   // Attempt biometric on mount if locked
   useEffect(() => {
-    if (isLocked && isBiometricEnabled && storedPin) {
+    if (isLocked && isBiometricEnabled && storedPin && Capacitor.isNativePlatform()) {
       triggerBiometric();
     }
   }, [isLocked, isBiometricEnabled, storedPin]);
 
   const triggerBiometric = async () => {
+    if (!Capacitor.isNativePlatform()) return;
     try {
       await NativeBiometric.verifyIdentity({
         reason: "Unlock Expense Manager",
@@ -131,20 +156,26 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
   };
 
   const enableLock = async (pin: string, useBiometric: boolean) => {
-    if (!Capacitor.isNativePlatform()) return;
-    await SecureStoragePlugin.set({ key: 'appLock_enabled', value: 'true' });
-    await SecureStoragePlugin.set({ key: 'appLock_pin', value: pin });
-    await SecureStoragePlugin.set({ key: 'appLock_biometric', value: useBiometric ? 'true' : 'false' });
+    await setStorage('appLock_enabled', 'true');
+    
+    if (pin !== "KEEP_CURRENT_PIN") {
+      await setStorage('appLock_pin', pin);
+      setStoredPin(pin);
+    }
+    
+    if (Capacitor.isNativePlatform()) {
+      await setStorage('appLock_biometric', useBiometric ? 'true' : 'false');
+      setIsBiometricEnabled(useBiometric);
+    }
     setIsLockEnabled(true);
-    setStoredPin(pin);
-    setIsBiometricEnabled(useBiometric);
   };
 
   const disableLock = async (currentPin: string) => {
     if (currentPin !== storedPin) return false;
-    await SecureStoragePlugin.remove({ key: 'appLock_enabled' });
-    await SecureStoragePlugin.remove({ key: 'appLock_pin' });
-    await SecureStoragePlugin.remove({ key: 'appLock_biometric' });
+    await removeStorage('appLock_enabled');
+    await removeStorage('appLock_pin');
+    await removeStorage('appLock_biometric');
+    
     setIsLockEnabled(false);
     setStoredPin(null);
     setIsBiometricEnabled(false);
@@ -153,18 +184,28 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
 
   const changePin = async (oldPin: string, newPin: string) => {
     if (oldPin !== storedPin) return false;
-    await SecureStoragePlugin.set({ key: 'appLock_pin', value: newPin });
+    await setStorage('appLock_pin', newPin);
     setStoredPin(newPin);
     return true;
   };
 
-  if (isChecking) {
-    return <div className="fixed inset-0 flex items-center justify-center bg-background z-50"></div>;
-  }
+  const lockNow = () => {
+    if (isLockEnabled) {
+      setIsLocked(true);
+      setPinInput("");
+      setErrorText("");
+    }
+  };
 
   return (
-    <AppLockContext.Provider value={{ isLockEnabled, isBiometricEnabled, enableLock, disableLock, changePin }}>
+    <AppLockContext.Provider value={{ isLockEnabled, isBiometricEnabled, enableLock, disableLock, changePin, lockNow }}>
       {children}
+      
+      {isChecking && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-background">
+          <div className="size-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      )}
       
       {isLocked && (
         <div className="fixed inset-0 z-[9999] bg-background flex flex-col items-center justify-center animate-in fade-in duration-200">

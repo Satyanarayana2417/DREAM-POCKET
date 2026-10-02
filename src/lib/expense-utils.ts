@@ -231,7 +231,7 @@ export function incomeStatus(spent: number, income: number) {
   const percent = income > 0 ? (spent / income) * 100 : 0;
   const remaining = income - spent; // can be negative
   const over = Math.max(spent - income, 0);
-  let state = "normal" as const;
+  let state: "normal" | "unset" | "exceeded" | "near" = "normal";
   if (income <= 0) {
     state = spent > 0 ? "exceeded" : "unset";
   } else {

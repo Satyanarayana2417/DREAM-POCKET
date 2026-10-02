@@ -143,14 +143,14 @@ function FamilyDetailsRoute() {
             <div>
               <div className="flex items-center gap-2">
                 <BackButton fallback="/family-budget" className="h-6 w-6 -ml-2 hidden sm:inline-flex" iconClassName="size-4" />
-                <h1 className="text-xl sm:text-2xl font-bold text-slate-900 leading-tight">Family Budget</h1>
+                <h1 className="text-xl sm:text-2xl font-bold text-foreground leading-tight">Family Budget</h1>
               </div>
-              <p className="text-sm font-medium text-slate-500">Together for a better tomorrow</p>
+              <p className="text-sm font-medium text-muted-foreground">Together for a better tomorrow</p>
             </div>
           </div>
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="w-[180px] bg-white h-10 shadow-sm border-slate-200 rounded-xl">
-              <Calendar className="mr-2 size-4 text-slate-500" />
+            <SelectTrigger className="w-[180px] bg-card h-10 shadow-sm border-border rounded-xl">
+              <Calendar className="mr-2 size-4 text-muted-foreground" />
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -177,8 +177,8 @@ function FamilyDetailsRoute() {
                   <Home className="size-6 sm:size-8 text-emerald-800" strokeWidth={2.5} />
                 </div>
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-0.5">{family.familyName}</h2>
-                  <p className="text-sm font-medium text-slate-600">{activeMembers.length} Members • {status.state === "exceeded" ? "Exceeded" : "On Track"}</p>
+                  <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-0.5">{family.familyName}</h2>
+                  <p className="text-sm font-medium text-muted-foreground">{activeMembers.length} Members • {status.state === "exceeded" ? "Exceeded" : "On Track"}</p>
                 </div>
               </div>
               <div className="hidden sm:block text-right transform -rotate-6 mr-2 mt-2 opacity-80">
@@ -187,21 +187,21 @@ function FamilyDetailsRoute() {
             </div>
 
             {/* White inner panel containing stats and progress */}
-            <div className="bg-white/80 sm:bg-white/90 backdrop-blur-md rounded-[1.5rem] sm:rounded-[2rem] p-4 sm:p-6 shadow-sm border border-white/60">
+            <div className="bg-card/80 sm:bg-card/90 backdrop-blur-md rounded-[1.5rem] sm:rounded-[2rem] p-4 sm:p-6 shadow-sm border border-white/60">
               <div className="grid grid-cols-3 divide-x divide-slate-200/80 mb-5">
                 
                 <div className="py-1 pr-2 sm:pr-6">
-                  <p className="text-[11px] sm:text-[13px] font-semibold text-slate-500 mb-1">Total Budget</p>
-                  <p className="text-[15px] sm:text-2xl font-bold text-slate-900 leading-none tracking-tight">{formatINR(totalFamilyBudget)}</p>
+                  <p className="text-[11px] sm:text-[13px] font-semibold text-muted-foreground mb-1">Total Budget</p>
+                  <p className="text-[15px] sm:text-2xl font-bold text-foreground leading-none tracking-tight">{formatINR(totalFamilyBudget)}</p>
                 </div>
                 
                 <div className="py-1 px-3 sm:px-6">
-                  <p className="text-[11px] sm:text-[13px] font-semibold text-slate-500 mb-1">Total Expenses</p>
-                  <p className="text-[15px] sm:text-2xl font-bold text-slate-900 leading-none tracking-tight">{formatINR(totalFamilySpent)}</p>
+                  <p className="text-[11px] sm:text-[13px] font-semibold text-muted-foreground mb-1">Total Expenses</p>
+                  <p className="text-[15px] sm:text-2xl font-bold text-foreground leading-none tracking-tight">{formatINR(totalFamilySpent)}</p>
                 </div>
 
                 <div className="py-1 pl-3 sm:pl-6">
-                  <p className="text-[11px] sm:text-[13px] font-semibold text-slate-500 mb-1">Remaining</p>
+                  <p className="text-[11px] sm:text-[13px] font-semibold text-muted-foreground mb-1">Remaining</p>
                   <p className={`text-[15px] sm:text-2xl font-bold leading-none tracking-tight ${statusColor}`}>{formatINR(status.remaining)}</p>
                 </div>
               </div>
@@ -215,7 +215,7 @@ function FamilyDetailsRoute() {
                   />
                 </div>
                 <div className="flex items-center justify-between text-[11px] sm:text-[13px] font-semibold mt-1">
-                  <span className="text-slate-700">{status.percent.toFixed(1)}% Used</span>
+                  <span className="text-foreground">{status.percent.toFixed(1)}% Used</span>
                   {status.percent < 100 ? (
                     <span className="text-emerald-700 flex items-center gap-1"><Leaf className="size-3 fill-emerald-700" /> On Track</span>
                   ) : (
@@ -226,8 +226,8 @@ function FamilyDetailsRoute() {
             </div>
             
             {pieData.length > 0 && (
-              <div className="mt-6 pt-6 border-t border-slate-100">
-                <p className="text-sm font-semibold text-slate-900 mb-4 text-center">Expense Contributions</p>
+              <div className="mt-6 pt-6 border-t border-border">
+                <p className="text-sm font-semibold text-foreground mb-4 text-center">Expense Contributions</p>
                 <div className="h-[180px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -254,7 +254,7 @@ function FamilyDetailsRoute() {
                 </div>
                 <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
                   {pieData.map((entry, index) => (
-                    <div key={index} className="flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
+                    <div key={index} className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded-md border border-border">
                       <div className="size-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
                       {entry.name} ({(entry.value / totalFamilySpent * 100).toFixed(0)}%)
                     </div>
@@ -268,8 +268,8 @@ function FamilyDetailsRoute() {
         {/* FAMILY MEMBERS */}
         <div>
           <div className="flex items-center justify-between mb-4 px-1">
-            <h2 className="text-xl font-bold text-slate-900">Family Members</h2>
-            <Button variant="ghost" className="text-slate-500 font-medium p-0 h-auto hover:bg-transparent">See All <ChevronRight className="ml-1 size-4" /></Button>
+            <h2 className="text-xl font-bold text-foreground">Family Members</h2>
+            <Button variant="ghost" className="text-muted-foreground font-medium p-0 h-auto hover:bg-transparent">See All <ChevronRight className="ml-1 size-4" /></Button>
           </div>
           <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-4 px-1 scrollbar-hide">
             {activeMembers.map(member => {
@@ -285,7 +285,7 @@ function FamilyDetailsRoute() {
                   <div className={`rounded-full p-[3px] border-2 ${isOwnerRole ? 'border-emerald-500' : 'border-[#e1e7fa]'}`}>
                     <Avatar name={u?.["username"] || "User"} photoURL={u?.["photoURL"]} size={68} />
                   </div>
-                  <p className="font-bold text-slate-900 text-[15px]">{u?.["username"] || "Member"}</p>
+                  <p className="font-bold text-foreground text-[15px]">{u?.["username"] || "Member"}</p>
                   <div className={`px-3 py-[2px] rounded-full text-[11px] font-medium ${isOwnerRole ? 'bg-[#d1fae5] text-emerald-700' : 'bg-[#eff3ff] text-[#4f649a]'}`}>
                     {member.role === "owner" ? "Owner" : "Member"}
                   </div>
@@ -312,10 +312,10 @@ function FamilyDetailsRoute() {
         {/* FAMILY EXPENSES */}
         <div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-3">
-            <h2 className="text-lg font-semibold text-slate-900">Family Expenses</h2>
+            <h2 className="text-lg font-semibold text-foreground">Family Expenses</h2>
             <div className="flex items-center gap-2">
               <Select value={memberFilter} onValueChange={setMemberFilter}>
-                <SelectTrigger className="w-[140px] h-9 bg-white border-slate-200">
+                <SelectTrigger className="w-[140px] h-9 bg-card border-border">
                   <SelectValue placeholder="All Members" />
                 </SelectTrigger>
                 <SelectContent>
@@ -327,10 +327,10 @@ function FamilyDetailsRoute() {
                 </SelectContent>
               </Select>
               <div className="relative flex-1 sm:w-48">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                 <Input 
                   placeholder="Search..." 
-                  className="pl-8 h-9 bg-white border-slate-200" 
+                  className="pl-8 h-9 bg-card border-border" 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -340,7 +340,7 @@ function FamilyDetailsRoute() {
           
           <div className="space-y-3">
             {filteredExpenses.length === 0 ? (
-              <div className="text-center py-10 bg-white rounded-xl border border-slate-100 shadow-sm">
+              <div className="text-center py-10 bg-card rounded-xl border border-border shadow-sm">
                 <p className="text-muted-foreground">No expenses found.</p>
               </div>
             ) : (
@@ -349,14 +349,14 @@ function FamilyDetailsRoute() {
                 const u = usersInfo.find(ui => ui["uid"] === exp.addedBy);
                 return (
                   <FamilyExpenseDetailsDialog key={exp.id} expense={exp} username={u?.["username"] || "Member"}>
-                    <div className="flex items-center justify-between p-4 bg-white rounded-xl shadow-sm border border-slate-100 hover:border-emerald-200 hover:shadow-md transition-all">
+                    <div className="flex items-center justify-between p-4 bg-card rounded-xl shadow-sm border border-border hover:border-emerald-200 hover:shadow-md transition-all">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-50 border border-slate-100 group-hover:bg-emerald-50">
-                          <meta.icon className="h-5 w-5 text-slate-600" />
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted border border-border group-hover:bg-emerald-50">
+                          <meta.icon className="h-5 w-5 text-muted-foreground" />
                         </div>
                         <div className="text-left">
-                          <p className="font-semibold text-slate-900">{exp.title}</p>
-                          <p className="text-xs font-medium text-slate-500">
+                          <p className="font-semibold text-foreground">{exp.title}</p>
+                          <p className="text-xs font-medium text-muted-foreground">
                             {exp.category} • {formatDisplayDate(exp.date)}
                           </p>
                           <p className="text-[11px] font-medium text-emerald-600 mt-0.5">
@@ -364,7 +364,7 @@ function FamilyDetailsRoute() {
                           </p>
                         </div>
                       </div>
-                      <p className="font-semibold sm:font-bold text-slate-900 text-right">{formatINR(exp.amount)}</p>
+                      <p className="font-semibold sm:font-bold text-foreground text-right">{formatINR(exp.amount)}</p>
                     </div>
                   </FamilyExpenseDetailsDialog>
                 );

@@ -10,15 +10,20 @@ import { firebaseDb, firebaseMessaging } from "@/lib/firebase";
 import { toast } from "sonner";
 import { getToken } from "firebase/messaging";
 import { Capacitor } from "@capacitor/core";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function NotificationSettings() {
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const [isEnabled, setIsEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
   const [preferences, setPreferences] = useState<NotificationPreferences>(defaultPreferences);
+  const [isMobilePrefsOpen, setIsMobilePrefsOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
+
+    let unsubscribe: (() => void) | undefined;
 
     const checkStatus = async () => {
       try {
@@ -35,25 +40,30 @@ export function NotificationSettings() {
         }
 
         const registration = await navigator.serviceWorker.getRegistration();
+        if (!registration) {
+          setIsEnabled(false);
+          setLoading(false);
+          return;
+        }
         const token = await getToken(messaging, { 
-          vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+          vapidKey: import.meta.env['VITE_FIREBASE_VAPID_KEY'],
           serviceWorkerRegistration: registration,
         });
 
         if (token) {
           // Listen to the specific token document in Firestore to get preferences and status
-          const unsub = onSnapshot(doc(firebaseDb(), `users/${user.uid}/fcmTokens`, token), (doc) => {
+          unsubscribe = onSnapshot(doc(firebaseDb(), `users/${user.uid}/fcmTokens`, token), (doc) => {
             if (doc.exists()) {
               setIsEnabled(true);
-              if (doc.data().preferences) {
-                setPreferences(doc.data().preferences as NotificationPreferences);
+              const data = doc.data();
+              if (data && data['preferences']) {
+                setPreferences(data['preferences'] as NotificationPreferences);
               }
             } else {
               setIsEnabled(false);
             }
             setLoading(false);
           });
-          return () => unsub();
         } else {
           setIsEnabled(false);
           setLoading(false);
@@ -65,6 +75,10 @@ export function NotificationSettings() {
     };
 
     checkStatus();
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, [user]);
 
   const handleToggle = async (checked: boolean) => {
@@ -127,17 +141,21 @@ export function NotificationSettings() {
           iconBg="bg-red-500"
           title="Push Notifications"
           description="Receive alerts for important activities"
+          onClick={isMobile ? () => setIsMobilePrefsOpen(!isMobilePrefsOpen) : () => {}}
           value={
-            <Switch 
-              checked={isEnabled} 
-              onCheckedChange={handleToggle}
-              disabled={loading}
-            />
+            <div onClick={(e) => e.stopPropagation()}>
+              <Switch 
+                checked={isEnabled} 
+                onCheckedChange={handleToggle}
+                disabled={loading}
+              />
+            </div>
           }
         />
       </SettingsGroup>
 
-      <SettingsGroup title="Notification Preferences">
+      <div className={`md:block ${isMobilePrefsOpen ? 'block' : 'hidden'}`}>
+        <SettingsGroup title="Notification Preferences">
         <SettingsRow
           icon={Target}
           iconBg="bg-orange-500"
@@ -187,6 +205,7 @@ export function NotificationSettings() {
           }
         />
       </SettingsGroup>
+      </div>
     </>
   );
 }
