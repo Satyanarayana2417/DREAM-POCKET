@@ -19,6 +19,7 @@ import { useRef } from "react";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
 import { firebaseStorage } from "@/lib/firebase";
+import { AppLockSettings } from "@/components/AppLockSettings";
 
 export const Route = createFileRoute("/profile")({
   component: ProfileRoute,
@@ -273,7 +274,9 @@ function ProfileRoute() {
         </CardContent>
       </Card>
 
-      <Card>
+      <AppLockSettings />
+
+      <Card className="mt-6">
         <CardHeader>
           <CardTitle className="text-lg">App Settings</CardTitle>
           <CardDescription>Preferences and installation</CardDescription>

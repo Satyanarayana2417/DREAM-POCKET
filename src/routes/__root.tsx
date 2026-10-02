@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-router";
 import { AuthProvider } from "../lib/auth";
 import { PWAPrompt } from "../components/PWAPrompt";
+import { AppLockProvider } from "../components/AppLockProvider";
 
 function NotFoundComponent() {
   return (
@@ -74,8 +75,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function RootComponent() {
   return (
     <AuthProvider>
-      <Outlet />
-      <PWAPrompt />
+      <AppLockProvider>
+        <Outlet />
+        <PWAPrompt />
+      </AppLockProvider>
     </AuthProvider>
   );
 }
