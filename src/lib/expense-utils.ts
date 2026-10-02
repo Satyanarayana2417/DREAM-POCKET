@@ -35,6 +35,13 @@ export type Budget = {
   budget: number;
 };
 
+export type Income = {
+  id: string;
+  userId: string;
+  month: string; // YYYY-MM
+  amount: number;
+};
+
 export type Family = {
   id: string;
   familyName: string;
@@ -217,6 +224,19 @@ export function budgetStatus(spent: number, budget: number) {
   const over = Math.max(spent - budget, 0);
   const state =
     over > 0 ? ("exceeded" as const) : percent >= 80 ? ("near" as const) : ("normal" as const);
+  return { percent, remaining, over, state };
+}
+
+export function incomeStatus(spent: number, income: number) {
+  const percent = income > 0 ? (spent / income) * 100 : 0;
+  const remaining = income - spent; // can be negative
+  const over = Math.max(spent - income, 0);
+  let state = "normal" as const;
+  if (income <= 0) {
+    state = spent > 0 ? "exceeded" : "unset";
+  } else {
+    state = over > 0 ? "exceeded" : percent >= 80 ? "near" : "normal";
+  }
   return { percent, remaining, over, state };
 }
 

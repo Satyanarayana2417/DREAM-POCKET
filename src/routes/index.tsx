@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
-import { fetchExpenses, fetchBudgets } from "@/lib/data";
+import { fetchExpenses, fetchIncomes, saveIncome } from "@/lib/data";
 import {
-  budgetStatus,
+  incomeStatus,
   categoryTotals,
   currentMonthKey,
   dailyTotals,
@@ -18,7 +18,7 @@ import {
   type Expense,
 } from "@/lib/expense-utils";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, Wallet, TrendingUp, ReceiptText, ArrowRight, ChevronDown } from "lucide-react";
+import { Calendar, Wallet, TrendingUp, ReceiptText, ArrowRight, ChevronDown, Edit2 } from "lucide-react";
 import {
   PieChart,
   Pie,
@@ -39,6 +39,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -46,9 +51,13 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const { user, profile } = useAuth();
+  const queryClient = useQueryClient();
   const name = profile?.username?.split(" ")[0] || "User";
   const [selectedMonth, setSelectedMonth] = useState(currentMonthKey());
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
+  
+  const [isIncomeModalOpen, setIsIncomeModalOpen] = useState(false);
+  const [incomeInput, setIncomeInput] = useState("");
 
   const joinDate = (profile as any)?.createdAt
     ? new Date((profile as any).createdAt.seconds * 1000)
@@ -60,24 +69,45 @@ function Index() {
     enabled: !!user,
   });
 
-  const { data: budgets = [] } = useQuery({
-    queryKey: ["budgets", user?.uid],
-    queryFn: () => fetchBudgets(user!.uid),
+  const { data: incomes = [] } = useQuery({
+    queryKey: ["incomes", user?.uid],
+    queryFn: () => fetchIncomes(user!.uid),
     enabled: !!user,
   });
+
+  const incomeMutation = useMutation({
+    mutationFn: async (amount: number) => {
+      await saveIncome(user!.uid, monthKey, amount);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["incomes"] });
+      setIsIncomeModalOpen(false);
+      toast.success("Income updated successfully");
+    },
+    onError: () => {
+      toast.error("Failed to update income");
+    },
+  });
+
+  const handleSaveIncome = () => {
+    const amount = Number(incomeInput);
+    if (!isNaN(amount) && amount >= 0) {
+      incomeMutation.mutate(amount);
+    } else {
+      toast.error("Please enter a valid amount");
+    }
+  };
 
   const monthKey = selectedMonth; // e.g. "2026-09"
   const monthName = monthLabel(monthKey);
   const monthExpenses = expenses.filter((e) => inMonth(e, monthKey));
   
   const mainMonthExpenses = monthExpenses.filter(e => !e.isBudgetExpense);
-  const budgetMonthExpenses = monthExpenses.filter(e => e.isBudgetExpense);
 
-  const currentBudget = budgets.find((b) => b.month === monthKey)?.budget || 0;
+  const currentIncome = incomes.find((i) => i.month === monthKey)?.amount || 0;
 
   const mainSpent = sumAmount(mainMonthExpenses);
-  const budgetSpent = sumAmount(budgetMonthExpenses);
-  const status = budgetStatus(budgetSpent, currentBudget);
+  const status = incomeStatus(mainSpent, currentIncome);
 
   const recentExpenses = expenses.filter(e => !e.isBudgetExpense).slice(0, 4);
   const catTotals = categoryTotals(mainMonthExpenses);
@@ -118,15 +148,22 @@ function Index() {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          <Card className="border-0 shadow-sm rounded-2xl">
+          <Card 
+            className="border-0 shadow-sm rounded-2xl cursor-pointer hover:bg-slate-50 transition-colors"
+            onClick={() => {
+              setIncomeInput(currentIncome > 0 ? String(currentIncome) : "");
+              setIsIncomeModalOpen(true);
+            }}
+          >
             <CardContent className="p-5 flex flex-col justify-center">
               <div className="flex items-center gap-3 mb-3">
                 <div className="bg-blue-50 text-blue-500 p-2.5 rounded-xl">
                   <Calendar className="size-5" />
                 </div>
-                <span className="text-sm font-medium text-muted-foreground whitespace-nowrap truncate">Monthly Budget</span>
+                <span className="text-sm font-medium text-muted-foreground whitespace-nowrap truncate">Monthly Income</span>
+                <Edit2 className="size-3 text-muted-foreground/50 ml-auto" />
               </div>
-              <div className="text-2xl font-normal font-display">{formatINR(currentBudget, true)}</div>
+              <div className="text-2xl font-normal font-display">{formatINR(currentIncome, true)}</div>
             </CardContent>
           </Card>
           
@@ -150,7 +187,11 @@ function Index() {
                 </div>
                 <span className="text-sm font-medium text-muted-foreground whitespace-nowrap truncate">Remaining</span>
               </div>
-              <div className="text-2xl font-normal font-display">{formatINR(status.remaining, true)}</div>
+              <div className={`text-2xl font-normal font-display ${status.remaining < 0 ? 'text-red-600 text-lg sm:text-xl' : ''}`}>
+                {status.remaining < 0 
+                  ? `${formatINR(Math.abs(status.remaining), true)} over income` 
+                  : formatINR(status.remaining, true)}
+              </div>
             </CardContent>
           </Card>
 
@@ -169,11 +210,11 @@ function Index() {
 
         {/* Middle Section (Charts) */}
         <div className="grid gap-6 lg:grid-cols-2">
-          {/* Budget Progress */}
+          {/* Income Overview */}
           <Card className="border-0 shadow-sm rounded-2xl">
             <CardContent className="p-6">
               <div className="flex justify-between items-start mb-6">
-                <h3 className="font-semibold text-lg font-display">Budget Progress</h3>
+                <h3 className="font-semibold text-lg font-display">Income Overview</h3>
                 <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
                   status.state === "exceeded" 
                     ? "bg-red-50 text-red-600" 
@@ -186,14 +227,16 @@ function Index() {
               </div>
               
               <div className="flex justify-between items-end mb-3">
-                <div className="text-2xl font-bold">{status.percent.toFixed(1)}% used</div>
-                <div className="text-sm font-medium text-muted-foreground">Budget: {formatINR(currentBudget)}</div>
+                <div className="text-2xl font-bold">
+                  {currentIncome > 0 ? `${status.percent.toFixed(1)}% spent` : "No income added"}
+                </div>
+                <div className="text-sm font-medium text-muted-foreground">Income: {formatINR(currentIncome)}</div>
               </div>
 
               <div className="w-full bg-muted/50 rounded-full h-4 mb-4 overflow-hidden">
                 <div 
                   className={`h-full rounded-full transition-all duration-500 ${
-                    status.state === "exceeded" ? "bg-red-500" : "bg-blue-500"
+                    status.state === "exceeded" ? "bg-red-500" : "bg-emerald-500"
                   }`}
                   style={{ width: `${Math.min(status.percent, 100)}%` }}
                 />
@@ -201,11 +244,15 @@ function Index() {
 
               <div className="flex justify-between items-center text-sm">
                 <div>
-                  <span className="font-bold">{formatINR(budgetSpent)}</span>
+                  <span className="font-bold">{formatINR(mainSpent)}</span>
                   <span className="text-muted-foreground ml-1">Spent</span>
                 </div>
                 <div>
-                  <span className="font-bold">{formatINR(status.remaining)}</span>
+                  <span className="font-bold">
+                    {status.remaining < 0 
+                      ? `${formatINR(Math.abs(status.remaining))} over` 
+                      : formatINR(status.remaining)}
+                  </span>
                   <span className="text-muted-foreground ml-1">Remaining</span>
                 </div>
               </div>
@@ -393,6 +440,46 @@ function Index() {
         open={!!selectedExpense} 
         onOpenChange={(open) => !open && setSelectedExpense(null)} 
       />
+
+      <Dialog open={isIncomeModalOpen} onOpenChange={setIsIncomeModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{currentIncome > 0 ? "Edit" : "Add"} Monthly Income</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-1.5">
+              <Label className="text-muted-foreground font-normal">Month</Label>
+              <div className="font-semibold text-lg">{monthName}</div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="income" className="font-semibold">Monthly Income</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-2.5 text-muted-foreground">₹</span>
+                <Input
+                  id="income"
+                  type="number"
+                  placeholder="0"
+                  className="pl-7 text-lg font-display"
+                  value={incomeInput}
+                  onChange={(e) => setIncomeInput(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 mt-4">
+            <Button variant="outline" onClick={() => setIsIncomeModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSaveIncome} 
+              disabled={incomeMutation.isPending}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+            >
+              {incomeMutation.isPending ? "Saving..." : "Save"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }

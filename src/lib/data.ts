@@ -15,7 +15,7 @@ import {
 } from "firebase/firestore";
 
 import { firebaseDb } from "./firebase";
-import type { Budget, Expense, Family, FamilyMember, FamilyBudget, FamilyExpense, FamilyInvitation } from "./expense-utils";
+import type { Budget, Income, Expense, Family, FamilyMember, FamilyBudget, FamilyExpense, FamilyInvitation } from "./expense-utils";
 
 /* ---------------------------------- users --------------------------------- */
 
@@ -149,6 +149,34 @@ export async function saveBudget(userId: string, month: string, amount: number) 
 
 export async function removeBudget(userId: string, month: string) {
   await deleteDoc(doc(firebaseDb(), "budgets", `${userId}_${month}`));
+}
+
+/* --------------------------------- incomes -------------------------------- */
+
+export async function fetchIncomes(userId: string): Promise<Income[]> {
+  const q = query(collection(firebaseDb(), "monthlyIncome"), where("userId", "==", userId));
+  const snap = await getDocs(q);
+  return snap.docs
+    .map((d) => ({ id: d.id, ...(d.data() as Omit<Income, "id">) }))
+    .sort((a, b) => (a.month < b.month ? 1 : -1));
+}
+
+export async function saveIncome(userId: string, month: string, amount: number) {
+  const id = `${userId}_${month}`;
+  const ref = doc(firebaseDb(), "monthlyIncome", id);
+  const existing = await getDoc(ref);
+  await setDoc(
+    ref,
+    {
+      userId,
+      month,
+      amount,
+      createdAt: existing.exists() ? existing.data()["createdAt"] : serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true },
+  );
+  return id;
 }
 
 /* --------------------------------- families ------------------------------- */
