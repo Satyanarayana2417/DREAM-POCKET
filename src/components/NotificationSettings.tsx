@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Bell, BellRing, Activity, Target, PieChart, Users } from "lucide-react";
+import { Bell, Activity, Target, PieChart, Users } from "lucide-react";
+import { SettingsGroup, SettingsRow } from "@/components/SettingsUI";
 import { useAuth } from "@/lib/auth";
 import { requestNotificationPermissionAndSaveToken, disableNotifications, defaultPreferences, type NotificationPreferences } from "@/lib/notifications";
 import { doc, onSnapshot } from "firebase/firestore";
@@ -111,83 +111,68 @@ export function NotificationSettings() {
   }
 
   return (
-    <Card className="border-border/50 shadow-sm overflow-hidden mt-6">
-      <CardHeader className="bg-slate-50/50 border-b border-border/50 pb-4">
-        <div className="flex items-center gap-2">
-          <div className="p-2 bg-blue-100 rounded-lg">
-            <Bell className="size-5 text-blue-600" />
-          </div>
-          <div>
-            <CardTitle className="text-lg">Push Notifications</CardTitle>
-            <CardDescription>Stay updated on your expenses and family budget.</CardDescription>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <Label className="text-base font-semibold">Enable Notifications</Label>
-            <p className="text-sm text-muted-foreground">
-              Receive alerts for important activities.
-            </p>
-          </div>
+    <SettingsGroup>
+      <SettingsRow
+        icon={Bell}
+        iconBg="bg-red-500"
+        title="Push Notifications"
+        value={
           <Switch 
             checked={isEnabled} 
             onCheckedChange={handleToggle}
             disabled={loading}
           />
-        </div>
+        }
+      />
 
-        {isEnabled && (
-          <div className="mt-6 space-y-4 border-t pt-4">
-            <h4 className="text-sm font-medium text-slate-900 mb-2">Notification Preferences</h4>
-            
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Target className="size-4 text-slate-500" />
-                <Label className="text-sm font-medium">Expense Reminders</Label>
-              </div>
+      {isEnabled && (
+        <>
+          <SettingsRow
+            icon={Target}
+            iconBg="bg-orange-500"
+            title="Expense Reminders"
+            value={
               <Switch 
                 checked={preferences.expenseReminders} 
                 onCheckedChange={(c) => updatePreference('expenseReminders', c)} 
               />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Activity className="size-4 text-slate-500" />
-                <Label className="text-sm font-medium">Income Reminders</Label>
-              </div>
+            }
+          />
+          <SettingsRow
+            icon={Activity}
+            iconBg="bg-green-500"
+            title="Income Reminders"
+            value={
               <Switch 
                 checked={preferences.incomeReminders} 
                 onCheckedChange={(c) => updatePreference('incomeReminders', c)} 
               />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Users className="size-4 text-slate-500" />
-                <Label className="text-sm font-medium">Family Activity</Label>
-              </div>
+            }
+          />
+          <SettingsRow
+            icon={Users}
+            iconBg="bg-blue-500"
+            title="Family Activity"
+            value={
               <Switch 
                 checked={preferences.familyActivity} 
                 onCheckedChange={(c) => updatePreference('familyActivity', c)} 
               />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <PieChart className="size-4 text-slate-500" />
-                <Label className="text-sm font-medium">Monthly Summary</Label>
-              </div>
+            }
+          />
+          <SettingsRow
+            icon={PieChart}
+            iconBg="bg-purple-500"
+            title="Monthly Summary"
+            value={
               <Switch 
                 checked={preferences.monthlySummary} 
                 onCheckedChange={(c) => updatePreference('monthlySummary', c)} 
               />
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+            }
+          />
+        </>
+      )}
+    </SettingsGroup>
   );
 }

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useAppLock } from './AppLockProvider';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { SettingsGroup, SettingsRow } from '@/components/SettingsUI';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Capacitor } from '@capacitor/core';
@@ -58,50 +58,33 @@ export function AppLockSettings() {
 
   return (
     <>
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Lock className="size-5 text-emerald-600" /> App Lock Security
-          </CardTitle>
-          <CardDescription>Secure your expense data with PIN or biometrics</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label className="text-base">Enable App Lock</Label>
-              <p className="text-sm text-muted-foreground">Require authentication when opening the app</p>
-            </div>
-            <Switch checked={isLockEnabled} onCheckedChange={handleToggle} />
-          </div>
-
-          {isLockEnabled && (
-            <div className="pt-4 border-t space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-slate-100 rounded-lg">
-                  <Fingerprint className="size-5 text-slate-700" />
-                </div>
-                <div>
-                  <p className="font-medium text-sm">Biometric Authentication</p>
-                  <p className="text-xs text-muted-foreground">
-                    {isBiometricEnabled ? "Enabled" : "Disabled"}
-                  </p>
-                </div>
-              </div>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="w-full"
-                onClick={() => {
-                  setShowSetup(true);
-                  setPin("");
-                }}
-              >
-                Change Security Settings
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <SettingsGroup>
+        <SettingsRow
+          icon={Lock}
+          iconBg="bg-blue-500"
+          title="App Lock Security"
+          value={<Switch checked={isLockEnabled} onCheckedChange={handleToggle} />}
+        />
+        {isLockEnabled && (
+          <SettingsRow
+            icon={Fingerprint}
+            iconBg="bg-indigo-500"
+            title="Biometric Authentication"
+            value={isBiometricEnabled ? "Enabled" : "Disabled"}
+          />
+        )}
+        {isLockEnabled && (
+          <SettingsRow
+            icon={Lock}
+            iconBg="bg-slate-400"
+            title="Change Security Settings"
+            onClick={() => {
+              setShowSetup(true);
+              setPin("");
+            }}
+          />
+        )}
+      </SettingsGroup>
 
       <Dialog open={showSetup} onOpenChange={setShowSetup}>
         <DialogContent className="sm:max-w-sm">
