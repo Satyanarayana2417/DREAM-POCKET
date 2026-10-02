@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { App } from '@capacitor/app';
 import { NativeBiometric } from '@capgo/capacitor-native-biometric';
 import { SecureStoragePlugin } from 'capacitor-secure-storage-plugin';
-import { Fingerprint, Delete } from 'lucide-react';
+import { Fingerprint, Delete, Lock } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { cn } from '@/lib/utils';
 
