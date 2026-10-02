@@ -15,8 +15,8 @@ export default defineConfig({
       registerType: 'prompt',
       includeAssets: ['logo.png', 'logo-text.png', 'apple-touch-icon.png'],
       manifest: {
-        name: 'Home Expense Manager',
-        short_name: 'Expense Manager',
+        name: 'DreamPocket',
+        short_name: 'DreamPocket',
         description: 'Simple personal and family expense manager',
         theme_color: '#10b981',
         background_color: '#ffffff',
