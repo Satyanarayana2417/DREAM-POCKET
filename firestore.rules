@@ -16,6 +16,11 @@ service cloud.firestore {
       match /fcmTokens/{token} {
         allow read, write: if isAuthenticated() && request.auth.uid == userId;
       }
+
+      // Notifications history subcollection
+      match /notifications/{notificationId} {
+        allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      }
     }
 
     // Expenses Collection

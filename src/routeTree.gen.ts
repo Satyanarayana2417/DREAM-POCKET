@@ -15,6 +15,7 @@ import { Route as BudgetRouteImport } from './routes/budget'
 import { Route as ExpensesRouteImport } from './routes/expenses'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as EditExpenseIdRouteImport } from './routes/edit-expense.$id'
@@ -50,6 +51,11 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -91,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/expenses': typeof ExpensesRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
   '/profile': typeof ProfileRoute
   '/signup': typeof SignupRoute
   '/edit-expense/$id': typeof EditExpenseIdRoute
@@ -105,6 +112,7 @@ export interface FileRoutesByTo {
   '/expenses': typeof ExpensesRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
   '/profile': typeof ProfileRoute
   '/signup': typeof SignupRoute
   '/edit-expense/$id': typeof EditExpenseIdRoute
@@ -120,6 +128,7 @@ export interface FileRoutesById {
   '/expenses': typeof ExpensesRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/notifications': typeof NotificationsRoute
   '/profile': typeof ProfileRoute
   '/signup': typeof SignupRoute
   '/edit-expense/$id': typeof EditExpenseIdRoute
@@ -136,6 +145,7 @@ export interface FileRouteTypes {
     | '/expenses'
     | '/forgot-password'
     | '/login'
+    | '/notifications'
     | '/profile'
     | '/signup'
     | '/edit-expense/$id'
@@ -150,6 +160,7 @@ export interface FileRouteTypes {
     | '/expenses'
     | '/forgot-password'
     | '/login'
+    | '/notifications'
     | '/profile'
     | '/signup'
     | '/edit-expense/$id'
@@ -164,6 +175,7 @@ export interface FileRouteTypes {
     | '/expenses'
     | '/forgot-password'
     | '/login'
+    | '/notifications'
     | '/profile'
     | '/signup'
     | '/edit-expense/$id'
@@ -179,6 +191,7 @@ export interface RootRouteChildren {
   ExpensesRoute: typeof ExpensesRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
+  NotificationsRoute: typeof NotificationsRoute
   ProfileRoute: typeof ProfileRoute
   SignupRoute: typeof SignupRoute
   EditExpenseIdRoute: typeof EditExpenseIdRoute
@@ -229,6 +242,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -283,6 +303,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExpensesRoute: ExpensesRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
+  NotificationsRoute: NotificationsRoute,
   ProfileRoute: ProfileRoute,
   SignupRoute: SignupRoute,
   EditExpenseIdRoute: EditExpenseIdRoute,

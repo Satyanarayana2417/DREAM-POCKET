@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { LayoutDashboard, ListOrdered, LogOut, Plus, Target, User, Wallet, PieChart, Users, Menu } from "lucide-react";
+import { LayoutDashboard, ListOrdered, LogOut, Plus, Target, User, Wallet, PieChart, Users, Menu, Bell } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { type ReactNode, useState, useEffect } from "react";
 
@@ -8,6 +8,7 @@ import { FullPageLoader } from "./Loader";
 import { useAuth, useRequireAuth } from "@/lib/auth";
 
 import { setupForegroundMessageListener } from "@/lib/notifications";
+import { subscribeToUnreadCount } from "@/lib/notificationHistory";
 
 const NAV = [
   { to: "/", label: "Home", icon: LayoutDashboard },
@@ -28,14 +29,24 @@ export function AppShell({
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const location = useLocation();
+  
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     if (user) {
       let unsub: () => void = () => {};
-      setupForegroundMessageListener().then((u) => {
+      setupForegroundMessageListener(user.uid).then((u) => {
         if (typeof u === 'function') unsub = u;
       });
-      return () => unsub();
+      
+      const unsubCount = subscribeToUnreadCount(user.uid, (c) => {
+        setUnreadCount(c);
+      });
+      
+      return () => {
+        unsub();
+        unsubCount();
+      };
     }
   }, [user]);
 
@@ -116,9 +127,20 @@ export function AppShell({
             <img src="/logo.png" alt="DreamPocket Logo" className="size-11 object-contain" />
           </Link>
         </div>
-        <Link to="/" className="flex items-center shrink-0">
-          <img src="/logo-text.png" alt="DreamPocket" className="h-6 object-contain mr-2" />
-        </Link>
+        
+        <div className="flex items-center gap-4">
+          <Link to="/notifications" className="relative p-2 text-muted-foreground hover:bg-secondary rounded-full transition-colors">
+            <Bell className="size-5" />
+            {unreadCount > 0 && (
+              <span className="absolute top-1 right-1 flex size-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white shadow-sm ring-2 ring-card">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
+          </Link>
+          <Link to="/" className="flex items-center shrink-0 hidden sm:flex">
+            <img src="/logo-text.png" alt="DreamPocket" className="h-6 object-contain mr-2" />
+          </Link>
+        </div>
       </header>
 
       {/* Desktop Sidebar */}
@@ -148,9 +170,24 @@ export function AppShell({
             </Link>
           ))}
           
+          <Link
+            to="/notifications"
+            className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:bg-secondary/80 hover:text-foreground data-[status=active]:bg-primary/10 data-[status=active]:text-primary mt-auto"
+          >
+            <div className="relative">
+              <Bell className="size-5" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white shadow-sm ring-2 ring-card">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
+            </div>
+            Notifications
+          </Link>
+
           <button
             onClick={handleLogout}
-            className="mt-auto flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:bg-destructive/10 hover:text-destructive"
+            className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:bg-destructive/10 hover:text-destructive"
           >
             <LogOut className="size-5" />
             Logout

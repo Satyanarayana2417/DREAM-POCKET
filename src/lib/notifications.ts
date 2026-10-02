@@ -106,23 +106,36 @@ export async function disableNotifications(uid: string) {
   }
 }
 
-export async function setupForegroundMessageListener() {
+export async function setupForegroundMessageListener(uid?: string) {
   const messaging = await firebaseMessaging();
   if (!messaging) return () => {};
 
-  return onMessage(messaging, (payload) => {
+  return onMessage(messaging, async (payload) => {
     console.log("Received foreground message:", payload);
     const title = payload.notification?.title || "New Notification";
     const body = payload.notification?.body || "";
+    const url = payload.data?.url || "";
     
     toast(title, {
       description: body,
-      action: payload.data?.url ? {
+      action: url ? {
         label: "View",
         onClick: () => {
-          window.location.href = payload.data!.url;
+          window.location.href = url;
         }
       } : undefined
     });
+
+    if (uid) {
+      const { addNotificationHistory } = await import("./notificationHistory");
+      await addNotificationHistory(uid, {
+        title,
+        body,
+        type: "system",
+        read: false,
+        route: url || undefined,
+        data: payload.data
+      });
+    }
   });
 }
