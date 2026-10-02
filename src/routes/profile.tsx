@@ -222,9 +222,9 @@ function ProfileRoute() {
           title="Install Application"
           value={
             isInstalled ? (
-              <span className="text-emerald-600 font-medium">Installed</span>
+              <span className="text-[#00C853] font-medium">Installed</span>
             ) : installPrompt || isIOS ? (
-              <Button size="sm" variant="ghost" className="h-7 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 px-2" onClick={installPrompt ? handleInstallClick : () => setShowIOSInstructions(true)}>
+              <Button size="sm" variant="ghost" className="h-7 text-[#00C853] font-semibold text-[15px] hover:text-[#00E676] hover:bg-green-50 px-2" onClick={installPrompt ? handleInstallClick : () => setShowIOSInstructions(true)}>
                 Install
               </Button>
             ) : (
