@@ -118,7 +118,6 @@ export function NotificationSettings() {
           iconBg="bg-red-500"
           title="Push Notifications"
           description="Receive alerts for important activities"
-          onClick={() => handleToggle(!isEnabled)}
           value={
             <Switch 
               checked={isEnabled} 
