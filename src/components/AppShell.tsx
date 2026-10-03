@@ -89,7 +89,7 @@ export function AppShell({
               <SheetTitle className="sr-only">Menu</SheetTitle>
               <div className="flex flex-col h-full bg-card px-6 py-8">
                 <Link to="/" className="flex items-center gap-3 mb-10">
-                  <img src="/logo.png" alt="DreamPocket Logo" className="size-10 object-contain bg-white rounded-md p-1" />
+                  <img src="/logo.png" alt="DreamPocket Logo" className="size-10 object-contain" />
                   <div className="flex items-center">
                     <img src="/logo-text.png" alt="DreamPocket" className="h-5 object-contain" />
                   </div>
@@ -125,7 +125,7 @@ export function AppShell({
             </SheetContent>
           </Sheet>
           <Link to="/" className="flex items-center shrink-0">
-            <img src="/logo.png" alt="DreamPocket Logo" className="size-11 object-contain bg-white rounded-md p-1" />
+            <img src="/logo.png" alt="DreamPocket Logo" className="size-11 object-contain" />
           </Link>
         </div>
         
@@ -147,7 +147,7 @@ export function AppShell({
       {/* Desktop Sidebar */}
       <aside className="fixed inset-y-0 left-0 z-50 hidden w-[260px] flex-col border-r border-border/50 bg-card px-6 py-8 md:flex shadow-sm">
         <Link to="/" className="flex items-center gap-3 mb-10">
-          <img src="/logo.png" alt="DreamPocket Logo" className="size-10 object-contain bg-white rounded-md p-1" />
+          <img src="/logo.png" alt="DreamPocket Logo" className="size-10 object-contain" />
           <div className="flex items-center">
             <img src="/logo-text.png" alt="DreamPocket" className="h-5 object-contain" />
           </div>

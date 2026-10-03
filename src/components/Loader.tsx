@@ -8,7 +8,7 @@ export function FullPageLoader({ label = "Getting things ready…" }: { label?: 
           <img 
             src="/logo.png" 
             alt="DreamPocket Logo" 
-            className="w-full h-full object-contain drop-shadow-md bg-white rounded-xl p-1"
+            className="w-full h-full object-contain drop-shadow-md"
           />
         </div>
         <h1 className="text-2xl font-bold text-foreground tracking-tight mb-2">DreamPocket</h1>

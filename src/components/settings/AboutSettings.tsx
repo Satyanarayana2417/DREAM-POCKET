@@ -10,7 +10,7 @@ export function AboutSettings() {
       
       <div className="flex flex-col items-center justify-center pt-2 pb-2">
         <div className="size-20 rounded-3xl flex items-center justify-center mb-2">
-          <img src="/logo.png" alt="Dream Pocket" className="size-full object-contain drop-shadow-sm bg-white rounded-full p-2" />
+          <img src="/logo.png" alt="Dream Pocket" className="size-full object-contain drop-shadow-sm" />
         </div>
         <h2 className="text-2xl font-bold text-foreground tracking-tight">Dream Pocket</h2>
         <p className="text-[14px] text-muted-foreground text-center max-w-[260px] mt-1">
