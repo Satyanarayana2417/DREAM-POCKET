@@ -17,7 +17,7 @@ export function AuthLayout({
       <div className="w-full max-w-md">
         <div className="mb-6 flex flex-col items-center text-center">
           <div className="flex items-center gap-2 mb-4">
-            <img src="/logo.png" alt="DreamPocket Logo" className="size-10 object-contain" />
+            <img src="/logo.png" alt="DreamPocket Logo" className="size-10 object-contain bg-white rounded-md p-1" />
             <img src="/logo-text.png" alt="DreamPocket" className="h-6 object-contain" />
           </div>
           <h1 className="font-display text-2xl font-bold">{title}</h1>
