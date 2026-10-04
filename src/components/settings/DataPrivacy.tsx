@@ -16,7 +16,7 @@ export function DataPrivacy() {
           icon={FileText}
           iconBg="bg-blue-500"
           title="Privacy Policy"
-          onClick={() => navigate({ search: { view: 'about', subview: 'privacy-policy' } })}
+          onClick={() => navigate({ to: '/settings', search: { view: 'about', subview: 'privacy-policy' } })}
         />
         <SettingsRow
           icon={Database}

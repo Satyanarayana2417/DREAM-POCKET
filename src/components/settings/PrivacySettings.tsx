@@ -15,7 +15,7 @@ export function PrivacySettings() {
           icon={Shield}
           iconBg="bg-blue-500"
           title="Data & Privacy"
-          onClick={() => navigate({ search: { view: 'privacy', subview: 'data' } })}
+          onClick={() => navigate({ to: '/settings', search: { view: 'privacy', subview: 'data' } })}
         />
       </SettingsGroup>
     </div>

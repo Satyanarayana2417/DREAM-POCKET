@@ -1,12 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Target, Calendar, Search, Filter, Users, Home, Sprout, Wallet, TrendingUp, PieChart as PieChartIcon, Heart, Leaf, AlertCircle, ChevronRight, Plus } from "lucide-react";
 
 import { AppShell, Avatar } from "@/components/AppShell";
 import { useAuth } from "@/lib/auth";
 import { fetchFamilyById, fetchFamilyMembers, fetchFamilyBudgets, fetchFamilyExpenses, fetchUsersByIds } from "@/lib/data";
-import { currentMonthKey, categoryMeta, formatDisplayDate, formatINR, budgetStatus } from "@/lib/expense-utils";
+import { firebaseDb } from "@/lib/firebase";
+import { onSnapshot, collection, doc } from "firebase/firestore";
+import { currentMonthKey, categoryMeta, formatDisplayDate, formatINR, budgetStatus, type FamilyMember } from "@/lib/expense-utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -43,13 +45,39 @@ function FamilyDetailsRoute() {
     enabled: !!familyId,
   });
 
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!familyId) return;
+    
+    // Subscribe to family details (for pendingMemberIds)
+    const unsubFamily = onSnapshot(doc(firebaseDb(), "families", familyId), (snap) => {
+      if (snap.exists()) {
+        queryClient.setQueryData(["family", familyId], { id: snap.id, ...snap.data() });
+      }
+    });
+
+    // Subscribe to family members
+    const unsubMembers = onSnapshot(collection(firebaseDb(), `families/${familyId}/members`), (snap) => {
+      const data = snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<FamilyMember, "id">) }));
+      queryClient.setQueryData(["familyMembers", familyId], data);
+    });
+    
+    return () => {
+      unsubFamily();
+      unsubMembers();
+    };
+  }, [familyId, queryClient]);
+
   const activeMembers = members.filter(m => m.status === "active");
-  const memberIds = activeMembers.map(m => m.userId);
+  const activeMemberIds = activeMembers.map(m => m.userId);
+  const pendingIds = (family?.pendingMemberIds as string[]) || [];
+  const allUserIds = [...new Set([...activeMemberIds, ...pendingIds])];
 
   const { data: usersInfo = [] } = useQuery({
-    queryKey: ["usersInfo", memberIds],
-    queryFn: () => fetchUsersByIds(memberIds),
-    enabled: memberIds.length > 0,
+    queryKey: ["usersInfo", allUserIds],
+    queryFn: () => fetchUsersByIds(allUserIds),
+    enabled: allUserIds.length > 0,
   });
 
   const { data: budgets = [] } = useQuery({
@@ -290,6 +318,21 @@ function FamilyDetailsRoute() {
                     {member.role === "owner" ? "Owner" : "Member"}
                   </div>
                 </Link>
+              );
+            })}
+
+            {(family.pendingMemberIds as string[] || []).map(userId => {
+              const u = usersInfo.find(ui => ui["uid"] === userId);
+              return (
+                <div key={userId} className="flex flex-col items-center flex-shrink-0 gap-1.5 opacity-60 grayscale-[0.5]">
+                  <div className="rounded-full p-[3px] border-2 border-dashed border-muted-foreground/30">
+                    <Avatar name={u?.["username"] || "User"} photoURL={u?.["photoURL"]} size={68} />
+                  </div>
+                  <p className="font-bold text-muted-foreground text-[15px]">{u?.["username"] || "Member"}</p>
+                  <div className="px-3 py-[2px] rounded-full text-[11px] font-medium bg-muted text-muted-foreground">
+                    Pending
+                  </div>
+                </div>
               );
             })}
             

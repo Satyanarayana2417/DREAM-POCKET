@@ -254,6 +254,17 @@ export async function createFamilyInvitation(familyId: string, familyName: strin
     status: "pending",
     createdAt: serverTimestamp(),
   });
+
+  try {
+    const { addNotificationHistory } = await import("./notificationHistory");
+    await addNotificationHistory(invitedUserId, {
+      title: "Family Invitation",
+      body: `You have been invited to join the ${familyName} family.`,
+      type: "family",
+      read: false,
+      createdAt: new Date().toISOString()
+    });
+  } catch(e) {}
 }
 
 export async function acceptInvitation(familyId: string, userId: string, invitationId?: string) {
@@ -279,7 +290,28 @@ export async function acceptInvitation(familyId: string, userId: string, invitat
   });
 
   if (invitationId) {
-    await updateDoc(doc(firebaseDb(), "familyInvitations", invitationId), { status: "accepted" });
+    const invRef = doc(firebaseDb(), "familyInvitations", invitationId);
+    const invDoc = await getDoc(invRef);
+    await updateDoc(invRef, { status: "accepted" });
+
+    if (invDoc.exists()) {
+      const invitedBy = invDoc.data()?.["invitedBy"];
+      if (invitedBy) {
+        try {
+          const { addNotificationHistory } = await import("./notificationHistory");
+          const userDoc = await fetchUserDoc(userId);
+          const userName = userDoc?.username || "A user";
+          const familyName = fam.data()?.["familyName"] || "the family";
+          await addNotificationHistory(invitedBy, {
+            title: "Invitation Accepted",
+            body: `${userName} has accepted your invitation to join ${familyName}.`,
+            type: "family",
+            read: false,
+            createdAt: new Date().toISOString()
+          });
+        } catch(e) {}
+      }
+    }
   }
 }
 
@@ -296,7 +328,28 @@ export async function rejectInvitation(familyId: string, userId: string, invitat
   });
 
   if (invitationId) {
-    await updateDoc(doc(firebaseDb(), "familyInvitations", invitationId), { status: "declined" });
+    const invRef = doc(firebaseDb(), "familyInvitations", invitationId);
+    const invDoc = await getDoc(invRef);
+    await updateDoc(invRef, { status: "declined" });
+
+    if (invDoc.exists()) {
+      const invitedBy = invDoc.data()?.["invitedBy"];
+      if (invitedBy) {
+        try {
+          const { addNotificationHistory } = await import("./notificationHistory");
+          const userDoc = await fetchUserDoc(userId);
+          const userName = userDoc?.username || "A user";
+          const familyName = fam.data()?.["familyName"] || "the family";
+          await addNotificationHistory(invitedBy, {
+            title: "Invitation Declined",
+            body: `${userName} has declined your invitation to join ${familyName}.`,
+            type: "family",
+            read: false,
+            createdAt: new Date().toISOString()
+          });
+        } catch(e) {}
+      }
+    }
   }
 }
 

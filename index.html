@@ -17,6 +17,29 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      function displayError(message, stack) {
+        var errorDiv = document.createElement('div');
+        errorDiv.style.padding = '20px';
+        errorDiv.style.color = 'red';
+        errorDiv.style.fontFamily = 'monospace';
+        errorDiv.style.background = 'white';
+        errorDiv.style.border = '2px solid red';
+        errorDiv.style.position = 'absolute';
+        errorDiv.style.top = '0';
+        errorDiv.style.left = '0';
+        errorDiv.style.zIndex = '999999';
+        errorDiv.style.width = '100%';
+        errorDiv.innerHTML = '<h2>Runtime Error</h2><p>' + message + '</p><pre>' + stack + '</pre>';
+        document.body.appendChild(errorDiv);
+      }
+      window.onerror = function(message, source, lineno, colno, error) {
+        displayError(message, (error && error.stack ? error.stack : ''));
+      };
+      window.addEventListener('unhandledrejection', function(event) {
+        displayError('Unhandled Promise Rejection: ' + (event.reason ? event.reason.message || event.reason : 'Unknown'), event.reason && event.reason.stack ? event.reason.stack : '');
+      });
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -36,7 +36,14 @@ export function AddFamilyMemberDialog({ familyId, customTrigger }: { familyId: s
     queryFn: () => fetchFamilyMembers(familyId),
   });
 
+  const { data: family } = useQuery({
+    queryKey: ["family", familyId],
+    queryFn: () => fetchFamilyById(familyId),
+    enabled: !!familyId,
+  });
+
   const existingMemberIds = new Set(existingMembers.map((m) => m.userId));
+  const pendingMemberIds = new Set((family?.pendingMemberIds as string[]) || []);
 
   const filteredUsers = allUsers.filter(u => !existingMemberIds.has(u["uid"]));
 
@@ -55,12 +62,13 @@ export function AddFamilyMemberDialog({ familyId, customTrigger }: { familyId: s
       await createFamilyInvitation(familyId, fam.familyName, userId, user.uid);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["familyMembers", familyId] });
+      queryClient.invalidateQueries({ queryKey: ["family", familyId] });
       toast.success("Invitation sent successfully!");
       setIsOpen(false);
       setSearch("");
     },
     onError: (err: any) => {
+      console.error("Failed to add member:", err);
       toast.error(err.message || "Failed to add member");
     },
   });
@@ -97,24 +105,31 @@ export function AddFamilyMemberDialog({ familyId, customTrigger }: { familyId: s
             {!isLoading && searchResults.length === 0 && (
               <p className="text-center text-sm text-muted-foreground py-4">No users found.</p>
             )}
-            {searchResults.map((u: any) => (
-              <div key={u["uid"]} className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-secondary/20">
-                <div className="flex items-center gap-3">
-                  <Avatar name={u["username"] || u["email"]} photoURL={u["photoURL"]} size={36} />
-                  <div>
-                    <p className="font-semibold text-sm">{u["username"] || "User"}</p>
-                    <p className="text-xs text-muted-foreground">{u["email"]}</p>
+            {searchResults.map((u: any) => {
+              const isPending = pendingMemberIds.has(u["uid"]);
+              return (
+                <div key={u["uid"]} className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-secondary/20">
+                  <div className="flex items-center gap-3">
+                    <Avatar name={u["username"] || u["email"]} photoURL={u["photoURL"]} size={36} />
+                    <div>
+                      <p className="font-semibold text-sm">{u["username"] || "User"}</p>
+                      <p className="text-xs text-muted-foreground">{u["email"]}</p>
+                    </div>
                   </div>
+                  <Button 
+                    size="sm" 
+                    variant={isPending ? "secondary" : "default"}
+                    onClick={() => addMutation.mutate(u["uid"])}
+                    disabled={addMutation.isPending || isPending}
+                  >
+                    {isPending 
+                      ? "Pending" 
+                      : (addMutation.isPending && addMutation.variables === u["uid"] ? "Inviting..." : "Invite")
+                    }
+                  </Button>
                 </div>
-                <Button 
-                  size="sm" 
-                  onClick={() => addMutation.mutate(u["uid"])}
-                  disabled={addMutation.isPending}
-                >
-                  {addMutation.isPending ? "Inviting..." : "Invite"}
-                </Button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </DialogContent>

@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Users, Plus, ArrowRight, Wallet, Check, X } from "lucide-react";
 import { toast } from "sonner";
@@ -10,6 +10,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/lib/auth";
 import { fetchFamilies, createFamily, fetchPendingInvitations, acceptInvitation, rejectInvitation } from "@/lib/data";
+import { firebaseDb } from "@/lib/firebase";
+import { onSnapshot, collection, query, where } from "firebase/firestore";
+import type { FamilyInvitation } from "@/lib/expense-utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -57,18 +60,32 @@ function FamilyBudgetRoute() {
     enabled: !!user,
   });
 
+  useEffect(() => {
+    if (!user) return;
+    const q = query(
+      collection(firebaseDb(), "familyInvitations"),
+      where("invitedUserId", "==", user.uid),
+      where("status", "==", "pending")
+    );
+    const unsub = onSnapshot(q, (snap) => {
+      const data = snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<FamilyInvitation, "id">) }));
+      queryClient.setQueryData(["pendingInvitations", user.uid], data);
+    });
+    return () => unsub();
+  }, [user, queryClient]);
+
   const acceptMutation = useMutation({
-    mutationFn: (familyId: string) => acceptInvitation(familyId, user!.uid),
+    mutationFn: ({ familyId, invId }: { familyId: string, invId: string }) => acceptInvitation(familyId, user!.uid, invId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["families", user?.uid] });
       queryClient.invalidateQueries({ queryKey: ["pendingInvitations", user?.uid] });
-      toast.success("Invitation accepted!");
+      toast.success("You joined the group successfully!");
     },
     onError: (err: any) => toast.error(err.message || "Failed to accept invitation"),
   });
 
   const rejectMutation = useMutation({
-    mutationFn: (familyId: string) => rejectInvitation(familyId, user!.uid),
+    mutationFn: ({ familyId, invId }: { familyId: string, invId: string }) => rejectInvitation(familyId, user!.uid, invId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pendingInvitations", user?.uid] });
       toast.success("Invitation declined.");
@@ -135,7 +152,7 @@ function FamilyBudgetRoute() {
                     <div className="flex gap-2">
                       <Button 
                         size="sm" 
-                        onClick={() => acceptMutation.mutate(inv.id)}
+                        onClick={() => acceptMutation.mutate({ familyId: inv.familyId, invId: inv.id })}
                         disabled={acceptMutation.isPending || rejectMutation.isPending}
                         className="bg-primary text-primary-foreground"
                       >
@@ -144,7 +161,7 @@ function FamilyBudgetRoute() {
                       <Button 
                         size="sm" 
                         variant="outline"
-                        onClick={() => rejectMutation.mutate(inv.id)}
+                        onClick={() => rejectMutation.mutate({ familyId: inv.familyId, invId: inv.id })}
                         disabled={acceptMutation.isPending || rejectMutation.isPending}
                       >
                         <X className="mr-1 size-4" /> Decline

@@ -26,25 +26,25 @@ export function AboutSettings() {
           icon={Sparkles}
           iconBg="bg-amber-500"
           title="What's New"
-          onClick={() => navigate({ search: { view: 'about', subview: 'whats-new' } })}
+          onClick={() => navigate({ to: '/settings', search: { view: 'about', subview: 'whats-new' } })}
         />
         <SettingsRow
           icon={FileText}
           iconBg="bg-blue-500"
           title="Privacy Policy"
-          onClick={() => navigate({ search: { view: 'about', subview: 'privacy-policy' } })}
+          onClick={() => navigate({ to: '/settings', search: { view: 'about', subview: 'privacy-policy' } })}
         />
         <SettingsRow
           icon={Scale}
           iconBg="bg-indigo-500"
           title="Terms of Service"
-          onClick={() => navigate({ search: { view: 'about', subview: 'terms' } })}
+          onClick={() => navigate({ to: '/settings', search: { view: 'about', subview: 'terms' } })}
         />
         <SettingsRow
           icon={Info}
           iconBg="bg-muted0"
           title="Open Source Licenses"
-          onClick={() => navigate({ search: { view: 'about', subview: 'licenses' } })}
+          onClick={() => navigate({ to: '/settings', search: { view: 'about', subview: 'licenses' } })}
         />
         <SettingsRow
           icon={Star}

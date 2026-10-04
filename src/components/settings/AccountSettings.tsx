@@ -66,7 +66,7 @@ export function AccountSettings() {
             iconBg="bg-amber-500"
             title="Password"
             value={<span className="text-sm font-medium text-muted-foreground whitespace-nowrap text-right block">{isGoogle ? "Managed by Google" : "Change Password"}</span>}
-            onClick={isGoogle ? undefined : () => navigate({ search: { view: 'account', subview: 'change-password' } })}
+            onClick={isGoogle ? undefined : () => navigate({ to: '/settings', search: { view: 'account', subview: 'change-password' } })}
           />
         </SettingsGroup>
 
