@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
 import { AddFamilyMemberDialog } from "@/components/AddFamilyMemberDialog";
+import { AddFamilyExpenseDialog } from "@/components/AddFamilyExpenseDialog";
 import { FamilyExpenseDetailsDialog } from "@/components/FamilyExpenseDetailsDialog";
 import { BackButton } from "@/components/BackButton";
 
@@ -355,7 +356,22 @@ function FamilyDetailsRoute() {
         {/* FAMILY EXPENSES */}
         <div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-3">
-            <h2 className="text-lg font-semibold text-foreground">Family Expenses</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-foreground">Family Expenses</h2>
+              <div className="md:hidden">
+                {/* Mobile spacing adjustment if needed */}
+              </div>
+              <div className="hidden md:block">
+                <AddFamilyExpenseDialog 
+                  familyId={familyId} 
+                  customTrigger={
+                    <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white ml-4">
+                      <Plus className="mr-1.5 size-4" /> Add Expense
+                    </Button>
+                  }
+                />
+              </div>
+            </div>
             <div className="flex items-center gap-2">
               <Select value={memberFilter} onValueChange={setMemberFilter}>
                 <SelectTrigger className="w-[140px] h-9 bg-card border-border">
@@ -417,6 +433,20 @@ function FamilyDetailsRoute() {
         </div>
 
       </div>
+      
+      {/* Floating Add Family Expense Button (Mobile) */}
+      <div className="fixed right-5 bottom-28 z-50 md:hidden pointer-events-auto">
+        <AddFamilyExpenseDialog 
+          familyId={familyId} 
+          customTrigger={
+            <button className="flex size-14 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg transition-transform active:scale-95 hover:bg-emerald-700">
+              <Plus className="size-6" />
+            </button>
+          } 
+        />
+      </div>
+      
+      {/* Desktop Add Family Expense Button (Added to header) */}
     </AppShell>
   );
 }
