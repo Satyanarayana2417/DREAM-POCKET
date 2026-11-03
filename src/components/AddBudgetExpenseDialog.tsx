@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,7 +8,7 @@ import { toast } from "sonner";
 
 import { useAuth } from "@/lib/auth";
 import { createExpense } from "@/lib/data";
-import { todayISO, CATEGORY_NAMES } from "@/lib/expense-utils";
+import { todayISO, CATEGORY_NAMES, currentMonthKey, daysInMonth } from "@/lib/expense-utils";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 
 import {
@@ -44,17 +44,38 @@ export function AddBudgetExpenseDialog({ selectedMonth }: Props) {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
+  const getDefaultDate = (m: string) => {
+    if (m === currentMonthKey()) {
+      return todayISO();
+    }
+    return `${m}-01`;
+  };
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
       amount: "" as unknown as number,
-      category: "Other",
+      category: "Food",
       customCategory: "",
-      date: todayISO(),
+      date: getDefaultDate(selectedMonth),
       description: "",
     },
   });
+
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        title: "",
+        amount: "" as unknown as number,
+        category: "Food",
+        customCategory: "",
+        date: getDefaultDate(selectedMonth),
+        description: "",
+      });
+      clearImage();
+    }
+  }, [open, selectedMonth]);
 
   const selectedCategory = form.watch("category");
 
@@ -106,7 +127,7 @@ export function AddBudgetExpenseDialog({ selectedMonth }: Props) {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["expenses", user?.uid] });
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
       toast.success("Budget expense added!");
       setOpen(false);
       form.reset();
@@ -163,12 +184,12 @@ export function AddBudgetExpenseDialog({ selectedMonth }: Props) {
                     <FormControl>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 font-medium text-muted-foreground">₹</span>
-                        <Input 
-                          type="number" 
-                          step="0.01" 
-                          placeholder="0.00" 
-                          className="pl-7" 
-                          {...field} 
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00"
+                          className="pl-7"
+                          {...field}
                           value={field.value ?? ""}
                         />
                       </div>
@@ -185,7 +206,12 @@ export function AddBudgetExpenseDialog({ selectedMonth }: Props) {
                   <FormItem>
                     <FormLabel>Date</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input
+                        type="date"
+                        min={`${selectedMonth}-01`}
+                        max={`${selectedMonth}-${String(daysInMonth(selectedMonth)).padStart(2, "0")}`}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -198,7 +224,7 @@ export function AddBudgetExpenseDialog({ selectedMonth }: Props) {
                 render={({ field }) => (
                   <FormItem className="sm:col-span-2">
                     <FormLabel>Category</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a category" />
@@ -277,10 +303,10 @@ export function AddBudgetExpenseDialog({ selectedMonth }: Props) {
                   <FormItem className="sm:col-span-2">
                     <FormLabel>Description (Optional)</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Add any additional details here..." 
-                        className="resize-none h-20" 
-                        {...field} 
+                      <Textarea
+                        placeholder="Add any additional details here..."
+                        className="resize-none h-20"
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />

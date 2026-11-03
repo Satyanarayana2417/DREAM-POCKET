@@ -47,7 +47,7 @@ export function ExpenseDetailsDialog({ expense, open, onOpenChange }: ExpenseDet
       await removeExpense(id);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["expenses", user?.uid] });
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
       toast.success("Expense deleted successfully!");
       onOpenChange(false);
     },

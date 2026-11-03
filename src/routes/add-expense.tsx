@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { AppShell } from "@/components/AppShell";
 
@@ -48,6 +49,7 @@ const formSchema = z.object({
   customCategory: z.string().max(30, "Custom category name is too long").optional(),
   date: z.string().min(1, "Please select a date"),
   description: z.string().max(200, "Description is too long").optional(),
+  isBudgetExpense: z.boolean().default(false),
 });
 
 function AddExpenseRoute() {
@@ -63,10 +65,11 @@ function AddExpenseRoute() {
     defaultValues: {
       title: "",
       amount: "" as unknown as number,
-      category: "Other",
+      category: "Food",
       customCategory: "",
       date: todayISO(),
       description: "",
+      isBudgetExpense: false,
     },
   });
 
@@ -115,10 +118,11 @@ function AddExpenseRoute() {
         date: values.date,
         description: values.description || "",
         imageUrl,
+        isBudgetExpense: values.isBudgetExpense,
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["expenses", user?.uid] });
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
       toast.success("Expense added successfully!");
       navigate({ to: "/expenses" });
     },
@@ -138,214 +142,237 @@ function AddExpenseRoute() {
   return (
     <AppShell>
       <div className="mx-auto max-w-2xl">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Add Expense</CardTitle>
-          <CardDescription>Track a new transaction.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid gap-6 sm:grid-cols-2">
-                <FormField
-                  control={form.control as any}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem className="sm:col-span-2">
-                      <FormLabel>Expense Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g. Grocery Shopping" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control as any}
-                  name="amount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Amount</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 font-medium text-muted-foreground">₹</span>
-                          <Input 
-                            type="number" 
-                            step="0.01" 
-                            placeholder="0.00" 
-                            className="pl-7" 
-                            {...field} 
-                            value={field.value ?? ""}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control as any}
-                  name="date"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col mt-2">
-                      <FormLabel className="mb-1">Date</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground",
-                              )}
-                            >
-                              {field.value ? (
-                                format(new Date(field.value), "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value ? new Date(field.value) : undefined}
-                            onSelect={(date) =>
-                              field.onChange(date ? format(date, "yyyy-MM-dd") : "")
-                            }
-                            disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control as any}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem className="sm:col-span-2">
-                      <FormLabel>Category</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a category" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {CATEGORY_NAMES.map((cat) => (
-                            <SelectItem key={cat} value={cat}>
-                              {cat}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {selectedCategory === "Other" && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Add Expense</CardTitle>
+            <CardDescription>Track a new transaction.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <div className="grid gap-6 sm:grid-cols-2">
                   <FormField
                     control={form.control as any}
-                    name="customCategory"
+                    name="title"
                     render={({ field }) => (
                       <FormItem className="sm:col-span-2">
-                        <FormLabel>Custom Category Name</FormLabel>
+                        <FormLabel>Expense Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g. Subscriptions, Pet Care" {...field} />
+                          <Input placeholder="e.g. Grocery Shopping" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                )}
 
-                <FormField
-                  control={form.control as any}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem className="sm:col-span-2">
-                      <FormLabel>Description (Optional)</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Add any additional details here..."
-                          className="resize-none"
-                          {...field}
+                  <FormField
+                    control={form.control as any}
+                    name="amount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Amount</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 font-medium text-muted-foreground">₹</span>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00"
+                              className="pl-7"
+                              {...field}
+                              value={field.value ?? ""}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control as any}
+                    name="date"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col mt-2">
+                        <FormLabel className="mb-1">Date</FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant={"outline"}
+                                className={cn(
+                                  "w-full pl-3 text-left font-normal",
+                                  !field.value && "text-muted-foreground",
+                                )}
+                              >
+                                {field.value ? (
+                                  format(new Date(field.value), "PPP")
+                                ) : (
+                                  <span>Pick a date</span>
+                                )}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value ? new Date(field.value) : undefined}
+                              onSelect={(date) =>
+                                field.onChange(date ? format(date, "yyyy-MM-dd") : "")
+                              }
+                              disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control as any}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem className="sm:col-span-2">
+                        <FormLabel>Category</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a category" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {CATEGORY_NAMES.map((cat) => (
+                              <SelectItem key={cat} value={cat}>
+                                {cat}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {selectedCategory === "Other" && (
+                    <FormField
+                      control={form.control as any}
+                      name="customCategory"
+                      render={({ field }) => (
+                        <FormItem className="sm:col-span-2">
+                          <FormLabel>Custom Category Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g. Subscriptions, Pet Care" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+
+                  <FormField
+                    control={form.control as any}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem className="sm:col-span-2">
+                        <FormLabel>Description (Optional)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Add any additional details here..."
+                            className="resize-none"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="space-y-3 sm:col-span-2">
+                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      Receipt Image (Optional)
+                    </label>
+                    {preview ? (
+                      <div className="relative overflow-hidden rounded-xl border bg-muted/30 p-2 w-full max-w-[200px] aspect-[3/4]">
+                        <img
+                          src={preview}
+                          alt="Receipt preview"
+                          className="h-full w-full object-cover rounded-lg"
                         />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="space-y-3 sm:col-span-2">
-                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                    Receipt Image (Optional)
-                  </label>
-                  {preview ? (
-                    <div className="relative overflow-hidden rounded-xl border bg-muted/30 p-2 w-full max-w-[200px] aspect-[3/4]">
-                      <img
-                        src={preview}
-                        alt="Receipt preview"
-                        className="h-full w-full object-cover rounded-lg"
-                      />
-                      <button
-                        type="button"
-                        onClick={clearImage}
-                        className="absolute right-3 top-3 grid size-7 place-items-center rounded-full bg-black/60 text-white backdrop-blur hover:bg-black/80"
-                      >
-                        <X className="size-4" />
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="relative overflow-hidden rounded-xl border-2 border-dashed border-muted-foreground/25 bg-muted/10 transition-colors hover:bg-muted/30">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="absolute inset-0 z-10 w-full h-full cursor-pointer opacity-0"
-                        onChange={handleImageChange}
-                      />
-                      <div className="flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
-                        <div className="mb-4 grid size-12 place-items-center rounded-full bg-secondary text-secondary-foreground">
-                          <ImagePlus className="size-6" />
-                        </div>
-                        <p className="font-medium">Tap to upload a receipt</p>
-                        <p className="text-xs mt-1">JPEG, PNG up to 5MB</p>
+                        <button
+                          type="button"
+                          onClick={clearImage}
+                          className="absolute right-3 top-3 grid size-7 place-items-center rounded-full bg-black/60 text-white backdrop-blur hover:bg-black/80"
+                        >
+                          <X className="size-4" />
+                        </button>
                       </div>
-                    </div>
-                  )}
-                </div>
-              </div>
+                    ) : (
+                      <div className="relative overflow-hidden rounded-xl border-2 border-dashed border-muted-foreground/25 bg-muted/10 transition-colors hover:bg-muted/30">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="absolute inset-0 z-10 w-full h-full cursor-pointer opacity-0"
+                          onChange={handleImageChange}
+                        />
+                        <div className="flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
+                          <div className="mb-4 grid size-12 place-items-center rounded-full bg-secondary text-secondary-foreground">
+                            <ImagePlus className="size-6" />
+                          </div>
+                          <p className="font-medium">Tap to upload a receipt</p>
+                          <p className="text-xs mt-1">JPEG, PNG up to 5MB</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
 
-              <Button
-                type="submit"
-                className="w-full bg-gradient-primary shadow-soft"
-                disabled={createMutation.isPending}
-              >
-                {createMutation.isPending ? (
-                  <>
-                    <Loader2 className="mr-2 size-4 animate-spin" />
-                    {uploadProgress > 0 && uploadProgress < 100
-                      ? `Uploading Receipt ${uploadProgress}%`
-                      : "Saving..."}
-                  </>
-                ) : (
-                  "Save Expense"
-                )}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-    </div>
+                  <FormField
+                    control={form.control}
+                    name="isBudgetExpense"
+                    render={({ field }) => (
+                      <FormItem className="sm:col-span-2 flex flex-row items-center space-x-3 space-y-0 rounded-xl border p-4 bg-muted/20">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel className="cursor-pointer font-medium">
+                            Track under Monthly Budget
+                          </FormLabel>
+                          <p className="text-xs text-muted-foreground">
+                            Include this expense in your monthly budget calculations
+                          </p>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full bg-gradient-primary shadow-soft"
+                  disabled={createMutation.isPending}
+                >
+                  {createMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 size-4 animate-spin" />
+                      {uploadProgress > 0 && uploadProgress < 100
+                        ? `Uploading Receipt ${uploadProgress}%`
+                        : "Saving..."}
+                    </>
+                  ) : (
+                    "Save Expense"
+                  )}
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
     </AppShell>
   );
 }

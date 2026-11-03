@@ -167,6 +167,7 @@ function EditExpenseRoute() {
         date: values.date,
         description: values.description || "",
         imageUrl,
+        isBudgetExpense: expense?.isBudgetExpense,
       });
     },
     onSuccess: () => {

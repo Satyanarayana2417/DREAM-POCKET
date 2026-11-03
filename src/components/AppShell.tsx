@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { LayoutDashboard, ListOrdered, LogOut, Plus, Target, User, Wallet, PieChart, Users, Menu, Bell } from "lucide-react";
+import { LayoutDashboard, ListOrdered, LogOut, Plus, Target, User, Wallet, PieChart, Users, Menu, Bell, Banknote } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { type ReactNode, useState, useEffect } from "react";
 
@@ -14,9 +14,8 @@ const NAV = [
   { to: "/", label: "Home", icon: LayoutDashboard },
   { to: "/expenses", label: "Expenses", icon: ListOrdered },
   { to: "/add-expense", label: "Add Expense", icon: Plus, mobileOnly: true },
-  { to: "/budget", label: "Budget", icon: Target },
+  { to: "/budget", label: "Budget", icon: Banknote },
   { to: "/family-budget", label: "Family", icon: Users },
-  { to: "/profile", label: "Profile", icon: User },
 ] as const;
 
 export function AppShell({
@@ -68,7 +67,7 @@ export function AppShell({
     { to: "/", label: "Home", icon: LayoutDashboard },
     { to: "/expenses", label: "Expenses", icon: ListOrdered },
     { to: "/add-expense", label: "Add Expense", icon: Plus },
-    { to: "/budget", label: "Budget", icon: Target },
+    { to: "/budget", label: "Budget", icon: Banknote },
     { to: "/family-budget", label: "Family Budget", icon: Users },
     { to: "/profile", label: "Profile", icon: User },
   ];
@@ -129,8 +128,8 @@ export function AppShell({
           </Link>
         </div>
         
-        <div className="flex items-center gap-4">
-          <Link to="/notifications" className="relative p-2 text-muted-foreground hover:bg-secondary rounded-full transition-colors">
+        <div className="flex items-center gap-3">
+          <Link to="/notifications" className="relative p-2 text-muted-foreground hover:bg-secondary rounded-full transition-colors" aria-label="Notifications">
             <Bell className="size-5" />
             {unreadCount > 0 && (
               <span className="absolute top-1 right-1 flex size-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white shadow-sm ring-2 ring-card">
@@ -138,8 +137,8 @@ export function AppShell({
               </span>
             )}
           </Link>
-          <Link to="/" className="flex items-center shrink-0 hidden sm:flex">
-            <img src="/logo-text.png" alt="DreamPocket" className="h-6 object-contain mr-2" />
+          <Link to="/profile" className="flex items-center justify-center rounded-full transition-transform active:scale-95 ring-2 ring-primary/20 hover:ring-primary/40" aria-label="Profile">
+            <Avatar photoURL={profile?.photoURL} name={profile?.username || "User"} size={36} />
           </Link>
         </div>
       </header>
@@ -232,9 +231,10 @@ export function AppShell({
           <Link
             to="/budget"
             aria-label="Budget"
-            className="absolute left-1/2 top-[-28px] -translate-x-1/2 z-50 flex size-[56px] items-center justify-center rounded-full bg-emerald-600 text-white shadow-[0_4px_12px_rgba(5,150,105,0.4)] transition-transform active:scale-95"
+            className="absolute left-1/2 top-[-14px] -translate-x-1/2 z-50 flex flex-col size-[58px] items-center justify-center rounded-full bg-emerald-600 text-white shadow-[0_4px_14px_rgba(5,150,105,0.35)] transition-transform active:scale-95"
           >
-            <Target className="size-6" />
+            <Banknote className="size-5" />
+            <span className="text-[10px] font-semibold tracking-tight leading-none mt-1">Budget</span>
           </Link>
 
           {/* Left Items (Home, Expenses) */}
@@ -253,10 +253,10 @@ export function AppShell({
           </div>
 
           {/* Spacer for Center Cutout */}
-          <div className="w-[60px] shrink-0" />
+          <div className="w-[76px] shrink-0" />
 
-          {/* Right Items (Family, Profile) */}
-          <div className="flex flex-1 justify-evenly items-center z-10">
+          {/* Right Items (Family) */}
+          <div className="flex flex-1 justify-center items-center z-10">
             {NAV.filter(n => !("mobileOnly" in n && n.mobileOnly)).slice(3).map((item) => (
               <Link
                 key={item.to}

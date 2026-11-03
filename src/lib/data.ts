@@ -71,11 +71,12 @@ export async function fetchExpenses(userId: string): Promise<Expense[]> {
   const q = query(
     collection(firebaseDb(), "expenses"),
     where("userId", "==", userId),
-    orderBy("date", "desc"),
     limit(1000),
   );
   const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Expense, "id">) }));
+  return snap.docs
+    .map((d) => ({ id: d.id, ...(d.data() as Omit<Expense, "id">) }))
+    .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
 }
 
 export async function fetchExpense(id: string): Promise<Expense | null> {

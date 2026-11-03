@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Target, Wallet } from "lucide-react";
+import { Loader2, Banknote, Wallet } from "lucide-react";
 import { toast } from "sonner";
 
 import { useAuth } from "@/lib/auth";
@@ -192,7 +192,7 @@ function BudgetRoute() {
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
                 <div className="rounded-xl border bg-card p-4">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Target className="size-4" /> Budget
+                    <Banknote className="size-4" /> Budget
                   </div>
                   <div className="mt-1 text-2xl font-bold">{formatINR(currentBudget, true)}</div>
                 </div>
@@ -277,7 +277,7 @@ function BudgetRoute() {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
-              <Target className="mb-4 size-12 opacity-30" />
+              <Banknote className="mb-4 size-12 opacity-30" />
               <h3 className="mb-1 font-semibold text-lg text-foreground">No Budget Set</h3>
               <p className="mb-4 text-sm max-w-[250px]">
                 You haven't set a budget for {monthLabel(selectedMonth)} yet.
