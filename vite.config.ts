@@ -58,6 +58,7 @@ export default defineConfig({
     port: 8081,
   },
   build: {
-    target: 'es2015',
+    target: 'es2020',
+    chunkSizeWarningLimit: 2500,
   }
 });

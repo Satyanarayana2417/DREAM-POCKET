@@ -20,6 +20,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as EditExpenseIdRouteImport } from './routes/edit-expense.$id'
+import { Route as ExpenseIdRouteImport } from './routes/expense.$id'
 import { Route as FamilyBudgetIndexRouteImport } from './routes/family-budget/index'
 import { Route as FamilyBudgetFamilyIdRouteImport } from './routes/family-budget/$familyId'
 import { Route as FamilyBudgetFamilyIdMemberMemberIdRouteImport } from './routes/family-budget_.$familyId_.member.$memberId'
@@ -79,6 +80,11 @@ const EditExpenseIdRoute = EditExpenseIdRouteImport.update({
   path: '/edit-expense/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ExpenseIdRoute = ExpenseIdRouteImport.update({
+  id: '/expense/$id',
+  path: '/expense/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FamilyBudgetIndexRoute = FamilyBudgetIndexRouteImport.update({
   id: '/family-budget/',
   path: '/family-budget/',
@@ -108,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/edit-expense/$id': typeof EditExpenseIdRoute
+  '/expense/$id': typeof ExpenseIdRoute
   '/family-budget/$familyId': typeof FamilyBudgetFamilyIdRoute
   '/family-budget/': typeof FamilyBudgetIndexRoute
   '/family-budget/$familyId/member/$memberId': typeof FamilyBudgetFamilyIdMemberMemberIdRoute
@@ -124,6 +131,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/edit-expense/$id': typeof EditExpenseIdRoute
+  '/expense/$id': typeof ExpenseIdRoute
   '/family-budget/$familyId': typeof FamilyBudgetFamilyIdRoute
   '/family-budget': typeof FamilyBudgetIndexRoute
   '/family-budget/$familyId/member/$memberId': typeof FamilyBudgetFamilyIdMemberMemberIdRoute
@@ -141,6 +149,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/edit-expense/$id': typeof EditExpenseIdRoute
+  '/expense/$id': typeof ExpenseIdRoute
   '/family-budget/$familyId': typeof FamilyBudgetFamilyIdRoute
   '/family-budget/': typeof FamilyBudgetIndexRoute
   '/family-budget_/$familyId_/member/$memberId': typeof FamilyBudgetFamilyIdMemberMemberIdRoute
@@ -159,6 +168,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/signup'
     | '/edit-expense/$id'
+    | '/expense/$id'
     | '/family-budget/$familyId'
     | '/family-budget/'
     | '/family-budget/$familyId/member/$memberId'
@@ -175,6 +185,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/signup'
     | '/edit-expense/$id'
+    | '/expense/$id'
     | '/family-budget/$familyId'
     | '/family-budget'
     | '/family-budget/$familyId/member/$memberId'
@@ -191,6 +202,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/signup'
     | '/edit-expense/$id'
+    | '/expense/$id'
     | '/family-budget/$familyId'
     | '/family-budget/'
     | '/family-budget_/$familyId_/member/$memberId'
@@ -208,6 +220,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
   EditExpenseIdRoute: typeof EditExpenseIdRoute
+  ExpenseIdRoute: typeof ExpenseIdRoute
   FamilyBudgetFamilyIdRoute: typeof FamilyBudgetFamilyIdRoute
   FamilyBudgetIndexRoute: typeof FamilyBudgetIndexRoute
   FamilyBudgetFamilyIdMemberMemberIdRoute: typeof FamilyBudgetFamilyIdMemberMemberIdRoute
@@ -292,6 +305,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EditExpenseIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/expense/$id': {
+      id: '/expense/$id'
+      path: '/expense/$id'
+      fullPath: '/expense/$id'
+      preLoaderRoute: typeof ExpenseIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/family-budget/': {
       id: '/family-budget/'
       path: '/family-budget'
@@ -328,6 +348,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,
   EditExpenseIdRoute: EditExpenseIdRoute,
+  ExpenseIdRoute: ExpenseIdRoute,
   FamilyBudgetFamilyIdRoute: FamilyBudgetFamilyIdRoute,
   FamilyBudgetIndexRoute: FamilyBudgetIndexRoute,
   FamilyBudgetFamilyIdMemberMemberIdRoute:

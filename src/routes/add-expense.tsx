@@ -49,7 +49,7 @@ const formSchema = z.object({
   customCategory: z.string().max(30, "Custom category name is too long").optional(),
   date: z.string().min(1, "Please select a date"),
   description: z.string().max(200, "Description is too long").optional(),
-  isBudgetExpense: z.boolean().default(false),
+  isBudgetExpense: z.boolean(),
 });
 
 function AddExpenseRoute() {

@@ -1,8 +1,10 @@
 import { Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { LayoutDashboard, ListOrdered, LogOut, Plus, Target, User, Wallet, PieChart, Users, Menu, Bell, Banknote } from "lucide-react";
+import { LayoutDashboard, ListOrdered, LogOut, Plus, Target, User, Wallet, PieChart, Users, Menu, Bell, Banknote, Moon, Sun } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { type ReactNode, useState, useEffect } from "react";
+import { useTheme } from "@/components/theme-provider";
+import { cn } from "@/lib/utils";
 
 import { FullPageLoader } from "./Loader";
 import { useAuth, useRequireAuth } from "@/lib/auth";
@@ -18,6 +20,24 @@ const NAV = [
   { to: "/family-budget", label: "Family", icon: Users },
 ] as const;
 
+export function StyledHamburgerIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M4 6.5h16" />
+      <path d="M4 12h10" />
+      <path d="M4 17.5h14" />
+    </svg>
+  );
+}
+
 export function AppShell({
   children,
 }: {
@@ -30,6 +50,25 @@ export function AppShell({
   const location = useLocation();
   
   const [unreadCount, setUnreadCount] = useState(0);
+  const { theme, setTheme } = useTheme();
+  const isProfilePage = location.pathname.startsWith("/profile");
+  const isHomePage = location.pathname === "/";
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    if (!isHomePage) {
+      setIsScrolled(false);
+      return;
+    }
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 30);
+    };
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isHomePage]);
+
+  const isHeroTransparent = isHomePage && !isScrolled;
 
   useEffect(() => {
     if (user) {
@@ -75,12 +114,28 @@ export function AppShell({
   return (
     <div className="min-h-screen bg-background md:pl-[260px] overflow-x-hidden">
       {/* Mobile Header */}
-      <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-border/50 bg-card px-4 shadow-sm md:hidden">
-        <div className="flex items-center gap-3">
+      <header
+        className={cn(
+          "flex h-16 items-center justify-between px-4 transition-all duration-300 md:hidden z-40",
+          isHomePage
+            ? isHeroTransparent
+              ? "absolute top-0 left-0 right-0 border-b border-transparent bg-transparent shadow-none"
+              : "fixed top-0 left-0 right-0 border-b border-border/40 bg-background/95 backdrop-blur-md shadow-xs"
+            : "sticky top-0 border-b border-border/40 bg-background/95 backdrop-blur-md shadow-xs"
+        )}
+      >
+        <div className="flex items-center gap-2.5">
           <Sheet>
             <SheetTrigger asChild>
-              <button className="flex size-10 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary">
-                <Menu className="size-6" />
+              <button
+                className={cn(
+                  "flex size-10 items-center justify-center rounded-lg transition-colors active:scale-95",
+                  isHeroTransparent
+                    ? "text-white hover:bg-white/15"
+                    : "text-muted-foreground hover:bg-secondary"
+                )}
+              >
+                <StyledHamburgerIcon className="size-6" />
                 <span className="sr-only">Toggle Menu</span>
               </button>
             </SheetTrigger>
@@ -123,24 +178,60 @@ export function AppShell({
               </div>
             </SheetContent>
           </Sheet>
-          <Link to="/" className="flex items-center shrink-0">
-            <img src="/logo.png" alt="DreamPocket Logo" className="size-11 object-contain" />
+
+          <Link to="/" className="flex items-center gap-2 transition-opacity active:opacity-80">
+            <img src="/logo.png" alt="Dream Pocket" className="size-9 object-contain shrink-0" />
+            <span
+              className={cn(
+                "text-[17px] font-bold tracking-tight leading-none transition-colors",
+                isHeroTransparent
+                  ? "text-white drop-shadow-sm"
+                  : "text-emerald-600 dark:text-emerald-400"
+              )}
+            >
+              Dream Pocket
+            </span>
           </Link>
         </div>
         
-        <div className="flex items-center gap-3">
-          <Link to="/notifications" className="relative p-2 text-muted-foreground hover:bg-secondary rounded-full transition-colors" aria-label="Notifications">
-            <Bell className="size-5" />
-            {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 flex size-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white shadow-sm ring-2 ring-card">
-                {unreadCount > 99 ? '99+' : unreadCount}
-              </span>
-            )}
-          </Link>
-          <Link to="/profile" className="flex items-center justify-center rounded-full transition-transform active:scale-95 ring-2 ring-primary/20 hover:ring-primary/40" aria-label="Profile">
-            <Avatar photoURL={profile?.photoURL} name={profile?.username || "User"} size={36} />
-          </Link>
-        </div>
+        {isProfilePage ? (
+          <button
+            type="button"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="flex size-10 items-center justify-center rounded-full text-foreground/80 hover:bg-secondary transition-colors active:scale-95"
+            aria-label="Toggle dark/light mode"
+          >
+            {theme === "dark" ? <Sun className="size-5" /> : <Moon className="size-5" />}
+          </button>
+        ) : (
+          <div className="flex items-center gap-2.5">
+            <Link
+              to="/notifications"
+              className={cn(
+                "relative p-2 rounded-full transition-colors",
+                isHeroTransparent
+                  ? "text-white hover:bg-white/15"
+                  : "text-foreground/80 hover:bg-secondary/60"
+              )}
+              aria-label="Notifications"
+            >
+              <Bell className="size-5 stroke-[2]" />
+              <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-rose-500 ring-2 ring-background" />
+            </Link>
+            <Link
+              to="/profile"
+              className={cn(
+                "flex items-center justify-center rounded-full transition-transform active:scale-95 ring-2",
+                isHeroTransparent
+                  ? "ring-white/40 hover:ring-white/70"
+                  : "ring-primary/20 hover:ring-primary/40"
+              )}
+              aria-label="Profile"
+            >
+              <Avatar photoURL={profile?.photoURL} name={profile?.username || "User"} size={36} />
+            </Link>
+          </div>
+        )}
       </header>
 
       {/* Desktop Sidebar */}
@@ -196,7 +287,12 @@ export function AppShell({
       </aside>
 
       {/* Main Content Area */}
-      <main className="mx-auto w-full max-w-6xl px-4 pt-6 pb-28 sm:px-6 md:pb-12 md:pt-8">
+      <main
+        className={cn(
+          "mx-auto w-full max-w-6xl pb-28 sm:px-6 md:pb-12 md:pt-8",
+          isHomePage ? "px-4 pt-0 md:pt-8" : "px-4 pt-6 md:pt-8"
+        )}
+      >
         {children}
       </main>
 
@@ -215,61 +311,21 @@ export function AppShell({
           </Link>
         )}
 
-        {/* Pill Navbar with Cutout Budget Button */}
-        <nav className="relative flex items-center w-full h-[68px] pointer-events-auto filter drop-shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-          
-          {/* Dynamic SVG Background Layer */}
-          <div className="absolute inset-0 flex pointer-events-none">
-            <div className="flex-1 bg-card rounded-l-[34px]"></div>
-            <svg width="84" height="68" viewBox="0 0 84 68" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-card shrink-0">
-              <path d="M 0 0 C 5 0, 5 10, 12 20 A 36 36 0 0 0 72 20 C 79 10, 79 0, 84 0 L 84 68 L 0 68 Z" fill="currentColor" />
-            </svg>
-            <div className="flex-1 bg-card rounded-r-[34px]"></div>
-          </div>
-
-          {/* Central Cutout Floating Button (Budget) */}
-          <Link
-            to="/budget"
-            aria-label="Budget"
-            className="absolute left-1/2 top-[-14px] -translate-x-1/2 z-50 flex flex-col size-[58px] items-center justify-center rounded-full bg-emerald-600 text-white shadow-[0_4px_14px_rgba(5,150,105,0.35)] transition-transform active:scale-95"
-          >
-            <Banknote className="size-5" />
-            <span className="text-[10px] font-semibold tracking-tight leading-none mt-1">Budget</span>
-          </Link>
-
-          {/* Left Items (Home, Expenses) */}
+        {/* Pill Navbar — 4 icons in a row */}
+        <nav className="relative flex items-center w-full h-[64px] pointer-events-auto rounded-[32px] bg-card filter drop-shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
           <div className="flex flex-1 justify-evenly items-center z-10">
-            {NAV.filter(n => !("mobileOnly" in n && n.mobileOnly)).slice(0, 2).map((item) => (
+            {NAV.filter(n => !("mobileOnly" in n && n.mobileOnly)).map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
                 activeOptions={{ exact: item.to === "/" }}
-                className="flex flex-col items-center justify-center gap-1 py-1 px-1.5 text-[10px] font-medium text-muted-foreground transition-colors data-[status=active]:text-emerald-600 w-12"
+                className="flex flex-col items-center justify-center gap-1 py-1 px-1 text-[10px] font-medium text-muted-foreground transition-colors data-[status=active]:text-emerald-600 w-16"
               >
                 <item.icon className="size-5" />
-                <span className="truncate w-full text-center">{item.label}</span>
+                <span className="text-center whitespace-nowrap">{item.label}</span>
               </Link>
             ))}
           </div>
-
-          {/* Spacer for Center Cutout */}
-          <div className="w-[76px] shrink-0" />
-
-          {/* Right Items (Family) */}
-          <div className="flex flex-1 justify-center items-center z-10">
-            {NAV.filter(n => !("mobileOnly" in n && n.mobileOnly)).slice(3).map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                activeOptions={{ exact: item.to === "/" }}
-                className="flex flex-col items-center justify-center gap-1 py-1 px-1.5 text-[10px] font-medium text-muted-foreground transition-colors data-[status=active]:text-emerald-600 w-12"
-              >
-                <item.icon className="size-5" />
-                <span className="truncate w-full text-center">{item.label}</span>
-              </Link>
-            ))}
-          </div>
-
         </nav>
       </div>
       )}
