@@ -519,17 +519,17 @@ function Index() {
             </div>
           </div>
 
-          {/* Quick Action Cards – Row of 4 */}
-          <div className="grid grid-cols-4 gap-2">
+          {/* Quick Action Cards – Row of 3 */}
+          <div className="grid grid-cols-3 gap-2.5">
             {/* 1. Add Expense */}
             <Link
               to="/add-expense"
-              className="flex flex-col items-center justify-center rounded-2xl bg-white dark:bg-card p-2 text-center shadow-xs border border-border/40 transition-transform active:scale-95"
+              className="flex flex-col items-center justify-center rounded-2xl bg-white dark:bg-card py-2.5 px-2 text-center shadow-xs border border-border/40 transition-transform active:scale-95"
             >
-              <div className="mb-1.5 flex size-10 items-center justify-center rounded-full bg-[#054d3b] text-white shadow-xs">
+              <div className="mb-1.5 flex size-10.5 items-center justify-center rounded-full bg-[#054d3b] text-white shadow-xs">
                 <Plus className="size-5 stroke-[2.5]" />
               </div>
-              <span className="text-[11px] font-semibold text-foreground tracking-tight leading-tight line-clamp-1">
+              <span className="text-[12px] font-semibold text-foreground tracking-tight leading-tight whitespace-nowrap">
                 Add Expense
               </span>
             </Link>
@@ -541,12 +541,12 @@ function Index() {
                 setIncomeInput(currentIncome > 0 ? String(currentIncome) : "");
                 setIsIncomeModalOpen(true);
               }}
-              className="flex flex-col items-center justify-center rounded-2xl bg-white dark:bg-card p-2 text-center shadow-xs border border-border/40 transition-transform active:scale-95"
+              className="flex flex-col items-center justify-center rounded-2xl bg-white dark:bg-card py-2.5 px-2 text-center shadow-xs border border-border/40 transition-transform active:scale-95 cursor-pointer"
             >
-              <div className="mb-1.5 flex size-10 items-center justify-center rounded-full bg-[#dcfce7] text-[#16a34a]">
+              <div className="mb-1.5 flex size-10.5 items-center justify-center rounded-full bg-[#dcfce7] text-[#16a34a]">
                 <ArrowDown className="size-5 stroke-[2.5]" />
               </div>
-              <span className="text-[11px] font-semibold text-foreground tracking-tight leading-tight line-clamp-1">
+              <span className="text-[12px] font-semibold text-foreground tracking-tight leading-tight whitespace-nowrap">
                 Add Income
               </span>
             </button>
@@ -554,26 +554,13 @@ function Index() {
             {/* 3. Set Budget */}
             <Link
               to="/budget"
-              className="flex flex-col items-center justify-center rounded-2xl bg-white dark:bg-card p-2 text-center shadow-xs border border-border/40 transition-transform active:scale-95"
+              className="flex flex-col items-center justify-center rounded-2xl bg-white dark:bg-card py-2.5 px-2 text-center shadow-xs border border-border/40 transition-transform active:scale-95"
             >
-              <div className="mb-1.5 flex size-10 items-center justify-center rounded-full bg-[#ffedd5] text-[#ea580c]">
+              <div className="mb-1.5 flex size-10.5 items-center justify-center rounded-full bg-[#ffedd5] text-[#ea580c]">
                 <Target className="size-5 stroke-[2.2]" />
               </div>
-              <span className="text-[11px] font-semibold text-foreground tracking-tight leading-tight line-clamp-1">
+              <span className="text-[12px] font-semibold text-foreground tracking-tight leading-tight whitespace-nowrap">
                 Set Budget
-              </span>
-            </Link>
-
-            {/* 4. Savings Goal */}
-            <Link
-              to="/family-budget"
-              className="flex flex-col items-center justify-center rounded-2xl bg-white dark:bg-card p-2 text-center shadow-xs border border-border/40 transition-transform active:scale-95"
-            >
-              <div className="mb-1.5 flex size-10 items-center justify-center rounded-full bg-[#f3e8ff] text-[#9333ea]">
-                <PiggyBank className="size-5 stroke-[2.2]" />
-              </div>
-              <span className="text-[11px] font-semibold text-foreground tracking-tight leading-tight line-clamp-1">
-                Savings Goal
               </span>
             </Link>
           </div>

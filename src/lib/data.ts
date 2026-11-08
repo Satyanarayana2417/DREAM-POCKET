@@ -92,6 +92,8 @@ export type ExpenseInput = {
   description?: string;
   imageUrl?: string | null;
   isBudgetExpense?: boolean;
+  paymentType?: string;
+  paymentMethod?: string;
 };
 
 export async function createExpense(userId: string, input: ExpenseInput) {

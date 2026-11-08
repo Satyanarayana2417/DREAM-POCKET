@@ -52,6 +52,7 @@ export function AppShell({
   const [unreadCount, setUnreadCount] = useState(0);
   const { theme, setTheme } = useTheme();
   const isProfilePage = location.pathname.startsWith("/profile");
+  const isBudgetPage = location.pathname.startsWith("/budget");
   const isHomePage = location.pathname === "/";
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -113,126 +114,128 @@ export function AppShell({
 
   return (
     <div className="min-h-screen bg-background md:pl-[260px] overflow-x-hidden">
-      {/* Mobile Header */}
-      <header
-        className={cn(
-          "flex h-16 items-center justify-between px-4 transition-all duration-300 md:hidden z-40",
-          isHomePage
-            ? isHeroTransparent
-              ? "absolute top-0 left-0 right-0 border-b border-transparent bg-transparent shadow-none"
-              : "fixed top-0 left-0 right-0 border-b border-border/40 bg-background/95 backdrop-blur-md shadow-xs"
-            : "sticky top-0 border-b border-border/40 bg-background/95 backdrop-blur-md shadow-xs"
-        )}
-      >
-        <div className="flex items-center gap-2.5">
-          <Sheet>
-            <SheetTrigger asChild>
-              <button
+      {/* Mobile Header (Hidden on budget page) */}
+      {!isBudgetPage && (
+        <header
+          className={cn(
+            "flex h-16 items-center justify-between px-4 transition-all duration-300 md:hidden z-40",
+            isHomePage
+              ? isHeroTransparent
+                ? "absolute top-0 left-0 right-0 border-b border-transparent bg-transparent shadow-none"
+                : "fixed top-0 left-0 right-0 border-b border-border/40 bg-background/95 backdrop-blur-md shadow-xs"
+              : "sticky top-0 border-b border-border/40 bg-background/95 backdrop-blur-md shadow-xs"
+          )}
+        >
+          <div className="flex items-center gap-2.5">
+            <Sheet>
+              <SheetTrigger asChild>
+                <button
+                  className={cn(
+                    "flex size-10 items-center justify-center rounded-lg transition-colors active:scale-95",
+                    isHeroTransparent
+                      ? "text-white hover:bg-white/15"
+                      : "text-muted-foreground hover:bg-secondary"
+                  )}
+                >
+                  <StyledHamburgerIcon className="size-6" />
+                  <span className="sr-only">Toggle Menu</span>
+                </button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[260px] p-0">
+                <SheetTitle className="sr-only">Menu</SheetTitle>
+                <div className="flex flex-col h-full bg-card px-6 py-8">
+                  <Link to="/" className="flex items-center gap-3 mb-10">
+                    <img src="/logo.png" alt="DreamPocket Logo" className="size-10 object-contain" />
+                    <div className="flex items-center">
+                      <img src="/logo-text.png" alt="DreamPocket" className="h-5 object-contain" />
+                    </div>
+                  </Link>
+                  
+                  <div className="mb-6 px-1">
+                    <p className="text-sm font-semibold text-foreground">Track Today</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Build a Better Tomorrow</p>
+                  </div>
+
+                  <nav className="flex flex-1 flex-col gap-1.5">
+                    {desktopNav.map((item) => (
+                      <Link
+                        key={item.to}
+                        to={item.to}
+                        activeOptions={{ exact: item.to === "/" }}
+                        className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:bg-secondary/80 hover:text-foreground data-[status=active]:bg-primary/10 data-[status=active]:text-primary"
+                      >
+                        <item.icon className="size-5" />
+                        {item.label}
+                      </Link>
+                    ))}
+                    
+                    <button
+                      onClick={handleLogout}
+                      className="mt-auto flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:bg-destructive/10 hover:text-destructive"
+                    >
+                      <LogOut className="size-5" />
+                      Logout
+                    </button>
+                  </nav>
+                </div>
+              </SheetContent>
+            </Sheet>
+
+            <Link to="/" className="flex items-center gap-2 transition-opacity active:opacity-80">
+              <img src="/logo.png" alt="Dream Pocket" className="size-9 object-contain shrink-0" />
+              <span
                 className={cn(
-                  "flex size-10 items-center justify-center rounded-lg transition-colors active:scale-95",
+                  "text-[17px] font-bold tracking-tight leading-none transition-colors",
                   isHeroTransparent
-                    ? "text-white hover:bg-white/15"
-                    : "text-muted-foreground hover:bg-secondary"
+                    ? "text-white drop-shadow-sm"
+                    : "text-emerald-600 dark:text-emerald-400"
                 )}
               >
-                <StyledHamburgerIcon className="size-6" />
-                <span className="sr-only">Toggle Menu</span>
-              </button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[260px] p-0">
-              <SheetTitle className="sr-only">Menu</SheetTitle>
-              <div className="flex flex-col h-full bg-card px-6 py-8">
-                <Link to="/" className="flex items-center gap-3 mb-10">
-                  <img src="/logo.png" alt="DreamPocket Logo" className="size-10 object-contain" />
-                  <div className="flex items-center">
-                    <img src="/logo-text.png" alt="DreamPocket" className="h-5 object-contain" />
-                  </div>
-                </Link>
-                
-                <div className="mb-6 px-1">
-                  <p className="text-sm font-semibold text-foreground">Track Today</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Build a Better Tomorrow</p>
-                </div>
-
-                <nav className="flex flex-1 flex-col gap-1.5">
-                  {desktopNav.map((item) => (
-                    <Link
-                      key={item.to}
-                      to={item.to}
-                      activeOptions={{ exact: item.to === "/" }}
-                      className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:bg-secondary/80 hover:text-foreground data-[status=active]:bg-primary/10 data-[status=active]:text-primary"
-                    >
-                      <item.icon className="size-5" />
-                      {item.label}
-                    </Link>
-                  ))}
-                  
-                  <button
-                    onClick={handleLogout}
-                    className="mt-auto flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:bg-destructive/10 hover:text-destructive"
-                  >
-                    <LogOut className="size-5" />
-                    Logout
-                  </button>
-                </nav>
-              </div>
-            </SheetContent>
-          </Sheet>
-
-          <Link to="/" className="flex items-center gap-2 transition-opacity active:opacity-80">
-            <img src="/logo.png" alt="Dream Pocket" className="size-9 object-contain shrink-0" />
-            <span
-              className={cn(
-                "text-[17px] font-bold tracking-tight leading-none transition-colors",
-                isHeroTransparent
-                  ? "text-white drop-shadow-sm"
-                  : "text-emerald-600 dark:text-emerald-400"
-              )}
-            >
-              Dream Pocket
-            </span>
-          </Link>
-        </div>
-        
-        {isProfilePage ? (
-          <button
-            type="button"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="flex size-10 items-center justify-center rounded-full text-foreground/80 hover:bg-secondary transition-colors active:scale-95"
-            aria-label="Toggle dark/light mode"
-          >
-            {theme === "dark" ? <Sun className="size-5" /> : <Moon className="size-5" />}
-          </button>
-        ) : (
-          <div className="flex items-center gap-2.5">
-            <Link
-              to="/notifications"
-              className={cn(
-                "relative p-2 rounded-full transition-colors",
-                isHeroTransparent
-                  ? "text-white hover:bg-white/15"
-                  : "text-foreground/80 hover:bg-secondary/60"
-              )}
-              aria-label="Notifications"
-            >
-              <Bell className="size-5 stroke-[2]" />
-              <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-rose-500 ring-2 ring-background" />
-            </Link>
-            <Link
-              to="/profile"
-              className={cn(
-                "flex items-center justify-center rounded-full transition-transform active:scale-95 ring-2",
-                isHeroTransparent
-                  ? "ring-white/40 hover:ring-white/70"
-                  : "ring-primary/20 hover:ring-primary/40"
-              )}
-              aria-label="Profile"
-            >
-              <Avatar photoURL={profile?.photoURL} name={profile?.username || "User"} size={36} />
+                Dream Pocket
+              </span>
             </Link>
           </div>
-        )}
-      </header>
+          
+          {isProfilePage ? (
+            <button
+              type="button"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="flex size-10 items-center justify-center rounded-full text-foreground/80 hover:bg-secondary transition-colors active:scale-95"
+              aria-label="Toggle dark/light mode"
+            >
+              {theme === "dark" ? <Sun className="size-5" /> : <Moon className="size-5" />}
+            </button>
+          ) : (
+            <div className="flex items-center gap-2.5">
+              <Link
+                to="/notifications"
+                className={cn(
+                  "relative p-2 rounded-full transition-colors",
+                  isHeroTransparent
+                    ? "text-white hover:bg-white/15"
+                    : "text-foreground/80 hover:bg-secondary/60"
+                )}
+                aria-label="Notifications"
+              >
+                <Bell className="size-5 stroke-[2]" />
+                <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-rose-500 ring-2 ring-background" />
+              </Link>
+              <Link
+                to="/profile"
+                className={cn(
+                  "flex items-center justify-center rounded-full transition-transform active:scale-95 ring-2",
+                  isHeroTransparent
+                    ? "ring-white/40 hover:ring-white/70"
+                    : "ring-primary/20 hover:ring-primary/40"
+                )}
+                aria-label="Profile"
+              >
+                <Avatar photoURL={profile?.photoURL} name={profile?.username || "User"} size={36} />
+              </Link>
+            </div>
+          )}
+        </header>
+      )}
 
       {/* Desktop Sidebar */}
       <aside className="fixed inset-y-0 left-0 z-50 hidden w-[260px] flex-col border-r border-border/50 bg-card px-6 py-8 md:flex shadow-sm">
@@ -290,7 +293,7 @@ export function AppShell({
       <main
         className={cn(
           "mx-auto w-full max-w-6xl pb-28 sm:px-6 md:pb-12 md:pt-8",
-          isHomePage ? "px-4 pt-0 md:pt-8" : "px-4 pt-6 md:pt-8"
+          isHomePage ? "px-4 pt-0 md:pt-8" : isBudgetPage ? "px-4 pt-2 md:pt-6" : "px-4 pt-6 md:pt-8"
         )}
       >
         {children}

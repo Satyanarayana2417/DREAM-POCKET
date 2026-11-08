@@ -35,12 +35,23 @@ const formSchema = z.object({
 
 interface Props {
   selectedMonth: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: React.ReactNode;
 }
 
-export function AddBudgetExpenseDialog({ selectedMonth }: Props) {
+export function AddBudgetExpenseDialog({
+  selectedMonth,
+  open: controlledOpen,
+  onOpenChange: setControlledOpen,
+  trigger,
+}: Props) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = isControlled ? setControlledOpen! : setInternalOpen;
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
@@ -148,11 +159,15 @@ export function AddBudgetExpenseDialog({ selectedMonth }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="gap-2">
-          <Plus className="size-4" /> Add Expense
-        </Button>
-      </DialogTrigger>
+      {trigger !== undefined ? (
+        trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>
+      ) : (
+        <DialogTrigger asChild>
+          <Button className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl">
+            <Plus className="size-4" /> Add Expense
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add Budget Expense</DialogTitle>

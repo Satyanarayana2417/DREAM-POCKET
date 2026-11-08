@@ -24,6 +24,8 @@ export type Expense = {
   description?: string;
   imageUrl?: string | null;
   isBudgetExpense?: boolean;
+  paymentType?: string;
+  paymentMethod?: string;
   createdAt?: { seconds: number } | null;
   updatedAt?: { seconds: number } | null;
 };

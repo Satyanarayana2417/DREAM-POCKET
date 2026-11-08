@@ -382,10 +382,10 @@ function EditExpenseRoute() {
                   name="description"
                   render={({ field }) => (
                     <FormItem className="sm:col-span-2">
-                      <FormLabel>Description (Optional)</FormLabel>
+                      <FormLabel>Notes (Optional)</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Add any additional details here..."
+                          placeholder="Enter transaction notes..."
                           className="resize-none"
                           {...field}
                         />

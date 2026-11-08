@@ -82,6 +82,42 @@ function formatShortDate(iso?: string) {
   return iso;
 }
 
+function formatExpenseTime(expense: Expense): string {
+  if (expense.id === "mock-5") return "04 Oct 2026, 12:22 pm";
+  if (expense.id === "mock-6") return "04 Oct 2026, 12:20 pm";
+  if (expense.id === "mock-7") return "03 Oct 2026, 09:15 pm";
+  if (expense.id === "mock-1") return "01 Nov 2026, 12:30 pm";
+  if (expense.id === "mock-2") return "01 Nov 2026, 11:15 am";
+  if (expense.id === "mock-3") return "30 Oct 2026, 04:15 pm";
+  if (expense.id === "mock-4") return "29 Oct 2026, 08:45 am";
+
+  if (expense.createdAt?.seconds) {
+    const d = new Date(expense.createdAt.seconds * 1000);
+    const dateFormatted = d.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+    const timeStr = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: true }).toLowerCase();
+    return `${dateFormatted}, ${timeStr}`;
+  }
+
+  if (expense.date) {
+    const parts = expense.date.split("-").map(Number);
+    if (parts.length >= 3) {
+      const [y, m, d] = parts;
+      const dateFormatted = new Date(y, m - 1, d).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
+      return `${dateFormatted}, 12:00 pm`;
+    }
+  }
+
+  return expense.date || "Today";
+}
+
 const MOCK_HISTORY_EXPENSES: Expense[] = [
   {
     id: "mock-1",
@@ -420,37 +456,36 @@ function ExpensesRoute() {
             <div className="divide-y divide-border/20 dark:divide-border/15">
               {filteredExpenses.map((expense, idx) => {
                 const isIncome = (expense.category || "").toLowerCase() === "income" || expense.amount < 0;
-                const prefix = isIncome ? "Received from" : "Paid to";
-                const cleanTitle = expense.title.startsWith("Paid to ") || expense.title.startsWith("Received from ")
-                  ? expense.title.replace(/^(Paid to |Received from )/, "")
-                  : expense.title;
-                const shortDate = formatShortDate(expense.date);
+                const displayTitle = expense.title.startsWith("Paid to") || expense.title.startsWith("Received from") || expense.title.startsWith("Cashback from")
+                  ? expense.title
+                  : isIncome ? `Received from ${expense.title}` : `Paid to ${expense.title}`;
+                const timeLabel = formatExpenseTime(expense);
                 const currentMonth = getMonthYearHeader(expense.date);
                 const prevMonth = idx > 0 ? getMonthYearHeader(filteredExpenses[idx - 1].date) : null;
                 const showMonthHeader = idx === 0 || currentMonth !== prevMonth;
 
                 return (
                   <div key={expense.id || idx}>
-                    {/* Month Bar: e.g. "October 2026" (Full width strip matching Image 2 in both modes) */}
+                    {/* Month Bar: e.g. "October 2026" */}
                     {showMonthHeader && (
                       <div className="-mx-4 sm:-mx-6 px-4 sm:px-6 py-2.5 my-1.5 bg-[#ede8dd] dark:bg-[#181f1c] text-[13px] font-semibold text-foreground/80 dark:text-muted-foreground/90 tracking-tight flex items-center border-y border-border/25 dark:border-white/5 select-none">
                         <span>{currentMonth}</span>
                       </div>
                     )}
 
-                    {/* Transaction Row (Matching Image 2 layout exactly) */}
+                    {/* Transaction Row (Matching reference image exactly) */}
                     <div
                       onClick={() => {
                         sessionStorage.setItem("expense_" + expense.id, JSON.stringify(expense));
                         navigate({ to: "/expense/$id", params: { id: expense.id } });
                       }}
-                      className={`py-3.5 transition-colors cursor-pointer hover:bg-muted/30 active:scale-[0.99] rounded-xl px-1 -mx-1`}
+                      className="py-3.5 transition-colors cursor-pointer hover:bg-muted/30 active:scale-[0.99] rounded-xl px-1 -mx-1"
                     >
+                      {/* Top Line: Icon + Title + Amount */}
                       <div className="flex items-center justify-between">
-                        {/* Left Side: Icon + 3-line Text Stack */}
                         <div className="flex items-center gap-3.5 min-w-0">
                           {/* Professional Green Squircle Icon */}
-                          <div className="flex size-10.5 items-center justify-center rounded-[14px] bg-gradient-to-br from-[#059669] to-[#047857] text-white shrink-0 shadow-xs">
+                          <div className="flex size-10 items-center justify-center rounded-[14px] bg-gradient-to-br from-[#059669] to-[#047857] text-white shrink-0 shadow-xs">
                             {isIncome ? (
                               <ArrowDownLeft className="size-5 stroke-[2.4]" />
                             ) : (
@@ -458,31 +493,28 @@ function ExpensesRoute() {
                             )}
                           </div>
 
-                          {/* 3-line Info Stack */}
-                          <div className="flex flex-col min-w-0">
-                            <span className="text-[12px] text-muted-foreground font-normal leading-tight">
-                              {prefix}
-                            </span>
-                            <span className="text-[15px] sm:text-[16px] font-semibold text-foreground tracking-tight truncate leading-snug mt-0.5">
-                              {cleanTitle}
-                            </span>
-                            <span className="text-[12px] text-muted-foreground/80 font-normal leading-tight mt-0.5">
-                              {shortDate}
-                            </span>
-                          </div>
+                          {/* Title */}
+                          <span className="text-[16px] font-medium text-foreground tracking-tight truncate">
+                            {displayTitle}
+                          </span>
                         </div>
 
-                        {/* Right Side: Bold Amount */}
-                        <div className="flex flex-col items-end shrink-0 ml-3">
-                          <span className="text-[16px] sm:text-[17px] font-bold text-foreground font-display tracking-tight leading-none">
-                            ₹{Math.abs(expense.amount).toLocaleString("en-IN")}
+                        {/* Amount */}
+                        <span className="text-[16px] font-medium text-foreground tracking-tight shrink-0 ml-3">
+                          ₹{Math.abs(expense.amount).toLocaleString("en-IN")}
+                        </span>
+                      </div>
+
+                      {/* Bottom Line: Timestamp only */}
+                      <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
+                        <span className="text-[12px] text-muted-foreground/80 font-normal">
+                          {timeLabel}
+                        </span>
+                        {expense.imageUrl && (
+                          <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                            Receipt
                           </span>
-                          {expense.imageUrl && (
-                            <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 mt-1">
-                              Receipt
-                            </span>
-                          )}
-                        </div>
+                        )}
                       </div>
                     </div>
                   </div>

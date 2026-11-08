@@ -4,34 +4,36 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import {
   ArrowLeft,
-  MoreVertical,
   Pencil,
   Calendar,
   LayoutGrid,
   CreditCard,
   ArrowUpRight,
   ArrowDownLeft,
-  Repeat,
   FileText,
   Image as ImageIcon,
   Trash2,
-  Users,
   ChevronRight,
   Plus,
   Loader2,
   Share2,
   Copy,
+  MessageCircleQuestion,
+  Download,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { removeExpense } from "@/lib/data";
 import { type Expense, categoryMeta, formatINR } from "@/lib/expense-utils";
 import { optimizedImage } from "@/lib/cloudinary";
+import { getReceiptFileToShare, downloadReceiptFile } from "@/lib/receipt-generator";
 
 import {
   Dialog,
   DialogContent,
+  DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -43,17 +45,52 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 interface ExpenseDetailsDialogProps {
   expense: Expense | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+}
+
+function getPaymentMethodDetails(method?: string) {
+  const m = (method || "UPI").toLowerCase();
+  if (m.includes("phonepe") || m.includes("phone_pe") || m.includes("phone pe")) {
+    return { label: "PhonePe", icon: "/payment-icons/phonepe.png" };
+  }
+  if (m.includes("gpay") || m.includes("google pay") || m.includes("google_pay")) {
+    return { label: "Google Pay", icon: "/payment-icons/gpay.png" };
+  }
+  if (m.includes("paytm")) {
+    return { label: "Paytm", icon: "/payment-icons/paytm.png" };
+  }
+  if (m.includes("cred")) {
+    return { label: "CRED", icon: "/payment-icons/cred.png" };
+  }
+  if (m.includes("bhim")) {
+    return { label: "BHIM", icon: "/payment-icons/bhim.png" };
+  }
+  if (m.includes("amazon") || m.includes("amazon pay") || m.includes("amazonpay")) {
+    return { label: "Amazon Pay", icon: "/payment-icons/amazonpay.png" };
+  }
+  if (m.includes("fampay")) {
+    return { label: "FamPay", icon: "/payment-icons/fampay.png" };
+  }
+  if (m.includes("mobikwik")) {
+    return { label: "MobiKwik", icon: "/payment-icons/mobikwik.png" };
+  }
+  if (m.includes("cash")) {
+    return { label: "Cash", icon: "/payment-icons/cash.png" };
+  }
+  if (m.includes("debit")) {
+    return { label: "Debit Card", isCard: true };
+  }
+  if (m.includes("credit")) {
+    return { label: "Credit Card", isCard: true };
+  }
+  if (m.includes("bank") || m.includes("transfer")) {
+    return { label: "Bank Transfer", isBank: true };
+  }
+  return { label: method || "UPI", icon: "/payment-icons/upi.png" };
 }
 
 function getCategoryVisual(category: string) {
@@ -166,7 +203,7 @@ export function ExpenseDetailsDialog({ expense, open, onOpenChange }: ExpenseDet
       <DialogContent className="p-0 border-0 bg-transparent shadow-2xl max-w-md w-full h-[100dvh] sm:h-auto sm:max-h-[92vh] sm:rounded-[36px] overflow-hidden flex flex-col [&>button]:hidden">
         <DialogTitle className="sr-only">Expense Details - {cleanTitle}</DialogTitle>
 
-        <div className="flex-1 overflow-y-auto bg-[#f8f5ee] dark:bg-[#0f1412] flex flex-col">
+        <div className="flex-1 overflow-y-auto bg-white dark:bg-[#0f1412] flex flex-col">
           {/* ========================================================================= */}
           {/* HERO SECTION: Organic Green Silk Waves with Amount & Category Badge       */}
           {/* ========================================================================= */}
@@ -192,7 +229,7 @@ export function ExpenseDetailsDialog({ expense, open, onOpenChange }: ExpenseDet
               </defs>
             </svg>
 
-            {/* Top Navigation Bar: [← Back]  [dp DreamPocket]  [⋮ Menu] */}
+            {/* Top Navigation Bar: [← Back]  [Logo Dream Pocket]  [spacer] */}
             <div className="relative z-20 flex items-center justify-between px-4 sm:px-5 pt-2 pb-3">
               <button
                 type="button"
@@ -203,46 +240,20 @@ export function ExpenseDetailsDialog({ expense, open, onOpenChange }: ExpenseDet
                 <ArrowLeft className="size-5 stroke-[2.2]" />
               </button>
 
-              {/* Logo: dp DreamPocket */}
+              {/* Logo: Logo image + Dream Pocket */}
               <div className="flex items-center gap-2">
-                <div className="size-7 rounded-full bg-[#10b981] flex items-center justify-center text-white font-bold text-xs shadow-xs">
-                  dp
-                </div>
+                <img
+                  src="/logo.png"
+                  alt="Dream Pocket"
+                  className="size-8 object-contain shrink-0 drop-shadow-sm"
+                />
                 <span className="font-display font-semibold text-[17px] text-white tracking-tight">
                   Dream Pocket
                 </span>
               </div>
 
-              {/* Dropdown Menu */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    type="button"
-                    className="size-9 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 flex items-center justify-center text-white transition-colors"
-                    aria-label="More options"
-                  >
-                    <MoreVertical className="size-5" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem
-                    onClick={() => {
-                      navigator.clipboard.writeText(`${cleanTitle}: ₹${Math.abs(expense.amount)} on ${dateTimeStr}`);
-                      toast.success("Expense details copied to clipboard!");
-                    }}
-                  >
-                    <Share2 className="size-4 mr-2" /> Share Details
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => {
-                      navigator.clipboard.writeText(String(expense.amount));
-                      toast.success("Amount copied!");
-                    }}
-                  >
-                    <Copy className="size-4 mr-2" /> Copy Amount
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {/* Empty spacer for alignment */}
+              <div className="size-9 pointer-events-none" />
             </div>
 
             {/* Hero Main Content */}
@@ -292,12 +303,12 @@ export function ExpenseDetailsDialog({ expense, open, onOpenChange }: ExpenseDet
               </div>
             </div>
 
-            {/* Bottom Organic Wave: Smooth curve transitioning into cream body */}
+            {/* Bottom Organic Wave: Smooth curve transitioning into pure white body */}
             <div className="w-full overflow-hidden leading-none select-none pointer-events-none -mb-[1px]">
               <svg
                 viewBox="0 0 500 65"
                 preserveAspectRatio="none"
-                className="w-full h-8 sm:h-10 block text-[#f8f5ee] dark:text-[#0f1412]"
+                className="w-full h-8 sm:h-10 block text-white dark:text-[#0f1412]"
               >
                 <path
                   d="M0,0 C160,55 340,-15 500,40 L500,65 L0,65 Z"
@@ -308,13 +319,13 @@ export function ExpenseDetailsDialog({ expense, open, onOpenChange }: ExpenseDet
           </div>
 
           {/* ========================================================================= */}
-          {/* BODY SECTION: Details Rows + Category Spending Card + Action Buttons       */}
+          {/* BODY SECTION: Details Rows + Contact Support + Action Buttons             */}
           {/* ========================================================================= */}
-          <div className="flex-1 px-5 sm:px-6 pt-2 pb-6 space-y-4">
-            {/* Details Table: 7 Rows with Green Outlined Icons */}
-            <div className="divide-y divide-border/25 text-[14px]">
+          <div className="flex-1 px-5 sm:px-6 pt-2 pb-6 space-y-4 bg-white dark:bg-[#0f1412]">
+            {/* Details Table: Pure white rounded container */}
+            <div className="divide-y divide-slate-100 dark:divide-border/25 text-[14px] bg-white dark:bg-card/20 rounded-3xl p-4 border border-slate-200/90 dark:border-border/40 shadow-sm">
               {/* Row 1: Date & Time */}
-              <div className="flex items-center justify-between py-3">
+              <div className="flex items-center justify-between py-3 first:pt-0">
                 <div className="flex items-center gap-3">
                   <div className="size-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
                     <Calendar className="size-4.5 stroke-[2]" />
@@ -347,11 +358,34 @@ export function ExpenseDetailsDialog({ expense, open, onOpenChange }: ExpenseDet
                   </div>
                   <span className="font-medium text-foreground/80 tracking-tight">Payment Method</span>
                 </div>
-                <div className="inline-flex items-center gap-1.5 rounded-full bg-card dark:bg-[#1a2320] px-3 py-1 text-xs font-semibold text-foreground border border-border/60 shadow-2xs">
-                  <span className="size-2 rounded-full bg-orange-500" />
-                  <span>UPI</span>
-                  <ChevronRight className="size-3 text-muted-foreground ml-0.5" />
-                </div>
+                {(() => {
+                  const pm = getPaymentMethodDetails(expense.paymentMethod);
+                  return (
+                    <div className="flex items-center justify-end">
+                      {pm.icon ? (
+                        <div
+                          className="size-8.5 rounded-full overflow-hidden flex items-center justify-center bg-transparent"
+                          title={pm.label}
+                          aria-label={pm.label}
+                        >
+                          <img
+                            src={pm.icon}
+                            alt={pm.label}
+                            className="size-7.5 object-contain"
+                          />
+                        </div>
+                      ) : (
+                        <div
+                          className="size-8.5 rounded-full flex items-center justify-center bg-transparent text-emerald-700 dark:text-emerald-400"
+                          title={pm.label}
+                          aria-label={pm.label}
+                        >
+                          <CreditCard className="size-5.5 stroke-[2]" />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* Row 4: Transaction Type */}
@@ -371,125 +405,56 @@ export function ExpenseDetailsDialog({ expense, open, onOpenChange }: ExpenseDet
                 </span>
               </div>
 
-              {/* Row 5: Recurring */}
-              <div className="flex items-center justify-between py-3">
-                <div className="flex items-center gap-3">
-                  <div className="size-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                    <Repeat className="size-4.5 stroke-[2]" />
-                  </div>
-                  <span className="font-medium text-foreground/80 tracking-tight">Recurring</span>
-                </div>
-                <span className="font-semibold text-foreground">No</span>
-              </div>
-
-              {/* Row 6: Notes */}
-              <div className="flex items-center justify-between py-3">
+              {/* Row 5: Notes */}
+              <div className="flex items-center justify-between py-3 last:pb-0">
                 <div className="flex items-center gap-3">
                   <div className="size-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
                     <FileText className="size-4.5 stroke-[2]" />
                   </div>
                   <span className="font-medium text-foreground/80 tracking-tight">Notes</span>
                 </div>
-                <span className="font-medium text-foreground/90 max-w-[60%] truncate text-right">
-                  {expense.description || "Lunch with team"}
-                </span>
+                {expense.description && expense.description.trim() ? (
+                  <span className="font-medium text-foreground/90 max-w-[60%] truncate text-right">
+                    {expense.description.trim()}
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground/60 text-xs italic">
+                    No notes added
+                  </span>
+                )}
               </div>
 
-              {/* Row 7: Attachment */}
-              <div className="flex items-center justify-between py-3">
-                <div className="flex items-center gap-3">
-                  <div className="size-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                    <ImageIcon className="size-4.5 stroke-[2]" />
+              {/* Row 6: Attachment (Only visible if user attached an image) */}
+              {expense.imageUrl && (
+                <div className="flex items-center justify-between py-3 last:pb-0">
+                  <div className="flex items-center gap-3">
+                    <div className="size-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                      <ImageIcon className="size-4.5 stroke-[2]" />
+                    </div>
+                    <span className="font-medium text-foreground/80 tracking-tight">Attachment</span>
                   </div>
-                  <span className="font-medium text-foreground/80 tracking-tight">Attachment</span>
-                </div>
 
-                {expense.imageUrl ? (
                   <div
+                    role="button"
+                    tabIndex={0}
                     onClick={() => setShowFullImage(true)}
-                    className="relative cursor-pointer group"
+                    className="relative cursor-pointer group active:scale-95 transition-transform"
+                    title="View full attachment"
                   >
                     <img
                       src={optimizedImage(expense.imageUrl, 200)}
-                      alt="Receipt"
-                      className="h-10 w-14 rounded-lg object-cover border border-border/80 shadow-xs group-hover:scale-105 transition-transform"
+                      alt="Receipt thumbnail"
+                      className="h-10 w-14 rounded-lg object-cover border border-slate-200 dark:border-border/80 shadow-xs group-hover:scale-105 group-hover:ring-2 group-hover:ring-emerald-500/40 transition-all"
                     />
                   </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <div className="h-10 w-14 rounded-lg bg-muted/70 dark:bg-card border border-border/60 flex items-center justify-center text-[10px] text-muted-foreground font-medium">
-                      Receipt
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onOpenChange(false);
-                        navigate({ to: "/edit-expense/$id", params: { id: expense.id } });
-                      }}
-                      className="size-9 rounded-lg bg-[#eaf7f0] dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 flex items-center justify-center hover:bg-emerald-100 transition-colors"
-                      aria-label="Add receipt"
-                    >
-                      <Plus className="size-4 stroke-[2.5]" />
-                    </button>
-                  </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
             {/* ========================================================================= */}
-            {/* CATEGORY SPENDING CARD: Circular Progress + Budget Bar                    */}
+            {/* BOTTOM ACTION BUTTONS: Edit, Share Receipt, Delete                       */}
             {/* ========================================================================= */}
-            <div className="rounded-2xl bg-[#eaf7f0] dark:bg-emerald-950/30 border border-emerald-200/70 dark:border-emerald-800/40 p-4 flex items-center justify-between shadow-xs">
-              <div className="flex items-center gap-3.5 flex-1 min-w-0 mr-2">
-                {/* 37% Circular Progress Ring */}
-                <div className="relative size-12 shrink-0 flex items-center justify-center">
-                  <svg className="size-12 -rotate-90" viewBox="0 0 36 36">
-                    <circle
-                      cx="18"
-                      cy="18"
-                      r="14"
-                      fill="none"
-                      className="stroke-emerald-200 dark:stroke-emerald-900"
-                      strokeWidth="3.2"
-                    />
-                    <circle
-                      cx="18"
-                      cy="18"
-                      r="14"
-                      fill="none"
-                      className="stroke-[#059669]"
-                      strokeWidth="3.2"
-                      strokeDasharray="88"
-                      strokeDashoffset="55"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  <span className="absolute text-[11px] font-bold text-foreground font-display">
-                    37%
-                  </span>
-                </div>
-
-                {/* Text & Horizontal Bar */}
-                <div className="flex-1 min-w-0">
-                  <h4 className="text-[14px] font-bold text-foreground tracking-tight leading-none">
-                    Category Spending
-                  </h4>
-                  <p className="text-[12px] font-medium text-foreground/80 mt-1 leading-none">
-                    ₹4,600 of ₹12,500
-                  </p>
-                  <div className="h-1.5 w-full bg-emerald-200/70 dark:bg-emerald-900/40 rounded-full overflow-hidden mt-1.5">
-                    <div className="h-full w-[37%] bg-[#059669] rounded-full" />
-                  </div>
-                </div>
-              </div>
-
-              <ChevronRight className="size-5 text-emerald-800/70 dark:text-emerald-400 shrink-0" />
-            </div>
-
-            {/* ========================================================================= */}
-            {/* BOTTOM ACTION BUTTONS: Edit, Split Expense, Make Recurring, Delete       */}
-            {/* ========================================================================= */}
-            <div className="grid grid-cols-4 gap-2 pt-2">
+            <div className="grid grid-cols-3 gap-3 pt-2">
               {/* 1. Edit */}
               <button
                 type="button"
@@ -497,88 +462,159 @@ export function ExpenseDetailsDialog({ expense, open, onOpenChange }: ExpenseDet
                   onOpenChange(false);
                   navigate({ to: "/edit-expense/$id", params: { id: expense.id } });
                 }}
-                className="flex flex-col items-center justify-center group active:scale-95 transition-transform"
+                className="flex flex-col items-center justify-center group active:scale-95 transition-transform cursor-pointer"
               >
                 <div className="size-12 rounded-full bg-[#e8f7ee] dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/40 flex items-center justify-center shadow-xs group-hover:bg-emerald-100 transition-colors">
                   <Pencil className="size-5 stroke-[2]" />
                 </div>
-                <span className="text-[11px] font-semibold text-foreground/85 mt-1.5">
+                <span className="text-[11.5px] font-semibold text-foreground/85 mt-1.5">
                   Edit
                 </span>
               </button>
 
-              {/* 2. Split Expense */}
+              {/* 2. Share Receipt */}
               <button
                 type="button"
-                onClick={() => {
-                  toast.success(`Split requested for "${cleanTitle}" (₹${Math.abs(expense.amount)})`);
+                onClick={async () => {
+                  const file = await getReceiptFileToShare(expense, dateTimeStr);
+                  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    try {
+                      await navigator.share({
+                        title: `Dream Pocket Receipt - ${cleanTitle}`,
+                        text: `${cleanTitle}: ₹${Math.abs(expense.amount)} on ${dateTimeStr}`,
+                        files: [file],
+                      });
+                    } catch (e: any) {
+                      if (e?.name !== "AbortError") downloadReceiptFile(file);
+                    }
+                  } else {
+                    downloadReceiptFile(file);
+                    toast.success("Receipt image downloaded!");
+                  }
                 }}
-                className="flex flex-col items-center justify-center group active:scale-95 transition-transform"
+                className="flex flex-col items-center justify-center group active:scale-95 transition-transform cursor-pointer"
               >
                 <div className="size-12 rounded-full bg-[#e8f7ee] dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/40 flex items-center justify-center shadow-xs group-hover:bg-emerald-100 transition-colors">
-                  <Users className="size-5 stroke-[2]" />
+                  <Share2 className="size-5 stroke-[2]" />
                 </div>
-                <span className="text-[11px] font-semibold text-foreground/85 mt-1.5 whitespace-nowrap">
-                  Split Expense
+                <span className="text-[11.5px] font-semibold text-foreground/85 mt-1.5 whitespace-nowrap">
+                  Share Receipt
                 </span>
               </button>
 
-              {/* 3. Make Recurring */}
+              {/* 3. Delete */}
               <button
                 type="button"
-                onClick={() => {
-                  toast.success(`"${cleanTitle}" marked as monthly recurring`);
-                }}
-                className="flex flex-col items-center justify-center group active:scale-95 transition-transform"
+                onClick={() => setIsDeleting(true)}
+                className="flex flex-col items-center justify-center group active:scale-95 transition-transform cursor-pointer"
               >
-                <div className="size-12 rounded-full bg-[#e8f7ee] dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/40 flex items-center justify-center shadow-xs group-hover:bg-emerald-100 transition-colors">
-                  <Repeat className="size-5 stroke-[2]" />
+                <div className="size-12 rounded-full bg-[#fde8e8] dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200/80 dark:border-rose-800/40 flex items-center justify-center shadow-xs group-hover:bg-rose-100 transition-colors">
+                  <Trash2 className="size-5 stroke-[2]" />
                 </div>
-                <span className="text-[11px] font-semibold text-foreground/85 mt-1.5 whitespace-nowrap">
-                  Make Recurring
+                <span className="text-[11.5px] font-semibold text-rose-600 dark:text-rose-400 mt-1.5">
+                  Delete
                 </span>
               </button>
+            </div>
 
-              {/* 4. Delete */}
-              <AlertDialog open={isDeleting} onOpenChange={setIsDeleting}>
-                <button
-                  type="button"
-                  onClick={() => setIsDeleting(true)}
-                  className="flex flex-col items-center justify-center group active:scale-95 transition-transform"
-                >
-                  <div className="size-12 rounded-full bg-[#fde8e8] dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200/80 dark:border-rose-800/40 flex items-center justify-center shadow-xs group-hover:bg-rose-100 transition-colors">
-                    <Trash2 className="size-5 stroke-[2]" />
-                  </div>
-                  <span className="text-[11px] font-semibold text-foreground/85 mt-1.5">
-                    Delete
-                  </span>
-                </button>
-
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete this transaction?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This will permanently remove "{cleanTitle}" (₹{Math.abs(expense.amount)}). This action cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => deleteMutation.mutate(expense.id)}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    >
-                      {deleteMutation.isPending ? (
-                        <Loader2 className="size-4 animate-spin" />
-                      ) : (
-                        "Delete"
-                      )}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+            {/* ========================================================================= */}
+            {/* CONTACT DREAM POCKET SUPPORT: Positioned below the 3 options              */}
+            {/* ========================================================================= */}
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => {
+                onOpenChange(false);
+                navigate({ to: "/expense/$id", params: { id: expense.id } });
+              }}
+              className="w-full rounded-2xl bg-[#111613] dark:bg-[#151c17] text-white px-4.5 py-4 flex items-center justify-between shadow-xs hover:bg-[#19211c] dark:hover:bg-[#1c2620] active:scale-[0.99] transition-all cursor-pointer border border-emerald-900/30 dark:border-emerald-800/30 mt-2"
+            >
+              <div className="flex items-center gap-3.5">
+                <MessageCircleQuestion className="size-6 stroke-[1.9] text-white shrink-0" />
+                <span className="text-[15px] font-semibold tracking-tight text-white">
+                  Contact Dream Pocket Support
+                </span>
+              </div>
+              <ChevronRight className="size-5 text-white/70 stroke-[2] shrink-0" />
             </div>
           </div>
         </div>
+
+        {/* Delete Confirmation Popup Dialog */}
+        <AlertDialog open={isDeleting} onOpenChange={setIsDeleting}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete this transaction?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently remove "{cleanTitle}" (₹{Math.abs(expense.amount)}). This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => deleteMutation.mutate(expense.id)}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {deleteMutation.isPending ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  "Delete"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Attachment Full Preview Dialog with Download Button */}
+        {expense.imageUrl && (
+          <Dialog open={showFullImage} onOpenChange={setShowFullImage}>
+            <DialogContent className="max-w-md p-4 bg-background">
+              <DialogHeader className="flex flex-row items-center justify-between pr-6">
+                <div>
+                  <DialogTitle className="text-base font-semibold">Attached Receipt</DialogTitle>
+                  <DialogDescription className="text-xs">
+                    {cleanTitle} · {dateTimeStr}
+                  </DialogDescription>
+                </div>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      const response = await fetch(expense.imageUrl!, { mode: "cors" });
+                      const blob = await response.blob();
+                      const mime = blob.type || "image/jpeg";
+                      const ext = mime.includes("png") ? "png" : "jpg";
+                      const file = new File([blob], `Receipt_${cleanTitle.replace(/\s+/g, "_")}.${ext}`, { type: mime });
+                      downloadReceiptFile(file);
+                      toast.success("Receipt image downloaded!");
+                    } catch (e) {
+                      const a = document.createElement("a");
+                      a.href = expense.imageUrl!;
+                      a.download = `Receipt_${cleanTitle}.jpg`;
+                      a.target = "_blank";
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      toast.success("Downloading receipt image...");
+                    }
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                  title="Download Image"
+                >
+                  <Download className="size-3.5 stroke-[2.2]" />
+                  <span>Download</span>
+                </button>
+              </DialogHeader>
+              <div className="mt-2 rounded-xl overflow-hidden border border-border/70 max-h-[70vh] flex items-center justify-center bg-black/5">
+                <img
+                  src={expense.imageUrl}
+                  alt="Full receipt"
+                  className="w-full h-auto object-contain max-h-[65vh]"
+                />
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </DialogContent>
     </Dialog>
   );
