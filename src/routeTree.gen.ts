@@ -19,6 +19,7 @@ import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as EditExpenseIdRouteImport } from './routes/edit-expense.$id'
 import { Route as ExpenseIdRouteImport } from './routes/expense.$id'
 import { Route as FamilyBudgetIndexRouteImport } from './routes/family-budget/index'
@@ -75,6 +76,11 @@ const SignupRoute = SignupRouteImport.update({
   path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VerifyEmailRoute = VerifyEmailRouteImport.update({
+  id: '/verify-email',
+  path: '/verify-email',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EditExpenseIdRoute = EditExpenseIdRouteImport.update({
   id: '/edit-expense/$id',
   path: '/edit-expense/$id',
@@ -113,6 +119,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/edit-expense/$id': typeof EditExpenseIdRoute
   '/expense/$id': typeof ExpenseIdRoute
   '/family-budget/$familyId': typeof FamilyBudgetFamilyIdRoute
@@ -130,6 +137,7 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/edit-expense/$id': typeof EditExpenseIdRoute
   '/expense/$id': typeof ExpenseIdRoute
   '/family-budget/$familyId': typeof FamilyBudgetFamilyIdRoute
@@ -148,6 +156,7 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/edit-expense/$id': typeof EditExpenseIdRoute
   '/expense/$id': typeof ExpenseIdRoute
   '/family-budget/$familyId': typeof FamilyBudgetFamilyIdRoute
@@ -167,6 +176,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/settings'
     | '/signup'
+    | '/verify-email'
     | '/edit-expense/$id'
     | '/expense/$id'
     | '/family-budget/$familyId'
@@ -184,6 +194,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/settings'
     | '/signup'
+    | '/verify-email'
     | '/edit-expense/$id'
     | '/expense/$id'
     | '/family-budget/$familyId'
@@ -201,6 +212,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/settings'
     | '/signup'
+    | '/verify-email'
     | '/edit-expense/$id'
     | '/expense/$id'
     | '/family-budget/$familyId'
@@ -219,6 +231,7 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
+  VerifyEmailRoute: typeof VerifyEmailRoute
   EditExpenseIdRoute: typeof EditExpenseIdRoute
   ExpenseIdRoute: typeof ExpenseIdRoute
   FamilyBudgetFamilyIdRoute: typeof FamilyBudgetFamilyIdRoute
@@ -298,6 +311,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/verify-email': {
+      id: '/verify-email'
+      path: '/verify-email'
+      fullPath: '/verify-email'
+      preLoaderRoute: typeof VerifyEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/edit-expense/$id': {
       id: '/edit-expense/$id'
       path: '/edit-expense/$id'
@@ -347,6 +367,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,
+  VerifyEmailRoute: VerifyEmailRoute,
   EditExpenseIdRoute: EditExpenseIdRoute,
   ExpenseIdRoute: ExpenseIdRoute,
   FamilyBudgetFamilyIdRoute: FamilyBudgetFamilyIdRoute,

@@ -31,7 +31,6 @@ import {
   Plus,
   Filter,
   Wallet,
-  HelpCircle,
   SlidersHorizontal,
   ArrowUpRight,
   ArrowDownLeft,
@@ -385,64 +384,79 @@ function ExpensesRoute() {
 
   return (
     <AppShell>
-      <div className="space-y-4 max-w-3xl mx-auto pb-10">
-        {/* Top Header: "History" with Help Icon (Matching Image 2 exactly) */}
-        <div className="flex items-center justify-between pt-1">
+      <div className="space-y-3.5 max-w-3xl mx-auto pb-10">
+        {/* Top Header: Title & Total Count (Clean, no cut-off icon) */}
+        <div className="pt-1">
           <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight text-foreground">
             History
           </h1>
-          <button
-            type="button"
-            className="text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-full active:scale-95"
-            aria-label="Help"
-          >
-            <HelpCircle className="size-5.5 stroke-[1.8]" />
-          </button>
+          <div className="flex items-center justify-between gap-2 mt-0.5">
+            <p className="text-xs text-muted-foreground">
+              {filteredExpenses.length} {filteredExpenses.length === 1 ? "transaction" : "transactions"}
+              {(timeFilter !== "all" || categoryFilter !== "all" || search) ? " found" : " recorded"}
+            </p>
+            {(timeFilter !== "all" || categoryFilter !== "all" || sortOrder !== "newest" || search) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setTimeFilter("all");
+                  setCategoryFilter("all");
+                  setSortOrder("newest");
+                  setSearch("");
+                  setCustomRange({ from: "", to: "" });
+                }}
+                className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
+              >
+                Clear filters
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Unified Search & Filter Pill Bar (Matching Image 2 exactly) */}
-        <div className="relative flex items-center h-12 w-full rounded-2xl bg-card dark:bg-[#151c19] border border-border/60 shadow-2xs px-3.5 transition-all focus-within:ring-2 focus-within:ring-emerald-600/30">
-          <Search className="size-4.5 text-muted-foreground/80 shrink-0 mr-2.5" />
-          <input
-            type="text"
-            placeholder="Search"
-            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/70 outline-none"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          {search && (
-            <button
-              type="button"
-              onClick={() => setSearch("")}
-              className="p-1 text-muted-foreground hover:text-foreground text-xs mr-2 transition-colors"
-            >
-              ✕
-            </button>
-          )}
-
-          {/* Vertical Divider Line */}
-          <div className="h-5 w-px bg-border/60 mx-1 shrink-0" />
-
-          {/* Filter Icon Button */}
-          <Sheet>
+        {/* Clean Search Input with Embedded Filter Button */}
+        <Sheet>
+          <div className="relative flex items-center h-11 sm:h-12 w-full rounded-2xl bg-card border border-border/70 shadow-2xs px-3.5 transition-all focus-within:ring-2 focus-within:ring-emerald-500/30 focus-within:border-emerald-500">
+            <Search className="size-4.5 text-muted-foreground/80 shrink-0 mr-2.5" />
+            <input
+              type="text"
+              placeholder="Search by name, category or note..."
+              className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/70 outline-none min-w-0 pr-1"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="p-1 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground text-xs transition-colors cursor-pointer mr-1 shrink-0"
+                aria-label="Clear search"
+              >
+                ✕
+              </button>
+            )}
+            <div className="h-5 w-px bg-border/70 mx-1.5 shrink-0" />
             <SheetTrigger asChild>
               <button
                 type="button"
-                className="p-1.5 text-muted-foreground hover:text-foreground transition-colors shrink-0 active:scale-95"
+                className="p-1 text-muted-foreground hover:text-foreground relative transition-colors cursor-pointer shrink-0 rounded-lg hover:bg-muted/60"
                 aria-label="Filter transactions"
               >
-                <SlidersHorizontal className="size-4.5" />
+                <SlidersHorizontal className="size-4.5 stroke-[1.8]" />
+                {(timeFilter !== "all" || categoryFilter !== "all" || sortOrder !== "newest") && (
+                  <span className="absolute -top-0.5 -right-0.5 size-2 rounded-full bg-emerald-500 ring-2 ring-card" />
+                )}
               </button>
             </SheetTrigger>
-            <SheetContent side="bottom" className="rounded-t-3xl max-h-[85vh] overflow-y-auto">
-              <SheetHeader className="mb-4">
-                <SheetTitle>Filters</SheetTitle>
-                <SheetDescription>Refine your transaction history</SheetDescription>
-              </SheetHeader>
-              <FilterOptions />
-            </SheetContent>
-          </Sheet>
-        </div>
+          </div>
+
+          <SheetContent side="bottom" className="rounded-t-3xl max-h-[85vh] overflow-y-auto">
+            <SheetHeader className="mb-4">
+              <SheetTitle>Filters</SheetTitle>
+              <SheetDescription>Refine your transaction history</SheetDescription>
+            </SheetHeader>
+            <FilterOptions />
+          </SheetContent>
+        </Sheet>
 
         {/* Transactions List */}
         <div className="pt-1">

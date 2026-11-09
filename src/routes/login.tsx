@@ -5,10 +5,11 @@ import {
   AuthLayout,
   Field,
   GoogleButton,
+  AppleButton,
   inputClass,
   primaryButtonClass,
 } from "@/components/AuthLayout";
-import { friendlyAuthError, useAuth } from "@/lib/auth";
+import { friendlyAuthError, isUserEmailVerificationRequired, useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/login")({
   ssr: false,
@@ -30,7 +31,7 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
-  const { loginWithEmail, loginWithGoogle, user, loading } = useAuth();
+  const { loginWithEmail, loginWithGoogle, loginWithApple, user, loading } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -38,7 +39,13 @@ function LoginPage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (!loading && user) navigate({ to: "/", replace: true });
+    if (!loading && user) {
+      if (isUserEmailVerificationRequired(user)) {
+        navigate({ to: "/verify-email", replace: true });
+      } else {
+        navigate({ to: "/", replace: true });
+      }
+    }
   }, [loading, user, navigate]);
 
   async function submit(event: React.FormEvent) {
@@ -50,8 +57,12 @@ function LoginPage() {
     }
     setBusy(true);
     try {
-      await loginWithEmail(email.trim(), password);
-      navigate({ to: "/", replace: true });
+      const loggedUser = await loginWithEmail(email.trim(), password);
+      if (isUserEmailVerificationRequired(loggedUser)) {
+        navigate({ to: "/verify-email", replace: true });
+      } else {
+        navigate({ to: "/", replace: true });
+      }
     } catch (err) {
       setError(friendlyAuthError(err));
     } finally {
@@ -64,6 +75,19 @@ function LoginPage() {
     setBusy(true);
     try {
       await loginWithGoogle();
+      navigate({ to: "/", replace: true });
+    } catch (err) {
+      setError(friendlyAuthError(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function apple() {
+    setError(null);
+    setBusy(true);
+    try {
+      await loginWithApple();
       navigate({ to: "/", replace: true });
     } catch (err) {
       setError(friendlyAuthError(err));
@@ -127,7 +151,10 @@ function LoginPage() {
         <span className="h-px flex-1 bg-border" /> OR <span className="h-px flex-1 bg-border" />
       </div>
 
-      <GoogleButton onClick={google} loading={busy} />
+      <div className="space-y-2.5">
+        <GoogleButton onClick={google} loading={busy} />
+        <AppleButton onClick={apple} loading={busy} />
+      </div>
     </AuthLayout>
   );
 }
