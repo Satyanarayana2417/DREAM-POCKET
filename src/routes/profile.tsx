@@ -334,36 +334,36 @@ function ProfileRoute() {
           <div className="bg-card px-2 py-3.5">
             <div className="grid grid-cols-3 divide-x divide-border/40 py-1 text-center">
               {/* Total Income */}
-              <div className="flex flex-col items-center px-1">
-                <div className="flex size-8 items-center justify-center text-emerald-600 dark:text-emerald-400 mb-1.5">
-                  <Target className="size-5 stroke-[2.2]" />
+              <div className="flex flex-col items-center px-0.5 xs:px-1 min-w-0">
+                <div className="flex size-7.5 xs:size-8 items-center justify-center text-emerald-600 dark:text-emerald-400 mb-1.5">
+                  <Target className="size-4.5 xs:size-5 stroke-[2.2]" />
                 </div>
-                <span className="text-base font-bold text-foreground font-display tracking-tight">
+                <span className="text-sm xs:text-base font-bold text-foreground font-display tracking-tight truncate max-w-full">
                   {formatINR(incomeAmount, true)}
                 </span>
-                <span className="text-[11px] font-medium text-muted-foreground mt-0.5">Total Income</span>
+                <span className="text-[10px] xs:text-[11px] font-medium text-muted-foreground mt-0.5 whitespace-nowrap">Total Income</span>
               </div>
 
               {/* Total Expenses */}
-              <div className="flex flex-col items-center px-1">
-                <div className="flex size-8 items-center justify-center text-emerald-600 dark:text-emerald-400 mb-1.5">
-                  <ArrowUp className="size-5 stroke-[2.2]" />
+              <div className="flex flex-col items-center px-0.5 xs:px-1 min-w-0">
+                <div className="flex size-7.5 xs:size-8 items-center justify-center text-emerald-600 dark:text-emerald-400 mb-1.5">
+                  <ArrowUp className="size-4.5 xs:size-5 stroke-[2.2]" />
                 </div>
-                <span className="text-base font-bold text-foreground font-display tracking-tight">
+                <span className="text-sm xs:text-base font-bold text-foreground font-display tracking-tight truncate max-w-full">
                   {formatINR(expenseAmount, true)}
                 </span>
-                <span className="text-[11px] font-medium text-muted-foreground mt-0.5">Total Expenses</span>
+                <span className="text-[10px] xs:text-[11px] font-medium text-muted-foreground mt-0.5 whitespace-nowrap">Total Expenses</span>
               </div>
 
               {/* Net Savings */}
-              <div className="flex flex-col items-center px-1">
-                <div className="flex size-8 items-center justify-center text-emerald-600 dark:text-emerald-400 mb-1.5">
-                  <Coins className="size-5 stroke-[2]" />
+              <div className="flex flex-col items-center px-0.5 xs:px-1 min-w-0">
+                <div className="flex size-7.5 xs:size-8 items-center justify-center text-emerald-600 dark:text-emerald-400 mb-1.5">
+                  <Coins className="size-4.5 xs:size-5 stroke-[2]" />
                 </div>
-                <span className="text-base font-bold text-foreground font-display tracking-tight">
+                <span className="text-sm xs:text-base font-bold text-foreground font-display tracking-tight truncate max-w-full">
                   {formatINR(savingsAmount, true)}
                 </span>
-                <span className="text-[11px] font-medium text-muted-foreground mt-0.5">Net Savings</span>
+                <span className="text-[10px] xs:text-[11px] font-medium text-muted-foreground mt-0.5 whitespace-nowrap">Net Savings</span>
               </div>
             </div>
           </div>

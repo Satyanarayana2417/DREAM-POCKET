@@ -461,18 +461,18 @@ function Index() {
 
                   {/* Amount */}
                   <div className="my-1.5">
-                    <span className="text-[28px] sm:text-[32px] font-extrabold tracking-tight text-white font-display leading-none drop-shadow-sm">
+                    <span className="text-[24px] xs:text-[28px] sm:text-[32px] font-extrabold tracking-tight text-white font-display leading-none drop-shadow-sm truncate block">
                       {showBalance ? formatINR(balanceAmount) : "••••••••"}
                     </span>
                   </div>
 
                   {/* Growth Pill */}
                   <div className="flex items-center gap-1.5 pt-0.5">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[#10b981]/25 px-2 py-0.5 text-[11px] font-semibold text-[#34d399] border border-[#34d399]/40 backdrop-blur-xs leading-none shadow-xs">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#10b981]/25 px-1.5 xs:px-2 py-0.5 text-[10.5px] xs:text-[11px] font-semibold text-[#34d399] border border-[#34d399]/40 backdrop-blur-xs leading-none shadow-xs">
                       <ArrowUp className="size-3 stroke-[3]" />
                       <span>+12.4%</span>
                     </span>
-                    <span className="text-[11px] font-medium text-emerald-200/80 whitespace-nowrap leading-none drop-shadow-xs">
+                    <span className="text-[10.5px] xs:text-[11px] font-medium text-emerald-200/80 whitespace-nowrap leading-none drop-shadow-xs">
                       vs last month
                     </span>
                   </div>
@@ -484,34 +484,34 @@ function Index() {
             </div>
 
             {/* Bottom Section: Income & Expenses (Exact 2-column layout matching reference image, Net Savings removed) */}
-            <div className="bg-white/95 dark:bg-card/95 backdrop-blur-sm py-3.5 px-3 sm:px-6 grid grid-cols-2 divide-x divide-border/50 border-t border-black/5 dark:border-white/5">
+            <div className="bg-white/95 dark:bg-card/95 backdrop-blur-sm py-3 px-2 xs:px-3 sm:px-6 grid grid-cols-2 divide-x divide-border/50 border-t border-black/5 dark:border-white/5">
               {/* Column 1: Income */}
-              <div className="flex items-center justify-center gap-3 pr-2 sm:pr-4">
+              <div className="flex items-center justify-center gap-2 xs:gap-3 pr-1.5 sm:pr-4">
                 {/* Green Sphere Icon with Down Arrow */}
-                <div className="size-8 sm:size-9 rounded-full bg-gradient-to-br from-[#22c55e] to-[#16a34a] text-white flex items-center justify-center shrink-0 shadow-xs">
-                  <ArrowDown className="size-4 stroke-[2.8]" />
+                <div className="size-7.5 xs:size-8 sm:size-9 rounded-full bg-gradient-to-br from-[#22c55e] to-[#16a34a] text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <ArrowDown className="size-3.5 xs:size-4 stroke-[2.8]" />
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-[16px] sm:text-[17px] font-bold text-foreground font-display tracking-tight leading-none">
+                  <span className="text-[14.5px] xs:text-[16px] sm:text-[17px] font-bold text-foreground font-display tracking-tight leading-none truncate">
                     {showBalance ? formatINR(incomeAmount) : "••••••"}
                   </span>
-                  <span className="text-[12px] font-medium text-[#0d5244] dark:text-emerald-400 mt-1.5 leading-none">
+                  <span className="text-[11px] xs:text-[12px] font-medium text-[#0d5244] dark:text-emerald-400 mt-1 leading-none">
                     Income
                   </span>
                 </div>
               </div>
 
               {/* Column 2: Expenses */}
-              <div className="flex items-center justify-center gap-3 pl-2 sm:pl-4">
+              <div className="flex items-center justify-center gap-2 xs:gap-3 pl-1.5 sm:pl-4">
                 {/* Red/Coral Sphere Icon with Up Arrow */}
-                <div className="size-8 sm:size-9 rounded-full bg-gradient-to-br from-[#f43f5e] to-[#e11d48] text-white flex items-center justify-center shrink-0 shadow-xs">
-                  <ArrowUp className="size-4 stroke-[2.8]" />
+                <div className="size-7.5 xs:size-8 sm:size-9 rounded-full bg-gradient-to-br from-[#f43f5e] to-[#e11d48] text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <ArrowUp className="size-3.5 xs:size-4 stroke-[2.8]" />
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-[16px] sm:text-[17px] font-bold text-foreground font-display tracking-tight leading-none">
+                  <span className="text-[14.5px] xs:text-[16px] sm:text-[17px] font-bold text-foreground font-display tracking-tight leading-none truncate">
                     {showBalance ? formatINR(expenseAmount) : "••••••"}
                   </span>
-                  <span className="text-[12px] font-medium text-[#0d5244] dark:text-emerald-400 mt-1.5 leading-none">
+                  <span className="text-[11px] xs:text-[12px] font-medium text-[#0d5244] dark:text-emerald-400 mt-1 leading-none">
                     Expenses
                   </span>
                 </div>
@@ -520,16 +520,16 @@ function Index() {
           </div>
 
           {/* Quick Action Cards – Row of 3 */}
-          <div className="grid grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-3 gap-2 xs:gap-2.5">
             {/* 1. Add Expense */}
             <Link
               to="/add-expense"
-              className="flex flex-col items-center justify-center rounded-2xl bg-white dark:bg-card py-2.5 px-2 text-center shadow-xs border border-border/40 transition-transform active:scale-95"
+              className="flex flex-col items-center justify-center rounded-2xl bg-white dark:bg-card py-2.5 px-1.5 xs:px-2 text-center shadow-xs border border-border/40 transition-transform active:scale-95"
             >
-              <div className="mb-1.5 flex size-10.5 items-center justify-center rounded-full bg-[#054d3b] text-white shadow-xs">
-                <Plus className="size-5 stroke-[2.5]" />
+              <div className="mb-1.5 flex size-9.5 xs:size-10.5 items-center justify-center rounded-full bg-[#054d3b] text-white shadow-xs">
+                <Plus className="size-4.5 xs:size-5 stroke-[2.5]" />
               </div>
-              <span className="text-[12px] font-semibold text-foreground tracking-tight leading-tight whitespace-nowrap">
+              <span className="text-[11px] xs:text-[12px] font-semibold text-foreground tracking-tight leading-tight text-center truncate w-full">
                 Add Expense
               </span>
             </Link>
@@ -541,12 +541,12 @@ function Index() {
                 setIncomeInput(currentIncome > 0 ? String(currentIncome) : "");
                 setIsIncomeModalOpen(true);
               }}
-              className="flex flex-col items-center justify-center rounded-2xl bg-white dark:bg-card py-2.5 px-2 text-center shadow-xs border border-border/40 transition-transform active:scale-95 cursor-pointer"
+              className="flex flex-col items-center justify-center rounded-2xl bg-white dark:bg-card py-2.5 px-1.5 xs:px-2 text-center shadow-xs border border-border/40 transition-transform active:scale-95 cursor-pointer"
             >
-              <div className="mb-1.5 flex size-10.5 items-center justify-center rounded-full bg-[#dcfce7] text-[#16a34a]">
-                <ArrowDown className="size-5 stroke-[2.5]" />
+              <div className="mb-1.5 flex size-9.5 xs:size-10.5 items-center justify-center rounded-full bg-[#dcfce7] text-[#16a34a]">
+                <ArrowDown className="size-4.5 xs:size-5 stroke-[2.5]" />
               </div>
-              <span className="text-[12px] font-semibold text-foreground tracking-tight leading-tight whitespace-nowrap">
+              <span className="text-[11px] xs:text-[12px] font-semibold text-foreground tracking-tight leading-tight text-center truncate w-full">
                 Add Income
               </span>
             </button>
@@ -554,19 +554,19 @@ function Index() {
             {/* 3. Set Budget */}
             <Link
               to="/budget"
-              className="flex flex-col items-center justify-center rounded-2xl bg-white dark:bg-card py-2.5 px-2 text-center shadow-xs border border-border/40 transition-transform active:scale-95"
+              className="flex flex-col items-center justify-center rounded-2xl bg-white dark:bg-card py-2.5 px-1.5 xs:px-2 text-center shadow-xs border border-border/40 transition-transform active:scale-95"
             >
-              <div className="mb-1.5 flex size-10.5 items-center justify-center rounded-full bg-[#ffedd5] text-[#ea580c]">
-                <Target className="size-5 stroke-[2.2]" />
+              <div className="mb-1.5 flex size-9.5 xs:size-10.5 items-center justify-center rounded-full bg-[#ffedd5] text-[#ea580c]">
+                <Target className="size-4.5 xs:size-5 stroke-[2.2]" />
               </div>
-              <span className="text-[12px] font-semibold text-foreground tracking-tight leading-tight whitespace-nowrap">
+              <span className="text-[11px] xs:text-[12px] font-semibold text-foreground tracking-tight leading-tight text-center truncate w-full">
                 Set Budget
               </span>
             </Link>
           </div>
 
         {/* Card 3: "This Month Overview" */}
-        <div className="rounded-[24px] bg-card p-5 shadow-xs border border-border/40">
+        <div className="rounded-[24px] bg-card p-4 xs:p-5 shadow-xs border border-border/40">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-base text-foreground font-display">This Month Overview</h3>
@@ -590,7 +590,7 @@ function Index() {
           {/* Content: Donut on Left + Category Breakdown on Right */}
           <div className="flex items-center">
             {/* Donut Chart with Centered Spent Amount */}
-            <div className="relative size-[130px] shrink-0 flex items-center justify-center">
+            <div className="relative size-[118px] xs:size-[130px] shrink-0 flex items-center justify-center">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -599,8 +599,8 @@ function Index() {
                     nameKey="name"
                     cx="50%"
                     cy="50%"
-                    innerRadius={44}
-                    outerRadius={62}
+                    innerRadius={38}
+                    outerRadius={56}
                     paddingAngle={2}
                     stroke="none"
                   >
@@ -611,25 +611,25 @@ function Index() {
                 </PieChart>
               </ResponsiveContainer>
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
-                <span className="text-sm font-extrabold text-foreground tracking-tight">
+                <span className="text-xs xs:text-sm font-extrabold text-foreground tracking-tight">
                   {formatINR(expenseAmount, true)}
                 </span>
-                <span className="text-[10px] text-muted-foreground font-medium">Spent</span>
+                <span className="text-[9.5px] xs:text-[10px] text-muted-foreground font-medium">Spent</span>
               </div>
             </div>
 
             {/* Category Breakdown List */}
-            <div className="flex-1 pl-3 flex flex-col justify-between py-1 space-y-2">
+            <div className="flex-1 pl-2.5 xs:pl-3 flex flex-col justify-between py-1 space-y-1.5 xs:space-y-2">
               {overviewCategories.map((cat, idx) => {
                 const Icon = cat.icon;
                 return (
                   <div key={idx} className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2 min-w-0">
+                    <div className="flex items-center gap-1.5 xs:gap-2 min-w-0">
                       <Icon className="size-3.5 shrink-0" style={{ color: cat.color }} />
-                      <div className="size-2 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
-                      <span className="font-semibold text-foreground truncate">{cat.name}</span>
+                      <div className="size-1.5 xs:size-2 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
+                      <span className="font-semibold text-foreground truncate text-[11px] xs:text-xs">{cat.name}</span>
                     </div>
-                    <span className="font-semibold text-foreground ml-2 shrink-0">{cat.percent}%</span>
+                    <span className="font-semibold text-foreground ml-1.5 xs:ml-2 shrink-0 text-[11px] xs:text-xs">{cat.percent}%</span>
                   </div>
                 );
               })}
@@ -640,7 +640,7 @@ function Index() {
         {/* Card 4: "Recent Transactions" (Ditto PhonePe UPI Style) */}
         <div className="rounded-[24px] bg-white dark:bg-card p-4 sm:p-5 shadow-xs border border-border/40">
           {/* Top Filter Pills Row (Exact match to reference) */}
-          <div className="flex items-center justify-between gap-2 pb-3.5 mb-1 border-b border-border/20">
+          <div className="flex items-center justify-between gap-1.5 sm:gap-2 pb-3.5 mb-1 border-b border-border/20 overflow-x-auto no-scrollbar">
             <div className="flex items-center gap-2">
               {/* Month Pill */}
               <DropdownMenu>
@@ -726,26 +726,26 @@ function Index() {
                   >
                     {/* Top Line: Icon + Title + Amount */}
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="flex items-center gap-2.5 xs:gap-3.5 min-w-0">
                         {/* Professional Green Squircle Icon */}
-                        <div className="flex size-10 items-center justify-center rounded-[14px] bg-gradient-to-br from-[#059669] to-[#047857] text-white shrink-0 shadow-xs">
+                        <div className="flex size-9 xs:size-10 items-center justify-center rounded-[12px] xs:rounded-[14px] bg-gradient-to-br from-[#059669] to-[#047857] text-white shrink-0 shadow-xs">
                           {item.iconType === "cashback" ? (
-                            <span className="font-bold text-[17px] leading-none font-sans select-none">पे</span>
+                            <span className="font-bold text-[15px] xs:text-[17px] leading-none font-sans select-none">पे</span>
                           ) : item.iconType === "received-down" ? (
-                            <ArrowDownLeft className="size-5 stroke-[2.4]" />
+                            <ArrowDownLeft className="size-4.5 xs:size-5 stroke-[2.4]" />
                           ) : (
-                            <ArrowUpRight className="size-5 stroke-[2.4]" />
+                            <ArrowUpRight className="size-4.5 xs:size-5 stroke-[2.4]" />
                           )}
                         </div>
 
                         {/* Title */}
-                        <span className="text-[16px] font-medium text-foreground tracking-tight truncate">
+                        <span className="text-[14.5px] xs:text-[16px] font-medium text-foreground tracking-tight truncate">
                           {item.title}
                         </span>
                       </div>
 
                       {/* Amount */}
-                      <span className="text-[16px] font-medium text-foreground tracking-tight shrink-0 ml-3">
+                      <span className="text-[14.5px] xs:text-[16px] font-medium text-foreground tracking-tight shrink-0 ml-2.5 xs:ml-3">
                         ₹{item.amountDisplay}
                       </span>
                     </div>

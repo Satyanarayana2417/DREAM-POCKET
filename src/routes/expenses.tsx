@@ -483,24 +483,24 @@ function ExpensesRoute() {
                     >
                       {/* Top Line: Icon + Title + Amount */}
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3.5 min-w-0">
+                        <div className="flex items-center gap-2.5 xs:gap-3.5 min-w-0">
                           {/* Professional Green Squircle Icon */}
-                          <div className="flex size-10 items-center justify-center rounded-[14px] bg-gradient-to-br from-[#059669] to-[#047857] text-white shrink-0 shadow-xs">
+                          <div className="flex size-9 xs:size-10 items-center justify-center rounded-[12px] xs:rounded-[14px] bg-gradient-to-br from-[#059669] to-[#047857] text-white shrink-0 shadow-xs">
                             {isIncome ? (
-                              <ArrowDownLeft className="size-5 stroke-[2.4]" />
+                              <ArrowDownLeft className="size-4.5 xs:size-5 stroke-[2.4]" />
                             ) : (
-                              <ArrowUpRight className="size-5 stroke-[2.4]" />
+                              <ArrowUpRight className="size-4.5 xs:size-5 stroke-[2.4]" />
                             )}
                           </div>
 
                           {/* Title */}
-                          <span className="text-[16px] font-medium text-foreground tracking-tight truncate">
+                          <span className="text-[14.5px] xs:text-[16px] font-medium text-foreground tracking-tight truncate">
                             {displayTitle}
                           </span>
                         </div>
 
                         {/* Amount */}
-                        <span className="text-[16px] font-medium text-foreground tracking-tight shrink-0 ml-3">
+                        <span className="text-[14.5px] xs:text-[16px] font-medium text-foreground tracking-tight shrink-0 ml-2.5 xs:ml-3">
                           ₹{Math.abs(expense.amount).toLocaleString("en-IN")}
                         </span>
                       </div>

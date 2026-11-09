@@ -440,13 +440,13 @@ function ExpenseDetailPage() {
           </span>
 
           {/* Amount: - ₹420 */}
-          <div className="text-[38px] sm:text-[44px] font-extrabold text-white tracking-tight font-display leading-tight my-1 drop-shadow-sm">
+          <div className="text-[30px] xs:text-[38px] sm:text-[44px] font-extrabold text-white tracking-tight font-display leading-tight my-1 drop-shadow-sm truncate max-w-full">
             {isIncome ? "+ " : "- "}₹{Math.abs(expense.amount).toLocaleString("en-IN")}
           </div>
 
           {/* Title with Edit Pencil: Lunch at Restaurant ✎ */}
-          <div className="flex items-center justify-center gap-2 max-w-[90%]">
-            <span className="text-[18px] sm:text-[20px] font-bold text-white tracking-tight truncate font-display">
+          <div className="flex items-center justify-center gap-2 max-w-[95%]">
+            <span className="text-[16px] xs:text-[18px] sm:text-[20px] font-bold text-white tracking-tight truncate font-display">
               {cleanTitle}
             </span>
             <button
@@ -624,7 +624,7 @@ function ExpenseDetailPage() {
         {/* ========================================================================= */}
         {/* BOTTOM ACTION BUTTONS: Exactly 3 Actions (Edit | Share Receipt | Delete)  */}
         {/* ========================================================================= */}
-        <div className="grid grid-cols-3 gap-4 pt-2 pb-2 max-w-sm mx-auto w-full">
+        <div className="grid grid-cols-3 gap-2 xs:gap-4 pt-2 pb-2 max-w-sm mx-auto w-full">
           {/* 1. Edit */}
           <button
             type="button"
@@ -633,10 +633,10 @@ function ExpenseDetailPage() {
             }}
             className="flex flex-col items-center justify-center group active:scale-95 transition-transform cursor-pointer"
           >
-            <div className="size-13 rounded-full bg-[#e8f7ee] dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/40 flex items-center justify-center shadow-xs group-hover:bg-emerald-100 transition-colors">
-              <Pencil className="size-5.5 stroke-[2]" />
+            <div className="size-12 xs:size-13 rounded-full bg-[#e8f7ee] dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/40 flex items-center justify-center shadow-xs group-hover:bg-emerald-100 transition-colors">
+              <Pencil className="size-5 xs:size-5.5 stroke-[2]" />
             </div>
-            <span className="text-[12px] font-semibold text-foreground/85 mt-2">
+            <span className="text-[11px] xs:text-[12px] font-semibold text-foreground/85 mt-2">
               Edit
             </span>
           </button>
@@ -648,14 +648,14 @@ function ExpenseDetailPage() {
             onClick={handleShareReceipt}
             className="flex flex-col items-center justify-center group active:scale-95 transition-transform cursor-pointer disabled:opacity-60"
           >
-            <div className="size-13 rounded-full bg-[#e8f7ee] dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/40 flex items-center justify-center shadow-xs group-hover:bg-emerald-100 transition-colors">
+            <div className="size-12 xs:size-13 rounded-full bg-[#e8f7ee] dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/40 flex items-center justify-center shadow-xs group-hover:bg-emerald-100 transition-colors">
               {isSharingReceipt ? (
-                <Loader2 className="size-5.5 stroke-[2] animate-spin text-emerald-600" />
+                <Loader2 className="size-5 xs:size-5.5 stroke-[2] animate-spin text-emerald-600" />
               ) : (
-                <Share2 className="size-5.5 stroke-[2]" />
+                <Share2 className="size-5 xs:size-5.5 stroke-[2]" />
               )}
             </div>
-            <span className="text-[12px] font-semibold text-foreground/85 mt-2 whitespace-nowrap">
+            <span className="text-[11px] xs:text-[12px] font-semibold text-foreground/85 mt-2 whitespace-nowrap">
               Share Receipt
             </span>
           </button>
@@ -666,10 +666,10 @@ function ExpenseDetailPage() {
             onClick={() => setIsDeleting(true)}
             className="flex flex-col items-center justify-center group active:scale-95 transition-transform cursor-pointer"
           >
-            <div className="size-13 rounded-full bg-[#fde8e8] dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200/80 dark:border-rose-800/40 flex items-center justify-center shadow-xs group-hover:bg-rose-100 transition-colors">
-              <Trash2 className="size-5.5 stroke-[2]" />
+            <div className="size-12 xs:size-13 rounded-full bg-[#fde8e8] dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200/80 dark:border-rose-800/40 flex items-center justify-center shadow-xs group-hover:bg-rose-100 transition-colors">
+              <Trash2 className="size-5 xs:size-5.5 stroke-[2]" />
             </div>
-            <span className="text-[12px] font-semibold text-rose-600 dark:text-rose-400 mt-2">
+            <span className="text-[11px] xs:text-[12px] font-semibold text-rose-600 dark:text-rose-400 mt-2">
               Delete
             </span>
           </button>

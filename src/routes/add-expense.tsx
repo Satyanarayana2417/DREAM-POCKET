@@ -254,13 +254,13 @@ function AddExpenseRoute() {
         <img
           src="/dream_pocket_green_wave_transparent.png"
           alt="Dream Pocket Banner"
-          className="w-full h-[180px] sm:h-[210px] object-cover object-[80%_top] sm:object-center block select-none pointer-events-none"
+          className="w-full h-[180px] sm:h-[210px] md:h-[240px] object-cover object-[80%_top] sm:object-center block select-none pointer-events-none"
         />
 
         {/* Foreground Overlay Content: Back button, Logo, Titles */}
         <div className="absolute inset-0 flex flex-col justify-between pt-3 pb-6 pointer-events-none">
           {/* Top Bar: [← Back]  [dp Dream Pocket] */}
-          <div className="flex items-center justify-between px-4 sm:px-6 pt-1 max-w-md mx-auto w-full pointer-events-auto">
+          <div className="flex items-center justify-between px-4 sm:px-6 pt-1 max-w-md sm:max-w-xl md:max-w-2xl mx-auto w-full pointer-events-auto">
             <button
               type="button"
               onClick={handleBack}
@@ -287,12 +287,12 @@ function AddExpenseRoute() {
           </div>
 
           {/* Hero Title & Subtitle */}
-          <div className="px-6 pb-2 max-w-md mx-auto w-full flex items-center justify-between pointer-events-auto">
-            <div className="max-w-[70%]">
-              <h1 className="text-[28px] sm:text-[32px] font-extrabold text-white tracking-tight font-display leading-tight drop-shadow-sm">
+          <div className="px-4 sm:px-6 pb-2 max-w-md sm:max-w-xl md:max-w-2xl mx-auto w-full flex items-center justify-between pointer-events-auto">
+            <div className="max-w-[75%] sm:max-w-[85%]">
+              <h1 className="text-[26px] xs:text-[28px] sm:text-[32px] md:text-[34px] font-extrabold text-white tracking-tight font-display leading-tight drop-shadow-sm">
                 Add <span className="text-[#34d399]">{isBudgetMode ? "Budget Expense" : "Expense"}</span>
               </h1>
-              <p className="text-[13px] text-white/90 font-normal mt-0.5 leading-snug drop-shadow-sm">
+              <p className="text-[12.5px] sm:text-[13px] text-white/90 font-normal mt-0.5 leading-snug drop-shadow-sm">
                 {isBudgetMode
                   ? targetMonth
                     ? `Tracking towards ${monthLabel(targetMonth)} budget`
@@ -305,15 +305,15 @@ function AddExpenseRoute() {
       </div>
 
       {/* ========================================================================= */}
-      {/* FORM BODY: Exact matching UI from reference image                         */}
+      {/* FORM BODY: Responsive layout across Mobile, Tablet, Desktop               */}
       {/* ========================================================================= */}
-      <div className="flex-1 px-4 sm:px-6 pt-2 pb-12 max-w-md mx-auto w-full">
+      <div className="flex-1 px-4 sm:px-6 pt-2 pb-12 max-w-md sm:max-w-xl md:max-w-2xl mx-auto w-full">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           {/* 1. Expense Name */}
           <div className="space-y-1">
-            <div className="flex items-center gap-3">
-              <div className="size-11 rounded-2xl bg-[#eaf7f0] dark:bg-emerald-950/50 border border-emerald-200/70 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-2xs">
-                <Tag className="size-5 stroke-[2] -rotate-45" />
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="size-9.5 sm:size-11 rounded-2xl bg-[#eaf7f0] dark:bg-emerald-950/50 border border-emerald-200/70 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-2xs">
+                <Tag className="size-4.5 sm:size-5 stroke-[2] -rotate-45" />
               </div>
               <div className="flex-1 min-w-0">
                 <label className="text-[13px] font-bold text-foreground tracking-tight flex items-center gap-1 mb-1">
@@ -328,22 +328,22 @@ function AddExpenseRoute() {
               </div>
             </div>
             {form.formState.errors.title && (
-              <p className="text-xs font-medium text-rose-500 ml-14">
+              <p className="text-xs font-medium text-rose-500 ml-12 sm:ml-14">
                 {form.formState.errors.title.message}
               </p>
             )}
           </div>
 
-          {/* 2. Amount & Date (2 Columns) */}
-          <div className="grid grid-cols-2 gap-3">
+          {/* 2. Amount & Date (2 Columns with responsive spacing & zero truncation) */}
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5">
             {/* Amount */}
-            <div className="space-y-1">
-              <div className="flex items-center gap-2.5">
-                <div className="size-11 rounded-2xl bg-[#eaf7f0] dark:bg-emerald-950/50 border border-emerald-200/70 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0 font-bold text-lg shadow-2xs">
+            <div className="space-y-1 min-w-0">
+              <div className="flex items-center gap-2 sm:gap-2.5">
+                <div className="size-9.5 sm:size-11 rounded-2xl bg-[#eaf7f0] dark:bg-emerald-950/50 border border-emerald-200/70 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0 font-bold text-base sm:text-lg shadow-2xs">
                   ₹
                 </div>
                 <div className="flex-1 min-w-0">
-                  <label className="text-[13px] font-bold text-foreground tracking-tight flex items-center gap-1 mb-1">
+                  <label className="text-[12.5px] sm:text-[13px] font-bold text-foreground tracking-tight flex items-center gap-1 mb-1">
                     Amount <span className="text-rose-500 font-bold">*</span>
                   </label>
                   <input
@@ -351,39 +351,39 @@ function AddExpenseRoute() {
                     step="0.01"
                     placeholder="₹ 0.00"
                     {...form.register("amount")}
-                    className="w-full h-11 px-3.5 rounded-2xl bg-white dark:bg-card border border-slate-200/90 dark:border-border text-[14px] font-semibold text-foreground placeholder:text-muted-foreground/50 shadow-2xs focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-all"
+                    className="w-full h-11 px-3 sm:px-3.5 rounded-2xl bg-white dark:bg-card border border-slate-200/90 dark:border-border text-[13.5px] sm:text-[14px] font-semibold text-foreground placeholder:text-muted-foreground/50 shadow-2xs focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-all"
                   />
                 </div>
               </div>
               {form.formState.errors.amount && (
-                <p className="text-xs font-medium text-rose-500 ml-13">
+                <p className="text-xs font-medium text-rose-500 ml-11 sm:ml-13">
                   {form.formState.errors.amount.message}
                 </p>
               )}
             </div>
 
             {/* Date */}
-            <div className="space-y-1">
-              <div className="flex items-center gap-2.5">
-                <div className="size-11 rounded-2xl bg-[#eaf7f0] dark:bg-emerald-950/50 border border-emerald-200/70 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-2xs">
-                  <Calendar className="size-5 stroke-[2]" />
+            <div className="space-y-1 min-w-0">
+              <div className="flex items-center gap-2 sm:gap-2.5">
+                <div className="size-9.5 sm:size-11 rounded-2xl bg-[#eaf7f0] dark:bg-emerald-950/50 border border-emerald-200/70 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-2xs">
+                  <Calendar className="size-4.5 sm:size-5 stroke-[2]" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <label className="text-[13px] font-bold text-foreground tracking-tight flex items-center gap-1 mb-1">
+                  <label className="text-[12.5px] sm:text-[13px] font-bold text-foreground tracking-tight flex items-center gap-1 mb-1">
                     Date <span className="text-rose-500 font-bold">*</span>
                   </label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <button
                         type="button"
-                        className="w-full h-11 px-3 rounded-2xl bg-white dark:bg-card border border-slate-200/90 dark:border-border text-[13px] text-foreground font-medium flex items-center justify-between shadow-2xs hover:border-emerald-400 transition-all cursor-pointer"
+                        className="w-full h-11 px-2.5 sm:px-3 rounded-2xl bg-white dark:bg-card border border-slate-200/90 dark:border-border text-[12px] sm:text-[13px] text-foreground font-medium flex items-center justify-between shadow-2xs hover:border-emerald-400 transition-all cursor-pointer min-w-0"
                       >
                         <span className="truncate">
                           {form.watch("date")
                             ? format(new Date(form.watch("date")), "dd MMM yyyy")
                             : "Select date"}
                         </span>
-                        <Calendar className="size-4 text-emerald-700 dark:text-emerald-400 shrink-0 ml-1 opacity-70" />
+                        <Calendar className="size-3.5 sm:size-4 text-emerald-700 dark:text-emerald-400 shrink-0 ml-1 opacity-70" />
                       </button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="end">
@@ -411,9 +411,9 @@ function AddExpenseRoute() {
             onClick={() => setShowCategoryDialog(true)}
             className="w-full rounded-2xl bg-white dark:bg-card border border-emerald-300 dark:border-emerald-800 p-3 flex items-center justify-between shadow-2xs hover:border-emerald-400 active:scale-[0.99] transition-all cursor-pointer"
           >
-            <div className="flex items-center gap-3">
-              <div className="size-11 rounded-2xl bg-[#eaf7f0] dark:bg-emerald-950/50 border border-emerald-200/70 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-2xs">
-                <LayoutGrid className="size-5 stroke-[2]" />
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="size-9.5 sm:size-11 rounded-2xl bg-[#eaf7f0] dark:bg-emerald-950/50 border border-emerald-200/70 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-2xs">
+                <LayoutGrid className="size-4.5 sm:size-5 stroke-[2]" />
               </div>
               <div>
                 <div className="text-[13px] font-bold text-foreground tracking-tight flex items-center gap-1">
@@ -737,7 +737,7 @@ function AddExpenseRoute() {
       {/* CATEGORY PICKER POPUP DIALOG                                              */}
       {/* ========================================================================= */}
       <Dialog open={showCategoryDialog} onOpenChange={setShowCategoryDialog}>
-        <DialogContent className="max-w-md p-5 bg-card">
+        <DialogContent className="w-[94vw] max-w-lg p-4 sm:p-6 bg-card rounded-3xl">
           <DialogHeader className="text-left">
             <DialogTitle className="text-lg font-bold">Select Category</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
@@ -757,8 +757,8 @@ function AddExpenseRoute() {
             />
           </div>
 
-          {/* Categories Grid */}
-          <div className="grid grid-cols-3 gap-2.5 max-h-[50vh] overflow-y-auto mt-3 pr-1">
+          {/* Categories Grid (Responsive: 3 cols on mobile, 4 cols on tablet/desktop) */}
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-2.5 max-h-[50vh] overflow-y-auto mt-3 pr-1">
             {filteredCategories.map((c) => {
               const Icon = c.icon;
               const isSelected = selectedCategory === c.name;
@@ -777,7 +777,7 @@ function AddExpenseRoute() {
                       setShowCategoryDialog(false);
                     }
                   }}
-                  className={`p-3 rounded-2xl flex flex-col items-center justify-center text-center transition-all cursor-pointer ${
+                  className={`p-2.5 sm:p-3 rounded-2xl flex flex-col items-center justify-center text-center transition-all cursor-pointer ${
                     isSelected
                       ? "bg-emerald-50 dark:bg-emerald-950/50 border-2 border-emerald-500 text-emerald-800 dark:text-emerald-200 font-bold shadow-xs"
                       : "bg-muted/30 hover:bg-muted/70 border border-border/70 text-foreground"
@@ -792,7 +792,7 @@ function AddExpenseRoute() {
                   >
                     <Icon className="size-5 stroke-[2]" />
                   </div>
-                  <span className="text-xs font-semibold tracking-tight leading-tight">
+                  <span className="text-[11.5px] sm:text-xs font-semibold tracking-tight leading-tight">
                     {c.name}
                   </span>
                 </button>

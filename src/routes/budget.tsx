@@ -255,7 +255,7 @@ function BudgetRoute() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-md sm:max-w-xl space-y-5 pb-16 select-none font-sans">
+      <div className="mx-auto max-w-md sm:max-w-xl md:max-w-2xl lg:max-w-3xl space-y-5 pb-16 select-none font-sans">
         {/* ========================================================================= */}
         {/* 1. TOP BAR: [← Back]   Monthly Budget   [⋮ Menu]                          */}
         {/* ========================================================================= */}
@@ -275,7 +275,7 @@ function BudgetRoute() {
             <ArrowLeft className="size-6 stroke-[2.4]" />
           </button>
 
-          <h1 className="text-[20px] font-bold text-[#064e3b] dark:text-[#ecfdf5] tracking-tight font-display text-center">
+          <h1 className="text-[20px] sm:text-[22px] font-bold text-[#064e3b] dark:text-[#ecfdf5] tracking-tight font-display text-center">
             Monthly Budget
           </h1>
 
@@ -378,9 +378,9 @@ function BudgetRoute() {
         {/* ========================================================================= */}
         <div className="relative pt-1 pb-1 px-1 sm:px-2 select-none">
           {/* Top Half: Donut Ring (Left) + Big Amounts (Right) */}
-          <div className="flex items-center justify-between gap-4 pt-1 pb-4">
+          <div className="flex items-center justify-between gap-3 sm:gap-6 pt-1 pb-4">
             {/* Donut Progress Ring with Center Label */}
-            <div className="relative size-[132px] sm:size-[140px] shrink-0 flex items-center justify-center">
+            <div className="relative size-[124px] xs:size-[134px] sm:size-[144px] md:size-[156px] shrink-0 flex items-center justify-center">
               <svg className="size-full -rotate-90" viewBox="0 0 120 120">
                 {/* Background Track */}
                 <circle
@@ -415,10 +415,10 @@ function BudgetRoute() {
 
               {/* Inside Donut Center: 68% Used */}
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
-                <span className="text-[28px] sm:text-[32px] font-black text-[#0f2a1e] dark:text-white leading-none font-display tracking-tight">
+                <span className="text-[25px] xs:text-[28px] sm:text-[32px] md:text-[36px] font-black text-[#0f2a1e] dark:text-white leading-none font-display tracking-tight">
                   {currentBudget > 0 ? `${Math.round(status.percent)}%` : "0%"}
                 </span>
-                <span className="text-[13px] font-semibold text-gray-500 dark:text-gray-400 mt-1">
+                <span className="text-[12px] sm:text-[13px] font-semibold text-gray-500 dark:text-gray-400 mt-1">
                   Used
                 </span>
               </div>
@@ -428,16 +428,16 @@ function BudgetRoute() {
             <div className="h-20 sm:h-24 w-[1px] bg-gray-200/70 dark:bg-gray-800 self-center shrink-0" />
 
             {/* Right: Big Spent + of Total Budget + Green Swoosh */}
-            <div className="flex-1 pl-2 sm:pl-3 flex flex-col justify-center min-w-0">
-              <div className="text-[30px] sm:text-[38px] font-black text-[#073826] dark:text-[#ecfdf5] tracking-tight leading-none font-display truncate">
+            <div className="flex-1 pl-1.5 sm:pl-3 flex flex-col justify-center min-w-0">
+              <div className="text-[26px] xs:text-[30px] sm:text-[38px] md:text-[42px] font-black text-[#073826] dark:text-[#ecfdf5] tracking-tight leading-none font-display truncate">
                 ₹{spent.toLocaleString("en-IN")}
               </div>
-              <div className="text-[15px] sm:text-[18px] font-semibold text-[#1f3d2f]/75 dark:text-gray-300 mt-1.5 truncate">
+              <div className="text-[13.5px] xs:text-[15px] sm:text-[18px] md:text-[19px] font-semibold text-[#1f3d2f]/75 dark:text-gray-300 mt-1.5 truncate">
                 of ₹{currentBudget.toLocaleString("en-IN")}
               </div>
 
               {/* Green Curved Accent Swoosh Line */}
-              <svg viewBox="0 0 160 12" className="w-32 sm:w-40 h-2.5 mt-2.5 text-[#10b981] dark:text-[#34d399] overflow-visible">
+              <svg viewBox="0 0 160 12" className="w-28 xs:w-32 sm:w-40 md:w-48 h-2.5 mt-2.5 text-[#10b981] dark:text-[#34d399] overflow-visible">
                 <path
                   d="M2,8 C40,2 110,2 158,8"
                   fill="none"
@@ -456,30 +456,30 @@ function BudgetRoute() {
               className="text-center px-1 cursor-pointer hover:opacity-80 transition-opacity"
               onClick={handleOpenEdit}
             >
-              <div className="text-[15px] sm:text-[17px] font-extrabold text-[#0f172a] dark:text-white tracking-tight font-display">
+              <div className="text-[13.5px] xs:text-[15px] sm:text-[17px] md:text-[18px] font-extrabold text-[#0f172a] dark:text-white tracking-tight font-display truncate">
                 ₹{currentBudget.toLocaleString("en-IN")}
               </div>
-              <div className="text-[11px] sm:text-[12px] font-medium text-gray-500 dark:text-gray-400 mt-0.5">
+              <div className="text-[10px] xs:text-[11px] sm:text-[12px] font-medium text-gray-500 dark:text-gray-400 mt-0.5 whitespace-nowrap">
                 Total Budget
               </div>
             </div>
 
             {/* 2. Total Spent */}
             <div className="text-center px-1 border-x border-gray-200/60 dark:border-gray-800">
-              <div className="text-[15px] sm:text-[17px] font-extrabold text-[#0f172a] dark:text-white tracking-tight font-display">
+              <div className="text-[13.5px] xs:text-[15px] sm:text-[17px] md:text-[18px] font-extrabold text-[#0f172a] dark:text-white tracking-tight font-display truncate">
                 ₹{spent.toLocaleString("en-IN")}
               </div>
-              <div className="text-[11px] sm:text-[12px] font-medium text-gray-500 dark:text-gray-400 mt-0.5">
+              <div className="text-[10px] xs:text-[11px] sm:text-[12px] font-medium text-gray-500 dark:text-gray-400 mt-0.5 whitespace-nowrap">
                 Total Spent
               </div>
             </div>
 
             {/* 3. Remaining */}
             <div className="text-center px-1">
-              <div className="text-[15px] sm:text-[17px] font-extrabold text-[#16a34a] dark:text-[#4ade80] tracking-tight font-display">
+              <div className="text-[13.5px] xs:text-[15px] sm:text-[17px] md:text-[18px] font-extrabold text-[#16a34a] dark:text-[#4ade80] tracking-tight font-display truncate">
                 ₹{Math.max(0, currentBudget - spent).toLocaleString("en-IN")}
               </div>
-              <div className="text-[11px] sm:text-[12px] font-medium text-gray-500 dark:text-gray-400 mt-0.5">
+              <div className="text-[10px] xs:text-[11px] sm:text-[12px] font-medium text-gray-500 dark:text-gray-400 mt-0.5 whitespace-nowrap">
                 Remaining
               </div>
             </div>
@@ -489,11 +489,11 @@ function BudgetRoute() {
         {/* ========================================================================= */}
         {/* 4. FLOWING GREEN WAVE DIVIDER IMAGE (Middle of page above expenses)       */}
         {/* ========================================================================= */}
-        <div className="w-full overflow-hidden -my-2 select-none pointer-events-none flex items-center justify-center">
+        <div className="w-full max-w-md sm:max-w-xl md:max-w-2xl lg:max-w-3xl mx-auto overflow-hidden -my-2 select-none pointer-events-none flex items-center justify-center">
           <img
             src="/flowing-green-wave-divider.png"
             alt="Flowing Green Wave Divider"
-            className="w-full h-11 sm:h-13 object-cover object-center"
+            className="w-full h-10 xs:h-11 sm:h-13 md:h-15 object-cover object-center"
           />
         </div>
 
@@ -619,7 +619,7 @@ function BudgetRoute() {
           });
         }}
         aria-label="Add budget expense"
-        className="fixed right-5 bottom-28 z-50 flex size-14 items-center justify-center rounded-full bg-gradient-to-tr from-[#064e3b] via-[#047857] to-[#10b981] text-white shadow-[0_8px_25px_rgba(5,150,105,0.45)] hover:shadow-[0_10px_30px_rgba(5,150,105,0.55)] active:scale-95 transition-all cursor-pointer pointer-events-auto"
+        className="fixed right-5 bottom-28 md:bottom-8 md:right-8 z-50 flex size-14 items-center justify-center rounded-full bg-gradient-to-tr from-[#064e3b] via-[#047857] to-[#10b981] text-white shadow-[0_8px_25px_rgba(5,150,105,0.45)] hover:shadow-[0_10px_30px_rgba(5,150,105,0.55)] active:scale-95 transition-all cursor-pointer pointer-events-auto"
       >
         <Plus className="size-7 stroke-[2.5]" />
       </button>

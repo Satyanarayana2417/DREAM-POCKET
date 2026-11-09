@@ -301,30 +301,30 @@ export function AppShell({
 
       {/* Mobile bottom nav + floating add button */}
       {!hideBottomNav && (
-        <div className="fixed bottom-0 left-4 right-4 z-50 md:hidden pointer-events-none pb-[env(safe-area-inset-bottom)] pb-2">
+        <div className="fixed bottom-0 left-2 right-2 sm:left-4 sm:right-4 z-50 md:hidden pointer-events-none pb-[env(safe-area-inset-bottom)] pb-2">
         
         {/* Floating Action Button (Original Position - Add Expense) */}
         {showFAB && (
           <Link
             to="/add-expense"
             aria-label="Add expense"
-            className="fixed right-5 bottom-28 z-50 flex size-14 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg pointer-events-auto transition-transform active:scale-95"
+            className="fixed right-4 xs:right-5 bottom-26 sm:bottom-28 z-50 flex size-13 xs:size-14 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg pointer-events-auto transition-transform active:scale-95"
           >
             <Plus className="size-6" />
           </Link>
         )}
 
         {/* Pill Navbar — 4 icons in a row */}
-        <nav className="relative flex items-center w-full h-[64px] pointer-events-auto rounded-[32px] bg-card filter drop-shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+        <nav className="relative flex items-center w-full h-[62px] xs:h-[64px] pointer-events-auto rounded-[32px] bg-card filter drop-shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
           <div className="flex flex-1 justify-evenly items-center z-10">
             {NAV.filter(n => !("mobileOnly" in n && n.mobileOnly)).map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
                 activeOptions={{ exact: item.to === "/" }}
-                className="flex flex-col items-center justify-center gap-1 py-1 px-1 text-[10px] font-medium text-muted-foreground transition-colors data-[status=active]:text-emerald-600 w-16"
+                className="flex flex-col items-center justify-center gap-1 py-1 px-0.5 xs:px-1 text-[9.5px] xs:text-[10px] font-medium text-muted-foreground transition-colors data-[status=active]:text-emerald-600 w-14 xs:w-16"
               >
-                <item.icon className="size-5" />
+                <item.icon className="size-4.5 xs:size-5" />
                 <span className="text-center whitespace-nowrap">{item.label}</span>
               </Link>
             ))}
