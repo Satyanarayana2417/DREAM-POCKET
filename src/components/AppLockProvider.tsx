@@ -1,20 +1,22 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { App } from '@capacitor/app';
 import { NativeBiometric } from '@capgo/capacitor-native-biometric';
 import { SecureStoragePlugin } from 'capacitor-secure-storage-plugin';
-import { Fingerprint, Delete, Lock } from 'lucide-react';
+import { Fingerprint, Lock, ShieldCheck, RefreshCw, LogOut, AlertCircle } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
-import { cn } from '@/lib/utils';
+import { useAuth } from '@/lib/auth';
+import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { firebaseDb, isFirebaseReady } from '@/lib/firebase';
+import { toast } from 'sonner';
 
 interface AppLockContextType {
-  isPinEnabled: boolean;
   isBiometricEnabled: boolean;
   isBiometricSupported: boolean;
-  setPinEnabled: (enabled: boolean, pin?: string) => Promise<boolean>;
+  authenticatorLabel: string;
   setBiometricEnabled: (enabled: boolean) => Promise<boolean>;
-  changePin: (oldPin: string, newPin: string) => Promise<boolean>;
   verifyAuth: () => Promise<boolean>;
   lockNow: () => void;
+  isLocked: boolean;
 }
 
 const AppLockContext = createContext<AppLockContextType | null>(null);
@@ -25,370 +27,573 @@ export function useAppLock() {
   return context;
 }
 
+// Helpers for WebAuthn ArrayBuffer / Base64 conversions
+function bufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return window.btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function base64ToBuffer(base64: string): ArrayBuffer {
+  let str = base64.replace(/-/g, "+").replace(/_/g, "/");
+  while (str.length % 4) str += "=";
+  const binary = window.atob(str);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
+
+// Universal storage helpers (Native Keystore on Mobile, LocalStorage on Web)
+const getStorage = async (key: string): Promise<string | null> => {
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const res = await SecureStoragePlugin.get({ key });
+      return res.value;
+    } catch {
+      return null;
+    }
+  }
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+
+const setStorage = async (key: string, value: string): Promise<void> => {
+  if (Capacitor.isNativePlatform()) {
+    try {
+      await SecureStoragePlugin.set({ key, value });
+    } catch {
+      // fallback
+    }
+  }
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // Non-blocking
+  }
+};
+
+const removeStorage = async (key: string): Promise<void> => {
+  if (Capacitor.isNativePlatform()) {
+    try {
+      await SecureStoragePlugin.remove({ key });
+    } catch {
+      // Non-blocking
+    }
+  }
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // Non-blocking
+  }
+};
+
+/**
+ * Checks platform support for biometrics (Fingerprint, Face ID, Touch ID, Windows Hello)
+ */
+async function checkBiometricSupport(): Promise<{ supported: boolean; label: string }> {
+  // 1. Native Mobile (Capacitor)
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const res = await NativeBiometric.isAvailable();
+      if (res.isAvailable) {
+        let label = "Biometric Lock";
+        if (res.biometryType === 1) label = "Touch ID";
+        else if (res.biometryType === 2) label = "Face ID";
+        else if (res.biometryType === 3) label = "Fingerprint";
+        return { supported: true, label };
+      }
+    } catch {
+      // Fallback to WebAuthn check
+    }
+  }
+
+  // 2. Web / Desktop WebAuthn Platform Authenticator (Windows Hello, Touch ID, Android Biometrics)
+  if (
+    typeof window !== "undefined" &&
+    window.PublicKeyCredential &&
+    typeof window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable === "function"
+  ) {
+    try {
+      const available = await window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+      if (available) {
+        const isMacOrIOS = /Macintosh|iPhone|iPad|iPod/.test(navigator.userAgent);
+        const isWindows = /Windows/.test(navigator.userAgent);
+        const isAndroid = /Android/.test(navigator.userAgent);
+        let label = "Biometric Passkey";
+        if (isMacOrIOS) label = "Face ID / Touch ID";
+        else if (isWindows) label = "Windows Hello";
+        else if (isAndroid) label = "Fingerprint / Screen Lock";
+        return { supported: true, label };
+      }
+    } catch {
+      // Unsupported
+    }
+  }
+
+  return { supported: false, label: "Biometrics Unavailable" };
+}
+
 export function AppLockProvider({ children }: { children: React.ReactNode }) {
+  const { user, logout } = useAuth();
+
   const [isLocked, setIsLocked] = useState(false);
-  const [isPinEnabled, setIsPinEnabled] = useState(false);
   const [isBiometricEnabled, setIsBiometricEnabled] = useState(false);
   const [isBiometricSupported, setIsBiometricSupported] = useState(false);
-  const [storedPin, setStoredPin] = useState<string | null>(null);
+  const [authenticatorLabel, setAuthenticatorLabel] = useState("Biometric Lock");
+  const [storedCredId, setStoredCredId] = useState<string | null>(null);
 
-  // Overlay state
-  const [pinInput, setPinInput] = useState("");
-  const [errorText, setErrorText] = useState("");
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const [isChecking, setIsChecking] = useState(true);
-  const [showPinPad, setShowPinPad] = useState(false);
-  const [verifyOnly, setVerifyOnly] = useState<{resolve: (v: boolean) => void} | null>(null);
 
-  // Universal storage helpers
-  const getStorage = async (key: string) => {
-    if (Capacitor.isNativePlatform()) {
-      try {
-        const res = await SecureStoragePlugin.get({ key });
-        return res.value;
-      } catch { return null; }
-    }
-    return localStorage.getItem(key);
-  };
+  // Transient verification resolver (for settings re-auth)
+  const [verifyOnly, setVerifyOnly] = useState<{ resolve: (v: boolean) => void } | null>(null);
+  const isAuthenticatingRef = useRef(false);
 
-  const setStorage = async (key: string, value: string) => {
-    if (Capacitor.isNativePlatform()) {
-      await SecureStoragePlugin.set({ key, value });
-    } else {
-      localStorage.setItem(key, value);
-    }
-  };
-
-  const removeStorage = async (key: string) => {
-    if (Capacitor.isNativePlatform()) {
-      try { await SecureStoragePlugin.remove({ key }); } catch {}
-    } else {
-      localStorage.removeItem(key);
-    }
-  };
-
-  // Load initial state
+  // Clean up legacy PIN storage keys permanently
   useEffect(() => {
-    const init = async () => {
-      try {
-        let supportsBio = false;
-        if (Capacitor.isNativePlatform()) {
-          try {
-            const result = await NativeBiometric.isAvailable();
-            supportsBio = result.isAvailable;
-          } catch (e) {
-            supportsBio = false;
-          }
-        }
-        setIsBiometricSupported(supportsBio);
-
-        const oldEnabled = await getStorage('appLock_enabled');
-        const pinValue = await getStorage('appLock_pin');
-        const pinEnabledStr = await getStorage('appLock_pin_enabled');
-        const bioEnabledStr = await getStorage('appLock_biometric');
-
-        let pinEnabled = pinEnabledStr === 'true';
-        let bioEnabled = supportsBio && bioEnabledStr === 'true';
-
-        // Migration from old App Lock toggle
-        if (oldEnabled === 'true' && pinEnabledStr === null) {
-          pinEnabled = true;
-          await setStorage('appLock_pin_enabled', 'true');
-        }
-
-        setIsPinEnabled(pinEnabled);
-        setIsBiometricEnabled(bioEnabled);
-        setStoredPin(pinValue);
-
-        if (pinEnabled || bioEnabled) {
-          setIsLocked(true);
-        }
-      } catch (e) {
-        // Init error
-      } finally {
-        setIsChecking(false);
-      }
-    };
-    init();
+    removeStorage('appLock_pin');
+    removeStorage('appLock_pin_enabled');
+    removeStorage('appLock_enabled');
   }, []);
 
-  // Listen for app state changes to lock when going to background
+  // 1. Initial State Initialization
   useEffect(() => {
-    if (!Capacitor.isNativePlatform()) return;
-    
-    const listener = App.addListener('appStateChange', ({ isActive }) => {
-      if (!isActive && (isPinEnabled || isBiometricEnabled)) {
+    let active = true;
+
+    const init = async () => {
+      try {
+        const { supported, label } = await checkBiometricSupport();
+        if (!active) return;
+        setIsBiometricSupported(supported);
+        setAuthenticatorLabel(label);
+
+        // Check local secure storage
+        const localBioEnabled = (await getStorage('appLock_biometric_enabled')) === 'true';
+        const localCredId = await getStorage('appLock_biometric_cred_id');
+
+        let enabled = localBioEnabled;
+        let credId = localCredId;
+
+        // Sync with Firestore profile if user is logged in
+        if (user && isFirebaseReady()) {
+          try {
+            const userSnap = await getDoc(doc(firebaseDb(), "users", user.uid));
+            if (userSnap.exists()) {
+              const data = userSnap.data();
+              if (data?.["biometricLock"]?.["enabled"] !== undefined) {
+                enabled = Boolean(data["biometricLock"]["enabled"]);
+                credId = data["biometricLock"]["credentialId"] || credId;
+              }
+            }
+          } catch {
+            // Non-blocking fallback to local storage
+          }
+        }
+
+        if (active) {
+          setIsBiometricEnabled(enabled);
+          setStoredCredId(credId);
+
+          // If enabled, lock immediately on startup
+          if (enabled) {
+            setIsLocked(true);
+          }
+        }
+      } catch (err) {
+        console.error("Biometric init error:", err);
+      } finally {
+        if (active) setIsChecking(false);
+      }
+    };
+
+    init();
+    return () => {
+      active = false;
+    };
+  }, [user]);
+
+  // 2. Auto-lock on Mobile Backgrounding & Desktop Tab Inactivity
+  useEffect(() => {
+    if (!isBiometricEnabled) return;
+
+    // A. Native Capacitor App Background Listener
+    let nativeListener: Promise<any> | null = null;
+    if (Capacitor.isNativePlatform()) {
+      nativeListener = App.addListener('appStateChange', ({ isActive }) => {
+        if (!isActive && isBiometricEnabled) {
+          setIsLocked(true);
+          setAuthError(null);
+          setVerifyOnly(null);
+        }
+      });
+    }
+
+    // B. Web Tab Visibility Listener
+    const handleVisibilityChange = () => {
+      if (document.hidden && isBiometricEnabled) {
         setIsLocked(true);
-        setPinInput("");
-        setErrorText("");
+        setAuthError(null);
         setVerifyOnly(null);
       }
-    });
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
-      listener.then(l => l.remove());
-    };
-  }, [isPinEnabled, isBiometricEnabled]);
-
-  // Handle Lock Screen Mount
-  useEffect(() => {
-    if (isLocked) {
-      if (isBiometricEnabled && isBiometricSupported) {
-        setShowPinPad(false);
-        triggerBiometric();
-      } else if (isPinEnabled) {
-        setShowPinPad(true);
-      } else {
-        // Fallback if somehow both are false but isLocked is true
-        setIsLocked(false);
+      if (nativeListener) {
+        nativeListener.then((l) => l.remove()).catch(() => {});
       }
-    }
-  }, [isLocked]);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isBiometricEnabled]);
 
-  const triggerBiometric = async () => {
-    if (!Capacitor.isNativePlatform() || !isBiometricSupported) return false;
+  // 3. WebAuthn Registration (Enroll Authenticator)
+  const registerWebAuthn = async (): Promise<string | null> => {
+    if (typeof window === "undefined" || !window.PublicKeyCredential) {
+      throw new Error("WebAuthn is not supported by your browser.");
+    }
+
+    const challenge = new Uint8Array(32);
+    window.crypto.getRandomValues(challenge);
+
+    const userIdBytes = new TextEncoder().encode(user?.uid || "dreampocket_user");
+
+    const credential = (await navigator.credentials.create({
+      publicKey: {
+        challenge,
+        rp: {
+          name: "Dream Pocket",
+          id: window.location.hostname === "localhost" ? "localhost" : window.location.hostname,
+        },
+        user: {
+          id: userIdBytes,
+          name: user?.email || "user@dreampocket.app",
+          displayName: user?.displayName || user?.email || "Dream Pocket Account",
+        },
+        pubKeyCredParams: [
+          { alg: -7, type: "public-key" }, // ES256 (standard for mobile/face/fingerprint)
+          { alg: -257, type: "public-key" }, // RS256
+        ],
+        authenticatorSelection: {
+          authenticatorAttachment: "platform", // Enforces device's built-in biometric sensor
+          userVerification: "required",
+        },
+        timeout: 60000,
+        attestation: "none",
+      },
+    })) as PublicKeyCredential | null;
+
+    if (!credential) throw new Error("No credential was created.");
+
+    return bufferToBase64(credential.rawId);
+  };
+
+  // 4. WebAuthn Authentication (Verify Authenticator)
+  const authenticateWebAuthn = async (credId: string | null): Promise<boolean> => {
+    if (typeof window === "undefined" || !window.PublicKeyCredential) return false;
+
+    const challenge = new Uint8Array(32);
+    window.crypto.getRandomValues(challenge);
+
+    const allowCredentials = credId
+      ? [
+          {
+            id: base64ToBuffer(credId),
+            type: "public-key" as const,
+          },
+        ]
+      : undefined;
+
+    const assertion = await navigator.credentials.get({
+      publicKey: {
+        challenge,
+        rpId: window.location.hostname === "localhost" ? "localhost" : window.location.hostname,
+        timeout: 60000,
+        userVerification: "required",
+        allowCredentials,
+      },
+    });
+
+    return Boolean(assertion);
+  };
+
+  // 5. Trigger Native or Web Biometric Prompt
+  const triggerBiometric = useCallback(async (): Promise<boolean> => {
+    if (isAuthenticatingRef.current) return false;
+    isAuthenticatingRef.current = true;
+    setIsAuthenticating(true);
+    setAuthError(null);
+
     try {
-      await NativeBiometric.verifyIdentity({
-        reason: "Unlock Expense Manager",
-        title: "Unlock App",
-        subtitle: "Use your biometric to unlock",
-      });
-      handleUnlockSuccess();
-      return true;
-    } catch (e) {
-      console.log("Biometric error", e);
+      let success = false;
+
+      // Native Capacitor Biometrics
+      if (Capacitor.isNativePlatform()) {
+        await NativeBiometric.verifyIdentity({
+          reason: "Authenticate to unlock Dream Pocket",
+          title: "Dream Pocket Security",
+          subtitle: "Confirm your identity to access expenses",
+          negativeButtonText: "Cancel",
+        });
+        success = true;
+      } else {
+        // Web Platform Biometrics (WebAuthn / Passkeys)
+        success = await authenticateWebAuthn(storedCredId);
+      }
+
+      if (success) {
+        if (verifyOnly) {
+          verifyOnly.resolve(true);
+          setVerifyOnly(null);
+        }
+        setIsLocked(false);
+        setAuthError(null);
+        return true;
+      } else {
+        setAuthError("Biometric verification failed. Please try again.");
+        return false;
+      }
+    } catch (err: any) {
+      console.warn("Biometric verification error:", err);
+      const msg =
+        err?.message?.includes("cancelled") || err?.name === "NotAllowedError"
+          ? "Authentication was cancelled."
+          : "Biometric authentication failed. Tap below to retry.";
+      setAuthError(msg);
       return false;
+    } finally {
+      isAuthenticatingRef.current = false;
+      setIsAuthenticating(false);
     }
-  };
+  }, [storedCredId, verifyOnly]);
 
-  const handleUnlockSuccess = () => {
-    if (verifyOnly) {
-      verifyOnly.resolve(true);
-      setVerifyOnly(null);
+  // Automatically trigger biometric prompt on initial lock mount
+  useEffect(() => {
+    if (isLocked && isBiometricEnabled && !isAuthenticatingRef.current) {
+      const timer = setTimeout(() => {
+        triggerBiometric();
+      }, 300);
+      return () => clearTimeout(timer);
     }
-    setIsLocked(false);
-    setPinInput("");
-    setShowPinPad(false);
-  };
+  }, [isLocked, isBiometricEnabled, triggerBiometric]);
 
-  const handlePinDigit = (digit: string) => {
-    if (pinInput.length < 4) {
-      const newPin = pinInput + digit;
-      setPinInput(newPin);
-      setErrorText("");
+  // 6. Enable / Disable Biometric Lock
+  const setBiometricEnabledHandler = async (enabled: boolean): Promise<boolean> => {
+    if (enabled) {
+      // User is enabling biometric lock: must register and verify first
+      setIsAuthenticating(true);
+      try {
+        let credId: string | null = null;
 
-      if (newPin.length === 4) {
-        if (newPin === storedPin) {
-          setTimeout(() => {
-            handleUnlockSuccess();
-          }, 200);
+        if (Capacitor.isNativePlatform()) {
+          // Native verification
+          await NativeBiometric.verifyIdentity({
+            reason: "Verify your biometric to enable Dream Pocket App Lock",
+            title: "Enable Biometric Lock",
+            subtitle: "Scan your fingerprint or face to protect your account",
+          });
+          credId = "native-device-biometric";
         } else {
-          setErrorText("Incorrect PIN");
-          setTimeout(() => setPinInput(""), 500);
+          // WebAuthn Passkey Registration
+          credId = await registerWebAuthn();
+        }
+
+        if (!credId) throw new Error("Could not register biometric authenticator.");
+
+        // Persist locally
+        await setStorage('appLock_biometric_enabled', 'true');
+        await setStorage('appLock_biometric_cred_id', credId);
+        setStoredCredId(credId);
+        setIsBiometricEnabled(true);
+
+        // Persist in Firestore
+        if (user && isFirebaseReady()) {
+          try {
+            await updateDoc(doc(firebaseDb(), "users", user.uid), {
+              "biometricLock.enabled": true,
+              "biometricLock.credentialId": credId,
+              "biometricLock.authenticatorLabel": authenticatorLabel,
+              "biometricLock.updatedAt": serverTimestamp(),
+            });
+          } catch {
+            // Non-blocking
+          }
+        }
+
+        toast.success("Biometric App Lock enabled successfully!");
+        return true;
+      } catch (err: any) {
+        console.error("Biometric setup error:", err);
+        const isCancelled = err?.name === "NotAllowedError" || err?.message?.includes("cancel");
+        toast.error(isCancelled ? "Biometric setup cancelled." : "Could not enable Biometric Lock on this device.");
+        return false;
+      } finally {
+        setIsAuthenticating(false);
+      }
+    } else {
+      // Disabling Biometric Lock: requires re-authentication
+      const verified = await triggerBiometric();
+      if (!verified) {
+        toast.error("Authentication required to disable Biometric Lock.");
+        return false;
+      }
+
+      await setStorage('appLock_biometric_enabled', 'false');
+      await removeStorage('appLock_biometric_cred_id');
+      setStoredCredId(null);
+      setIsBiometricEnabled(false);
+      setIsLocked(false);
+
+      if (user && isFirebaseReady()) {
+        try {
+          await updateDoc(doc(firebaseDb(), "users", user.uid), {
+            "biometricLock.enabled": false,
+            "biometricLock.updatedAt": serverTimestamp(),
+          });
+        } catch {
+          // Non-blocking
         }
       }
+
+      toast.success("Biometric App Lock has been disabled.");
+      return true;
     }
   };
 
-  const handlePinDelete = () => {
-    setPinInput(prev => prev.slice(0, -1));
-    setErrorText("");
-  };
-
-  const setPinEnabled = async (enabled: boolean, pin?: string) => {
-    if (enabled) {
-      if (pin && pin !== "KEEP_CURRENT_PIN") {
-        await setStorage('appLock_pin', pin);
-        setStoredPin(pin);
-      }
-      await setStorage('appLock_pin_enabled', 'true');
-      setIsPinEnabled(true);
-    } else {
-      await setStorage('appLock_pin_enabled', 'false');
-      setIsPinEnabled(false);
-    }
-    return true;
-  };
-
-  const setBiometricEnabled = async (enabled: boolean) => {
-    if (Capacitor.isNativePlatform()) {
-      await setStorage('appLock_biometric', enabled ? 'true' : 'false');
-      setIsBiometricEnabled(enabled);
-    }
-    return true;
-  };
-
-  const changePin = async (oldPin: string, newPin: string) => {
-    if (oldPin !== storedPin) return false;
-    await setStorage('appLock_pin', newPin);
-    setStoredPin(newPin);
-    return true;
-  };
-
+  // 7. Re-auth helper (for sensitive actions)
   const verifyAuth = (): Promise<boolean> => {
-    if (!isPinEnabled && !isBiometricEnabled) {
-      return Promise.resolve(true);
-    }
+    if (!isBiometricEnabled) return Promise.resolve(true);
+
     return new Promise((resolve) => {
       setVerifyOnly({ resolve });
       setIsLocked(true);
-      setPinInput("");
-      setErrorText("");
+      setAuthError(null);
     });
   };
 
+  // 8. Manual Lock action
   const lockNow = () => {
-    if (isPinEnabled || isBiometricEnabled) {
+    if (isBiometricEnabled) {
       setIsLocked(true);
-      setPinInput("");
-      setErrorText("");
+      setAuthError(null);
       setVerifyOnly(null);
+    }
+  };
+
+  const handleSignOutFromLock = async () => {
+    try {
+      await logout();
+      setIsLocked(false);
+    } catch {
+      // Non-blocking
     }
   };
 
   return (
-    <AppLockContext.Provider value={{ 
-      isPinEnabled, 
-      isBiometricEnabled, 
-      isBiometricSupported, 
-      setPinEnabled, 
-      setBiometricEnabled, 
-      changePin, 
-      verifyAuth,
-      lockNow 
-    }}>
+    <AppLockContext.Provider
+      value={{
+        isBiometricEnabled,
+        isBiometricSupported,
+        authenticatorLabel,
+        setBiometricEnabled: setBiometricEnabledHandler,
+        verifyAuth,
+        lockNow,
+        isLocked,
+      }}
+    >
       {children}
-      
-      {isChecking && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-background">
-          <div className="size-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-        </div>
-      )}
-      
+
+      {/* Biometric Unlock Overlay Screen */}
       {isLocked && (
-        <div className="fixed inset-0 z-[9999] bg-background flex flex-col items-center justify-center animate-in fade-in duration-200">
-          <div className="flex flex-col items-center w-full max-w-sm px-6 relative">
+        <div className="fixed inset-0 z-[9999] bg-background/98 backdrop-blur-md flex flex-col items-center justify-center p-6 animate-in fade-in duration-200">
+          <div className="w-full max-w-sm flex flex-col items-center text-center">
+            {/* Verify Only Cancel Button */}
             {verifyOnly && (
-              <button 
+              <button
+                type="button"
                 onClick={() => {
                   verifyOnly.resolve(false);
                   setVerifyOnly(null);
                   setIsLocked(false);
                 }}
-                className="absolute -top-16 left-6 text-muted-foreground hover:text-foreground text-sm font-medium p-2"
+                className="self-start text-xs font-semibold text-muted-foreground hover:text-foreground mb-6 cursor-pointer"
               >
-                Cancel
+                ← Cancel
               </button>
             )}
-            {!showPinPad ? (
-              <div className="flex flex-col items-center animate-in fade-in zoom-in-95 duration-200">
-                <Lock className="size-16 text-primary mb-6" />
-                <h2 className="text-xl font-semibold mb-2 font-display text-foreground">App Locked</h2>
-                <p className="text-muted-foreground mb-12 text-center text-sm">
-                  {isPinEnabled ? "Unlock with biometric or PIN" : "Unlock with biometric"}
-                </p>
-                <button 
-                  onClick={triggerBiometric}
-                  className="rounded-full w-20 h-20 bg-primary/10 text-primary flex items-center justify-center hover:bg-primary/20 transition-colors mb-10"
-                >
-                  <Fingerprint className="size-10" />
-                </button>
-                {isPinEnabled && (
-                  <button 
-                    onClick={() => setShowPinPad(true)}
-                    className="text-primary font-medium hover:underline text-sm"
-                  >
-                    Use App PIN
-                  </button>
-                )}
+
+            {/* Dream Pocket Branding */}
+            <div className="flex items-center gap-2.5 mb-8">
+              <img src="/logo.png" alt="Dream Pocket" className="size-10 object-contain drop-shadow-sm" />
+              <img src="/logo-text.png" alt="Dream Pocket" className="h-6.5 object-contain" />
+            </div>
+
+            {/* Biometric Icon with Pulsing Emerald Glow */}
+            <div className="relative mb-6">
+              <div className="size-24 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 flex items-center justify-center border-2 border-emerald-500/30 shadow-lg shadow-emerald-500/10">
+                <Fingerprint className="size-12 text-emerald-600 dark:text-emerald-400 stroke-[1.8] animate-pulse" />
               </div>
-            ) : (
-              <div className="flex flex-col items-center w-full animate-in fade-in zoom-in-95 duration-200">
-                <h2 className="text-xl font-semibold mb-2 font-display text-foreground">
-                  {verifyOnly ? "Verify App PIN" : "Enter App PIN"}
-                </h2>
-                <p className="text-muted-foreground mb-8 text-center text-sm">
-                  Please enter your 4-digit security PIN
-                </p>
-                
-                {/* PIN Dots */}
-                <div className="flex gap-4 mb-10">
-                  {[0, 1, 2, 3].map(i => (
-                    <div 
-                      key={i} 
-                      className={cn(
-                        "w-3.5 h-3.5 rounded-full transition-all duration-200",
-                        i < pinInput.length 
-                          ? "bg-foreground border border-foreground scale-110" 
-                          : "bg-transparent border-[1.5px] border-muted-foreground/50"
-                      )}
-                    />
-                  ))}
-                </div>
+              <div className="absolute -bottom-1 -right-1 size-7 rounded-full bg-emerald-600 dark:bg-emerald-500 text-white flex items-center justify-center shadow-xs ring-2 ring-background">
+                <Lock className="size-3.5 stroke-[2.2]" />
+              </div>
+            </div>
 
-                <p className="text-red-500 text-sm h-6 mb-2">{errorText}</p>
+            {/* Heading & Subtitle */}
+            <h2 className="text-xl font-bold font-display text-foreground tracking-tight mb-2">
+              App Locked
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground mb-8 max-w-[280px] leading-relaxed">
+              Authenticate to unlock Dream Pocket and protect your financial privacy.
+            </p>
 
-                {/* Keypad */}
-                <div className="grid grid-cols-3 gap-x-6 gap-y-4 w-full max-w-[280px]">
-                  {[
-                    { num: "1", sub: "" },
-                    { num: "2", sub: "ABC" },
-                    { num: "3", sub: "DEF" },
-                    { num: "4", sub: "GHI" },
-                    { num: "5", sub: "JKL" },
-                    { num: "6", sub: "MNO" },
-                    { num: "7", sub: "PQRS" },
-                    { num: "8", sub: "TUV" },
-                    { num: "9", sub: "WXYZ" }
-                  ].map(k => (
-                    <button
-                      key={k.num}
-                      onClick={() => handlePinDigit(k.num)}
-                      className="w-[72px] h-[72px] rounded-full flex flex-col items-center justify-center transition-all mx-auto bg-card shadow-sm border border-border dark:border-primary dark:bg-transparent hover:bg-muted dark:hover:bg-primary/10 active:scale-95"
-                    >
-                      <span className="text-[26px] font-medium text-foreground leading-none">{k.num}</span>
-                      {k.sub && <span className="text-[9px] font-semibold text-muted-foreground dark:text-primary tracking-widest mt-1 uppercase">{k.sub}</span>}
-                    </button>
-                  ))}
-                  
-                  <button
-                    onClick={isBiometricEnabled && isBiometricSupported ? triggerBiometric : undefined}
-                    className={cn(
-                      "w-[72px] h-[72px] rounded-full flex flex-col items-center justify-center transition-all mx-auto",
-                      isBiometricEnabled && isBiometricSupported
-                        ? "bg-card shadow-sm border border-border dark:border-primary dark:bg-transparent hover:bg-muted dark:hover:bg-primary/10 active:scale-95 cursor-pointer text-foreground" 
-                        : "opacity-0 cursor-default"
-                    )}
-                    disabled={!isBiometricEnabled || !isBiometricSupported}
-                  >
-                    <Fingerprint className="size-7" />
-                  </button>
-
-                  <button
-                    onClick={() => handlePinDigit("0")}
-                    className="w-[72px] h-[72px] rounded-full flex flex-col items-center justify-center transition-all mx-auto bg-card shadow-sm border border-border dark:border-primary dark:bg-transparent hover:bg-muted dark:hover:bg-primary/10 active:scale-95"
-                  >
-                    <span className="text-[26px] font-medium text-foreground leading-none">0</span>
-                    <span className="text-[9px] font-semibold text-muted-foreground dark:text-primary tracking-widest mt-1 uppercase">+</span>
-                  </button>
-
-                  <button
-                    onClick={handlePinDelete}
-                    className="w-[72px] h-[72px] rounded-full flex flex-col items-center justify-center transition-all mx-auto bg-card shadow-sm border border-border dark:border-primary dark:bg-transparent hover:bg-muted dark:hover:bg-primary/10 active:scale-95 text-foreground"
-                  >
-                    <Delete className="size-6" />
-                  </button>
-                </div>
-                
-                {isBiometricEnabled && isBiometricSupported && (
-                   <button 
-                     onClick={() => setShowPinPad(false)}
-                     className="mt-8 text-primary font-medium hover:underline text-sm"
-                   >
-                     Use Biometric Unlock
-                   </button>
-                )}
+            {/* Error Message if Verification Failed */}
+            {authError && (
+              <div className="w-full mb-6 p-3 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-center gap-2.5 text-xs text-destructive text-left animate-in fade-in">
+                <AlertCircle className="size-4 shrink-0" />
+                <span>{authError}</span>
               </div>
             )}
+
+            {/* Primary Action Button */}
+            <button
+              type="button"
+              onClick={() => triggerBiometric()}
+              disabled={isAuthenticating}
+              className="w-full h-12 rounded-2xl bg-gradient-primary text-primary-foreground font-semibold text-sm shadow-soft hover:opacity-95 active:scale-[0.99] transition-all flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-60"
+            >
+              {isAuthenticating ? (
+                <>
+                  <RefreshCw className="size-4 animate-spin" />
+                  <span>Waiting for authentication...</span>
+                </>
+              ) : (
+                <>
+                  <Fingerprint className="size-4.5" />
+                  <span>Unlock with Biometrics</span>
+                </>
+              )}
+            </button>
+
+            {/* Sign Out Option */}
+            <div className="mt-8 pt-6 border-t border-border/60 w-full flex items-center justify-center">
+              <button
+                type="button"
+                onClick={handleSignOutFromLock}
+                className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
+              >
+                <LogOut className="size-3.5" />
+                <span>Sign out of account</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

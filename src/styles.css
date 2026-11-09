@@ -218,3 +218,21 @@
 }
 @keyframes splash-pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } }
 .animate-splash { animation: splash-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+/* Ultra-smooth transitions for mobile & desktop */
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+[data-state="open"],
+[data-state="closed"] {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+button, a, input, select, textarea, [role="button"] {
+  touch-action: manipulation;
+}

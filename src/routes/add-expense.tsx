@@ -30,6 +30,7 @@ import { useAuth } from "@/lib/auth";
 import { createExpense } from "@/lib/data";
 import { CATEGORIES, todayISO, monthLabel, currentMonthKey } from "@/lib/expense-utils";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+import { cn } from "@/lib/utils";
 
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
@@ -288,17 +289,20 @@ function AddExpenseRoute() {
 
           {/* Hero Title & Subtitle */}
           <div className="px-4 sm:px-6 pb-2 max-w-md sm:max-w-xl md:max-w-2xl mx-auto w-full flex items-center justify-between pointer-events-auto">
-            <div className="max-w-[75%] sm:max-w-[85%]">
-              <h1 className="text-[26px] xs:text-[28px] sm:text-[32px] md:text-[34px] font-extrabold text-white tracking-tight font-display leading-tight drop-shadow-sm">
+            <div className={isBudgetMode ? "max-w-[80%] sm:max-w-[85%]" : "max-w-[75%] sm:max-w-[85%]"}>
+              <h1 className={cn(
+                "font-extrabold text-white tracking-tight font-display leading-tight drop-shadow-sm",
+                isBudgetMode
+                  ? "text-[20px] xs:text-[22px] sm:text-[26px] md:text-[28px] whitespace-nowrap"
+                  : "text-[26px] xs:text-[28px] sm:text-[32px] md:text-[34px]"
+              )}>
                 Add <span className="text-[#34d399]">{isBudgetMode ? "Budget Expense" : "Expense"}</span>
               </h1>
-              <p className="text-[12.5px] sm:text-[13px] text-white/90 font-normal mt-0.5 leading-snug drop-shadow-sm">
-                {isBudgetMode
-                  ? targetMonth
-                    ? `Tracking towards ${monthLabel(targetMonth)} budget`
-                    : "Track towards your monthly budget"
-                  : "Track your spending in seconds"}
-              </p>
+              {!isBudgetMode && (
+                <p className="text-[12.5px] sm:text-[13px] text-white/90 font-normal mt-0.5 leading-snug drop-shadow-sm">
+                  Track your spending in seconds
+                </p>
+              )}
             </div>
           </div>
         </div>
