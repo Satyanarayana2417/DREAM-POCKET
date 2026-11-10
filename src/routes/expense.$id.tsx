@@ -53,97 +53,6 @@ export const Route = createFileRoute("/expense/$id")({
   component: ExpenseDetailPage,
 });
 
-const MOCK_FALLBACKS: Record<string, Expense> = {
-  "mock-1": {
-    id: "mock-1",
-    userId: "mock",
-    title: "Subrahmanyam tifens",
-    amount: 40,
-    category: "Food",
-    date: "2026-11-01",
-    description: "Morning breakfast with family",
-    imageUrl: null,
-    createdAt: null,
-  },
-  "mock-2": {
-    id: "mock-2",
-    userId: "mock",
-    title: "Chodisetti Surya",
-    amount: 40,
-    category: "Transfer",
-    date: "2026-11-01",
-    description: "UPI transfer",
-    imageUrl: null,
-    createdAt: null,
-  },
-  "mock-3": {
-    id: "mock-3",
-    userId: "mock",
-    title: "Nithin Csm",
-    amount: 20,
-    category: "Transfer",
-    date: "2026-10-30",
-    description: "Tea and snacks",
-    imageUrl: null,
-    createdAt: null,
-  },
-  "mock-4": {
-    id: "mock-4",
-    userId: "mock",
-    title: "APSRTC",
-    amount: 35,
-    category: "Travel",
-    date: "2026-10-29",
-    description: "Bus fare to city center",
-    imageUrl: null,
-    createdAt: null,
-  },
-  "mock-5": {
-    id: "mock-5",
-    userId: "mock",
-    title: "Puri",
-    amount: 40,
-    category: "Food",
-    date: "2026-10-04",
-    description: "Evening snacks",
-    imageUrl: null,
-    createdAt: null,
-  },
-  "mock-6": {
-    id: "mock-6",
-    userId: "mock",
-    title: "Mrng tiffins",
-    amount: 130,
-    category: "Food",
-    date: "2026-10-04",
-    description: "Tiffins parcel",
-    imageUrl: null,
-    createdAt: null,
-  },
-  "mock-7": {
-    id: "mock-7",
-    userId: "mock",
-    title: "Night tififns",
-    amount: 80,
-    category: "Food",
-    date: "2026-10-03",
-    description: "Dinner tiffins",
-    imageUrl: null,
-    createdAt: null,
-  },
-  "mock-garlic": {
-    id: "mock-garlic",
-    userId: "mock",
-    title: "Garlic",
-    amount: 20,
-    category: "Groceries",
-    date: "2026-10-04",
-    description: "Fresh groceries",
-    imageUrl: null,
-    createdAt: null,
-  },
-};
-
 function getPaymentMethodDetails(method?: string) {
   const m = (method || "UPI").toLowerCase();
   if (m.includes("phonepe") || m.includes("phone_pe") || m.includes("phone pe")) {
@@ -265,33 +174,20 @@ function ExpenseDetailPage() {
       const stored = sessionStorage.getItem("expense_" + id);
       if (stored) return JSON.parse(stored) as Expense;
     } catch {}
-    if (id.startsWith("mock") && MOCK_FALLBACKS[id]) {
-      return MOCK_FALLBACKS[id];
-    }
     return null;
   }, [id]);
 
   const { data: fetchedExpense, isLoading: queryLoading } = useQuery({
     queryKey: ["expense", id],
     queryFn: () => fetchExpense(id),
-    enabled: !!id && !id.startsWith("mock") && !cachedExpense,
+    enabled: !!id && !cachedExpense,
   });
 
-  const expense = cachedExpense || fetchedExpense || (id.startsWith("mock") ? MOCK_FALLBACKS[id] : null) || {
-    id,
-    userId: user?.uid || "user",
-    title: "Lunch at Restaurant",
-    amount: 420,
-    category: "Food & Dining",
-    date: "2026-10-04",
-    description: "",
-    imageUrl: null,
-    createdAt: null,
-  };
+  const expense = cachedExpense || fetchedExpense || null;
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      if (id.startsWith("mock")) return;
+      if (!expense) return;
       await removeExpense(id);
     },
     onSuccess: () => {
@@ -308,6 +204,26 @@ function ExpenseDetailPage() {
 
   if (authLoading || (queryLoading && !expense)) {
     return <FullPageLoader label="Loading transaction details..." />;
+  }
+
+  if (!expense) {
+    return (
+      <div className="min-h-screen bg-[#f7f9f7] dark:bg-[#0f1412] flex flex-col items-center justify-center p-6 text-center">
+        <div className="size-16 rounded-full bg-muted flex items-center justify-center mb-4 text-muted-foreground">
+          <CreditCard className="size-8" />
+        </div>
+        <h2 className="text-xl font-bold font-display text-foreground">Transaction not found</h2>
+        <p className="text-sm text-muted-foreground mt-1 max-w-sm">
+          This transaction may have been removed or does not exist.
+        </p>
+        <button
+          onClick={() => navigate({ to: "/expenses" })}
+          className="mt-5 px-5 py-2.5 rounded-xl bg-emerald-600 text-white font-semibold text-sm shadow-xs hover:bg-emerald-700 cursor-pointer"
+        >
+          View All Expenses
+        </button>
+      </div>
+    );
   }
 
   const meta = categoryMeta(expense.category);

@@ -5,12 +5,16 @@ export type UploadResult = { url: string; publicId: string };
 
 /** Unsigned upload straight to Cloudinary. Only the returned URL is stored. */
 export function uploadToCloudinary(
-  file: File,
+  file: File | Blob,
   onProgress?: (percent: number) => void,
 ): Promise<UploadResult> {
   return new Promise((resolve, reject) => {
     const form = new FormData();
-    form.append("file", file);
+    if (file instanceof File) {
+      form.append("file", file);
+    } else {
+      form.append("file", file, "image.jpg");
+    }
     form.append("upload_preset", UPLOAD_PRESET);
     form.append("folder", "expense-manager");
 

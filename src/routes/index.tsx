@@ -15,8 +15,10 @@ import {
   greeting,
   monthOptions,
   monthLabel,
+  CATEGORIES,
   type Expense,
 } from "@/lib/expense-utils";
+import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Calendar,
@@ -185,14 +187,6 @@ function getCategoryIconAndStyle(category: string, title?: string) {
   };
 }
 
-const MOCKUP_CATEGORIES = [
-  { name: "Food & Dining", percent: 37, color: "#10b981", icon: Utensils },
-  { name: "Transport", percent: 18, color: "#3b82f6", icon: Car },
-  { name: "Shopping", percent: 15, color: "#f97316", icon: ShoppingBag },
-  { name: "Housing", percent: 12, color: "#8b5cf6", icon: Home },
-  { name: "Others", percent: 18, color: "#94a3b8", icon: MoreHorizontal },
-];
-
 function Index() {
   const { user, profile } = useAuth();
   const queryClient = useQueryClient();
@@ -200,7 +194,7 @@ function Index() {
   const name = profile?.username?.split(" ")[0] || "User";
   const hour = new Date().getHours();
   const timeGreeting = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
-  const userGreetingName = profile?.username?.split(" ")[0] || "Satya";
+  const userGreetingName = profile?.username?.split(" ")[0] || user?.displayName?.split(" ")[0] || "User";
   const [selectedMonth, setSelectedMonth] = useState(currentMonthKey());
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [showBalance, setShowBalance] = useState(true);
@@ -271,18 +265,21 @@ function Index() {
   // Sorting categories by amount
   const sortedCategories = [...catTotals].sort((a, b) => b.value - a.value);
 
-  // Dynamic vs Mockup amounts
-  const hasData = expenses.length > 0 || incomes.length > 0;
-  const balanceAmount = hasData
-    ? currentIncome > 0
-      ? currentIncome - mainSpent
-      : -mainSpent
-    : 45800;
-  const incomeAmount = hasData ? currentIncome : 35000;
-  const expenseAmount = hasData ? mainSpent : 12450;
-  const savingsAmount = hasData ? Math.max(0, currentIncome - mainSpent) : 22550;
+  // Dynamic user-specific amounts
+  const balanceAmount = currentIncome > 0 ? currentIncome - mainSpent : -mainSpent;
+  const incomeAmount = currentIncome;
+  const expenseAmount = mainSpent;
+  const savingsAmount = Math.max(0, currentIncome - mainSpent);
 
-  // Overview categories computation
+  // Comparison with previous month
+  const [currY, currM] = monthKey.split("-").map(Number);
+  const prevMonthKey = currM === 1 ? `${currY - 1}-12` : `${currY}-${String(currM - 1).padStart(2, "0")}`;
+  const prevMonthExpenses = expenses.filter((e) => inMonth(e, prevMonthKey) && !e.isBudgetExpense);
+  const prevMonthSpent = sumAmount(prevMonthExpenses);
+  const hasComparison = prevMonthExpenses.length > 0 && prevMonthSpent > 0;
+  const spentChangePercent = hasComparison ? Math.round(((mainSpent - prevMonthSpent) / prevMonthSpent) * 100) : 0;
+
+  // Overview categories computation (strictly real data)
   const overviewCategories =
     mainSpent > 0 && sortedCategories.length > 0
       ? sortedCategories.slice(0, 4).map((cat) => {
@@ -295,7 +292,7 @@ function Index() {
             icon,
           };
         })
-      : MOCKUP_CATEGORIES;
+      : [];
 
   if (mainSpent > 0 && sortedCategories.length > 4) {
     const top4Percent = overviewCategories.reduce((sum, c) => sum + c.percent, 0);
@@ -307,95 +304,34 @@ function Index() {
     });
   }
 
-  const chartData = overviewCategories.map((c) => ({
-    name: c.name,
-    value: c.percent > 0 ? c.percent : 1,
-    color: c.color,
-  }));
+  const chartData =
+    overviewCategories.length > 0
+      ? overviewCategories.map((c) => ({
+          name: c.name,
+          value: c.percent > 0 ? c.percent : 1,
+          color: c.color,
+        }))
+      : [{ name: "No expenses", value: 1, color: "#cbd5e1" }];
 
-  // Display transactions: live if available, else mockup items matching PhonePe reference
-  const displayRecentExpenses =
-    recentExpenses.length > 0
-      ? recentExpenses.map((e) => {
-          const isIncome = (e.category || "").toLowerCase() === "income" || e.amount < 0;
-          const displayTitle = e.title.startsWith("Paid to") || e.title.startsWith("Received from") || e.title.startsWith("Cashback from")
-            ? e.title
-            : isIncome ? `Received from ${e.title}` : `Paid to ${e.title}`;
-          return {
-            id: e.id,
-            title: displayTitle,
-            category: e.category,
-            amount: Math.abs(e.amount),
-            amountDisplay: Math.abs(e.amount).toLocaleString("en-IN"),
-            timeLabel: formatExpenseTime(e),
-            date: e.date,
-            iconType: isIncome ? "received-up" : "paid",
-            isReal: true,
-            rawExpense: e,
-          };
-        })
-      : [
-          {
-            id: "mock-1",
-            title: "Paid to Subrahmanyam tifens",
-            category: "Food",
-            amount: 40,
-            amountDisplay: "40",
-            timeLabel: "01 Nov, 12:30 pm",
-            date: "2026-11-01",
-            iconType: "paid",
-            isReal: false,
-            rawExpense: null,
-          },
-          {
-            id: "mock-2",
-            title: "Paid to Chodisetti Surya",
-            category: "Transfer",
-            amount: 40,
-            amountDisplay: "40",
-            timeLabel: "01 Nov, 11:15 am",
-            date: "2026-11-01",
-            iconType: "paid",
-            isReal: false,
-            rawExpense: null,
-          },
-          {
-            id: "mock-3",
-            title: "Paid to Nithin Csm",
-            category: "Transfer",
-            amount: 20,
-            amountDisplay: "20",
-            timeLabel: "30 Oct, 04:15 pm",
-            date: "2026-10-30",
-            iconType: "paid",
-            isReal: false,
-            rawExpense: null,
-          },
-          {
-            id: "mock-4",
-            title: "Paid to APSRTC",
-            category: "Travel",
-            amount: 35,
-            amountDisplay: "35",
-            timeLabel: "29 Oct, 08:45 am",
-            date: "2026-10-29",
-            iconType: "paid",
-            isReal: false,
-            rawExpense: null,
-          },
-          {
-            id: "mock-5",
-            title: "Paid to Puri",
-            category: "Food",
-            amount: 40,
-            amountDisplay: "40",
-            timeLabel: "04 Oct, 12:22 pm",
-            date: "2026-10-04",
-            iconType: "paid",
-            isReal: false,
-            rawExpense: null,
-          },
-        ];
+  // Display transactions: purely user's real transactions
+  const displayRecentExpenses = recentExpenses.map((e) => {
+    const isIncome = (e.category || "").toLowerCase() === "income" || e.amount < 0;
+    const displayTitle = e.title.startsWith("Paid to") || e.title.startsWith("Received from") || e.title.startsWith("Cashback from")
+      ? e.title
+      : isIncome ? `Received from ${e.title}` : `Paid to ${e.title}`;
+    return {
+      id: e.id,
+      title: displayTitle,
+      category: e.category,
+      amount: Math.abs(e.amount),
+      amountDisplay: Math.abs(e.amount).toLocaleString("en-IN"),
+      timeLabel: formatExpenseTime(e),
+      date: e.date,
+      iconType: isIncome ? "received-up" : "paid",
+      isReal: true,
+      rawExpense: e,
+    };
+  });
 
   return (
     <AppShell>
@@ -466,16 +402,33 @@ function Index() {
                     </span>
                   </div>
 
-                  {/* Growth Pill */}
-                  <div className="flex items-center gap-1.5 pt-0.5">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[#10b981]/25 px-1.5 xs:px-2 py-0.5 text-[10.5px] xs:text-[11px] font-semibold text-[#34d399] border border-[#34d399]/40 backdrop-blur-xs leading-none shadow-xs">
-                      <ArrowUp className="size-3 stroke-[3]" />
-                      <span>+12.4%</span>
-                    </span>
-                    <span className="text-[10.5px] xs:text-[11px] font-medium text-emerald-200/80 whitespace-nowrap leading-none drop-shadow-xs">
-                      vs last month
-                    </span>
-                  </div>
+                  {/* Growth Pill / Month Indicator */}
+                  {hasComparison ? (
+                    <div className="flex items-center gap-1.5 pt-0.5">
+                      <span className={cn(
+                        "inline-flex items-center gap-1 rounded-full px-1.5 xs:px-2 py-0.5 text-[10.5px] xs:text-[11px] font-semibold border backdrop-blur-xs leading-none shadow-xs",
+                        spentChangePercent <= 0
+                          ? "bg-[#10b981]/25 text-[#34d399] border-[#34d399]/40"
+                          : "bg-rose-500/25 text-rose-300 border-rose-400/40"
+                      )}>
+                        {spentChangePercent <= 0 ? (
+                          <ArrowDown className="size-3 stroke-[3]" />
+                        ) : (
+                          <ArrowUp className="size-3 stroke-[3]" />
+                        )}
+                        <span>{spentChangePercent > 0 ? `+${spentChangePercent}%` : `${spentChangePercent}%`}</span>
+                      </span>
+                      <span className="text-[10.5px] xs:text-[11px] font-medium text-emerald-200/80 whitespace-nowrap leading-none drop-shadow-xs">
+                        vs last month
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 pt-0.5">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[#10b981]/25 px-2 py-0.5 text-[10.5px] xs:text-[11px] font-semibold text-[#34d399] border border-[#34d399]/40 backdrop-blur-xs leading-none shadow-xs">
+                        {monthName}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Right Side: Spacer so text does not overlap the wallet graphic in background */}
@@ -588,53 +541,63 @@ function Index() {
           </div>
 
           {/* Content: Donut on Left + Category Breakdown on Right */}
-          <div className="flex items-center">
-            {/* Donut Chart with Centered Spent Amount */}
-            <div className="relative size-[118px] xs:size-[130px] shrink-0 flex items-center justify-center">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={chartData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={38}
-                    outerRadius={56}
-                    paddingAngle={2}
-                    stroke="none"
-                  >
-                    {chartData.map((entry, index) => (
-                      <Cell key={`mobile-donut-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
-                <span className="text-xs xs:text-sm font-extrabold text-foreground tracking-tight">
-                  {formatINR(expenseAmount, true)}
-                </span>
-                <span className="text-[9.5px] xs:text-[10px] text-muted-foreground font-medium">Spent</span>
+          {expenseAmount > 0 && overviewCategories.length > 0 ? (
+            <div className="flex items-center">
+              {/* Donut Chart with Centered Spent Amount */}
+              <div className="relative size-[118px] xs:size-[130px] shrink-0 flex items-center justify-center">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={chartData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={38}
+                      outerRadius={56}
+                      paddingAngle={2}
+                      stroke="none"
+                    >
+                      {chartData.map((entry, index) => (
+                        <Cell key={`mobile-donut-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
+                  <span className="text-xs xs:text-sm font-extrabold text-foreground tracking-tight">
+                    {formatINR(expenseAmount, true)}
+                  </span>
+                  <span className="text-[9.5px] xs:text-[10px] text-muted-foreground font-medium">Spent</span>
+                </div>
+              </div>
+
+              {/* Category Breakdown List */}
+              <div className="flex-1 pl-2.5 xs:pl-3 flex flex-col justify-between py-1 space-y-1.5 xs:space-y-2">
+                {overviewCategories.map((cat, idx) => {
+                  const Icon = cat.icon;
+                  return (
+                    <div key={idx} className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1.5 xs:gap-2 min-w-0">
+                        <Icon className="size-3.5 shrink-0" style={{ color: cat.color }} />
+                        <div className="size-1.5 xs:size-2 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
+                        <span className="font-semibold text-foreground truncate text-[11px] xs:text-xs">{cat.name}</span>
+                      </div>
+                      <span className="font-semibold text-foreground ml-1.5 xs:ml-2 shrink-0 text-[11px] xs:text-xs">{cat.percent}%</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
-
-            {/* Category Breakdown List */}
-            <div className="flex-1 pl-2.5 xs:pl-3 flex flex-col justify-between py-1 space-y-1.5 xs:space-y-2">
-              {overviewCategories.map((cat, idx) => {
-                const Icon = cat.icon;
-                return (
-                  <div key={idx} className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-1.5 xs:gap-2 min-w-0">
-                      <Icon className="size-3.5 shrink-0" style={{ color: cat.color }} />
-                      <div className="size-1.5 xs:size-2 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
-                      <span className="font-semibold text-foreground truncate text-[11px] xs:text-xs">{cat.name}</span>
-                    </div>
-                    <span className="font-semibold text-foreground ml-1.5 xs:ml-2 shrink-0 text-[11px] xs:text-xs">{cat.percent}%</span>
-                  </div>
-                );
-              })}
+          ) : (
+            <div className="flex flex-col items-center justify-center py-6 text-center">
+              <div className="size-10 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2">
+                <TrendingUp className="size-5 stroke-[1.8]" />
+              </div>
+              <p className="text-xs font-semibold text-foreground">No expenses recorded for {shortMonthName}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">Your category breakdown will appear here once you add expenses.</p>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Card 4: "Recent Transactions" (Ditto PhonePe UPI Style) */}
@@ -667,9 +630,9 @@ function Index() {
                     <ChevronDown className="size-3 text-muted-foreground" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start">
-                  {MOCKUP_CATEGORIES.map((c) => (
-                    <DropdownMenuItem key={c.name}>
+                <DropdownMenuContent align="start" className="max-h-[280px] overflow-y-auto">
+                  {CATEGORIES.map((c) => (
+                    <DropdownMenuItem key={c.name} onClick={() => navigate({ to: "/expenses" })}>
                       {c.name}
                     </DropdownMenuItem>
                   ))}
@@ -688,79 +651,82 @@ function Index() {
           </div>
 
           {/* Transactions List Grouped by Month */}
-          <div>
-            {displayRecentExpenses.map((item, idx) => {
-              const currentMonth = getMonthYearLabel(item.date);
-              const prevMonth = idx > 0 ? getMonthYearLabel(displayRecentExpenses[idx - 1].date) : null;
-              const showMonthHeader = idx === 0 || currentMonth !== prevMonth;
+          {displayRecentExpenses.length > 0 ? (
+            <div>
+              {displayRecentExpenses.map((item, idx) => {
+                const currentMonth = getMonthYearLabel(item.date);
+                const prevMonth = idx > 0 ? getMonthYearLabel(displayRecentExpenses[idx - 1].date) : null;
+                const showMonthHeader = idx === 0 || currentMonth !== prevMonth;
 
-              return (
-                <div key={item.id || idx}>
-                  {/* Month Bar: e.g. "October 2026" (Full width strip matching reference image) */}
-                  {showMonthHeader && (
-                    <div className="-mx-4 sm:-mx-5 px-4 sm:px-5 py-2 my-2 bg-[#eae5d8]/90 dark:bg-[#1a2320] text-[13px] font-semibold text-foreground/80 dark:text-emerald-100/90 tracking-tight flex items-center border-y border-border/20 select-none">
-                      <span>{currentMonth}</span>
-                    </div>
-                  )}
+                return (
+                  <div key={item.id || idx}>
+                    {/* Month Bar: e.g. "October 2026" (Full width strip matching reference image) */}
+                    {showMonthHeader && (
+                      <div className="-mx-4 sm:-mx-5 px-4 sm:px-5 py-2 my-2 bg-[#eae5d8]/90 dark:bg-[#1a2320] text-[13px] font-semibold text-foreground/80 dark:text-emerald-100/90 tracking-tight flex items-center border-y border-border/20 select-none">
+                        <span>{currentMonth}</span>
+                      </div>
+                    )}
 
-                  {/* Transaction Row */}
-                  <div
-                    onClick={() => {
-                      const exp = item.rawExpense || {
-                        id: item.id,
-                        userId: "user",
-                        title: item.title,
-                        amount: item.amount,
-                        category: item.category || "Food & Dining",
-                        date: item.date || "2026-10-04",
-                        description: "Lunch with team",
-                        imageUrl: null,
-                        createdAt: { seconds: Math.floor(Date.now() / 1000) - 3600 },
-                      };
-                      sessionStorage.setItem("expense_" + exp.id, JSON.stringify(exp));
-                      navigate({ to: "/expense/$id", params: { id: exp.id } });
-                    }}
-                    className={`py-3.5 transition-colors cursor-pointer hover:bg-muted/30 active:scale-[0.99] rounded-xl px-1 -mx-1 ${
-                      !showMonthHeader && idx > 0 ? "border-t border-border/20" : ""
-                    }`}
-                  >
-                    {/* Top Line: Icon + Title + Amount */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2.5 xs:gap-3.5 min-w-0">
-                        {/* Professional Green Squircle Icon */}
-                        <div className="flex size-9 xs:size-10 items-center justify-center rounded-[12px] xs:rounded-[14px] bg-gradient-to-br from-[#059669] to-[#047857] text-white shrink-0 shadow-xs">
-                          {item.iconType === "cashback" ? (
-                            <span className="font-bold text-[15px] xs:text-[17px] leading-none font-sans select-none">पे</span>
-                          ) : item.iconType === "received-down" ? (
-                            <ArrowDownLeft className="size-4.5 xs:size-5 stroke-[2.4]" />
-                          ) : (
-                            <ArrowUpRight className="size-4.5 xs:size-5 stroke-[2.4]" />
-                          )}
+                    {/* Transaction Row */}
+                    <div
+                      onClick={() => {
+                        if (item.rawExpense) {
+                          sessionStorage.setItem("expense_" + item.rawExpense.id, JSON.stringify(item.rawExpense));
+                          navigate({ to: "/expense/$id", params: { id: item.rawExpense.id } });
+                        }
+                      }}
+                      className={`py-3.5 transition-colors cursor-pointer hover:bg-muted/30 active:scale-[0.99] rounded-xl px-1 -mx-1 ${
+                        !showMonthHeader && idx > 0 ? "border-t border-border/20" : ""
+                      }`}
+                    >
+                      {/* Top Line: Icon + Title + Amount */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5 xs:gap-3.5 min-w-0">
+                          {/* Professional Green Squircle Icon */}
+                          <div className="flex size-9 xs:size-10 items-center justify-center rounded-[12px] xs:rounded-[14px] bg-gradient-to-br from-[#059669] to-[#047857] text-white shrink-0 shadow-xs">
+                            {item.iconType === "cashback" ? (
+                              <span className="font-bold text-[15px] xs:text-[17px] leading-none font-sans select-none">पे</span>
+                            ) : item.iconType === "received-down" ? (
+                              <ArrowDownLeft className="size-4.5 xs:size-5 stroke-[2.4]" />
+                            ) : (
+                              <ArrowUpRight className="size-4.5 xs:size-5 stroke-[2.4]" />
+                            )}
+                          </div>
+
+                          {/* Title */}
+                          <span className="text-[14.5px] xs:text-[16px] font-medium text-foreground tracking-tight truncate">
+                            {item.title}
+                          </span>
                         </div>
 
-                        {/* Title */}
-                        <span className="text-[14.5px] xs:text-[16px] font-medium text-foreground tracking-tight truncate">
-                          {item.title}
+                        {/* Amount */}
+                        <span className="text-[14.5px] xs:text-[16px] font-medium text-foreground tracking-tight shrink-0 ml-2.5 xs:ml-3">
+                          ₹{item.amountDisplay}
                         </span>
                       </div>
 
-                      {/* Amount */}
-                      <span className="text-[14.5px] xs:text-[16px] font-medium text-foreground tracking-tight shrink-0 ml-2.5 xs:ml-3">
-                        ₹{item.amountDisplay}
-                      </span>
-                    </div>
-
-                    {/* Bottom Line: Timestamp only (Yellow bank icon completely removed) */}
-                    <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
-                      <span className="text-[12px] text-muted-foreground/80 font-normal">
-                        {item.timeLabel}
-                      </span>
+                      {/* Bottom Line: Timestamp only */}
+                      <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
+                        <span className="text-[12px] text-muted-foreground/80 font-normal">
+                          {item.timeLabel}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-10 text-center">
+              <div className="size-12 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2.5">
+                <Wallet className="size-6 stroke-[1.8]" />
+              </div>
+              <p className="text-sm font-semibold text-foreground">No transactions recorded yet</p>
+              <p className="text-xs text-muted-foreground mt-1 max-w-[240px]">
+                Tap the + button to add your first expense or income.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

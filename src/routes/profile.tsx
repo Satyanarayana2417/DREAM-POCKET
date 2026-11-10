@@ -23,6 +23,7 @@ import {
   Target,
   Coins,
   Crown,
+  Pencil,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useState, useRef } from "react";
@@ -40,9 +41,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AppShell, Avatar } from "@/components/AppShell";
 import { ImageCropperDialog } from "@/components/ImageCropper";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
-import { firebaseStorage } from "@/lib/firebase";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 
 export const Route = createFileRoute("/profile")({
   component: ProfileRoute,
@@ -114,18 +114,18 @@ function ProfileRoute() {
     try {
       setIsUploading(true);
       setSelectedImage(null);
-      const storage = firebaseStorage();
-      const storageRef = ref(storage, `users/${user.uid}/profile_${Date.now()}.jpg`);
-      await uploadBytes(storageRef, blob);
-      const url = await getDownloadURL(storageRef);
+
+      const file = new File([blob], `avatar_${user.uid}_${Date.now()}.jpg`, { type: "image/jpeg" });
+      const { url } = await uploadToCloudinary(file);
 
       await updateProfile(user, { photoURL: url });
       await updateUserDoc(user.uid, { photoURL: url });
+      await refreshProfile();
 
       toast.success("Profile picture updated!");
-      refreshProfile();
     } catch (err: any) {
-      toast.error(err.message || "Failed to upload picture");
+      console.error("Profile picture upload error:", err);
+      toast.error(err?.message || "Failed to upload picture. Please try again.");
     } finally {
       setIsUploading(false);
     }
@@ -166,15 +166,8 @@ function ProfileRoute() {
     {
       icon: BarChart3,
       title: "My Reports",
-      subtitle: "View and download your financial reports",
-      onClick: () => navigate({ to: "/expenses" }),
-      trailing: <ChevronRight className="size-5 text-muted-foreground/50" />,
-    },
-    {
-      icon: Layers,
-      title: "Categories",
-      subtitle: "Manage income and expense categories",
-      onClick: () => navigate({ to: "/settings", search: { view: "appearance" } }),
+      subtitle: "View and download your monthly financial reports",
+      onClick: () => navigate({ to: "/reports" }),
       trailing: <ChevronRight className="size-5 text-muted-foreground/50" />,
     },
     {
@@ -183,30 +176,6 @@ function ProfileRoute() {
       subtitle: "Manage cash, bank, UPI and card accounts",
       onClick: () => navigate({ to: "/settings", search: { view: "account" } }),
       trailing: <ChevronRight className="size-5 text-muted-foreground/50" />,
-    },
-    {
-      icon: Bell,
-      title: "Reminders",
-      subtitle: "Expense and bill payment reminders",
-      onClick: () => setRemindersEnabled(!remindersEnabled),
-      trailing: (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            setRemindersEnabled(!remindersEnabled);
-          }}
-          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 shrink-0 ${
-            remindersEnabled ? "bg-emerald-600" : "bg-muted-foreground/30"
-          }`}
-        >
-          <span
-            className={`inline-block size-4.5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${
-              remindersEnabled ? "translate-x-5.5" : "translate-x-1"
-            }`}
-          />
-        </button>
-      ),
     },
     {
       icon: Cloud,
@@ -318,14 +287,14 @@ function ProfileRoute() {
                 </div>
               </div>
 
-              {/* Edit Profile Button */}
+              {/* Edit Profile Button - Pencil Icon Only */}
               <button
                 type="button"
-                onClick={startEditing}
-                className="shrink-0 flex items-center gap-1.5 rounded-full border border-white/30 bg-white/10 hover:bg-white/20 active:scale-95 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur-xs transition-all shadow-xs"
+                onClick={() => navigate({ to: "/edit-profile" })}
+                className="shrink-0 size-9 rounded-full border border-white/30 bg-white/10 hover:bg-white/20 active:scale-95 flex items-center justify-center text-white backdrop-blur-xs transition-all shadow-xs cursor-pointer"
+                aria-label="Edit Profile"
               >
-                <Edit2 className="size-3.5" />
-                <span className="whitespace-nowrap">Edit Profile</span>
+                <Pencil className="size-4 stroke-[2.2]" />
               </button>
             </div>
           </div>

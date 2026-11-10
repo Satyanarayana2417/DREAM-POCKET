@@ -79,7 +79,8 @@ export function friendlyAuthError(err: unknown) {
     "auth/cancelled-popup-request": "Sign-in popup was cancelled.",
     "auth/popup-blocked": "Your browser blocked the sign-in popup. Allow popups and retry.",
     "auth/network-request-failed": "Network problem. Check your connection and try again.",
-    "auth/operation-not-allowed": "This sign-in method is not enabled in Firebase Authentication.",
+    "auth/operation-not-allowed":
+      "Sign in with Apple requires the Services ID and Private Key (.p8) to be configured in Firebase Console > Authentication > Sign-in method > Apple.",
     "auth/account-exists-with-different-credential":
       "An account already exists with this email using another sign-in method. Please sign in using your original method.",
     "auth/credential-already-in-use": "This credential is already linked to another account.",
@@ -216,42 +217,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     provider.addScope("email");
     provider.addScope("name");
 
-    const cred = await signInWithPopup(auth, provider);
+    try {
+      const cred = await signInWithPopup(auth, provider);
 
-    // Apple only provides user's full name on the FIRST authorization.
-    let displayName = cred.user.displayName;
-    if (!displayName) {
-      const additionalInfo = getAdditionalUserInfo(cred);
-      const profile = additionalInfo?.profile as Record<string, unknown> | undefined;
-      if (profile) {
-        const first = (profile["firstName"] || profile["first_name"] || "") as string;
-        const last = (profile["lastName"] || profile["last_name"] || "") as string;
-        const combined = `${first} ${last}`.trim();
-        if (combined) displayName = combined;
+      // Apple only provides user's full name on the FIRST authorization.
+      let displayName = cred.user.displayName;
+      if (!displayName) {
+        const additionalInfo = getAdditionalUserInfo(cred);
+        const profile = additionalInfo?.profile as Record<string, unknown> | undefined;
+        if (profile) {
+          const first = (profile["firstName"] || profile["first_name"] || "") as string;
+          const last = (profile["lastName"] || profile["last_name"] || "") as string;
+          const combined = `${first} ${last}`.trim();
+          if (combined) displayName = combined;
+        }
       }
-    }
 
-    if (!displayName && cred.user.email) {
-      displayName = cred.user.email.split("@")[0];
-    }
-
-    if (displayName && !cred.user.displayName) {
-      try {
-        await updateProfile(cred.user, { displayName });
-      } catch {
-        // Non-blocking
+      if (!displayName && cred.user.email) {
+        displayName = cred.user.email.split("@")[0];
       }
+
+      if (displayName && !cred.user.displayName) {
+        try {
+          await updateProfile(cred.user, { displayName });
+        } catch {
+          // Non-blocking
+        }
+      }
+
+      await upsertUserDoc({
+        uid: cred.user.uid,
+        username: displayName || "Apple User",
+        email: cred.user.email ?? "",
+        photoURL: cred.user.photoURL,
+        provider: "apple",
+      });
+
+      return cred.user;
+    } catch (err) {
+      console.error("Apple Sign-In error:", err);
+      throw err;
     }
-
-    await upsertUserDoc({
-      uid: cred.user.uid,
-      username: displayName || "Apple User",
-      email: cred.user.email ?? "",
-      photoURL: cred.user.photoURL,
-      provider: "apple",
-    });
-
-    return cred.user;
   }, []);
 
   const sendVerification = useCallback(async () => {

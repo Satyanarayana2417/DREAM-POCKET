@@ -1,11 +1,14 @@
 import { useAppLock } from './AppLockProvider';
 import { Switch } from '@/components/ui/switch';
 import { SettingsGroup, SettingsRow } from '@/components/SettingsUI';
-import { Fingerprint, Lock, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Fingerprint, Lock, ShieldCheck, Smartphone } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
 export function AppLockSettings() {
+  const isNative = Capacitor.isNativePlatform();
+
   const {
     isBiometricEnabled,
     isBiometricSupported,
@@ -28,6 +31,21 @@ export function AppLockSettings() {
     }
   };
 
+  // If on desktop / laptop: Biometrics are not used, show informational row
+  if (!isNative) {
+    return (
+      <SettingsGroup title="Security & App Lock">
+        <SettingsRow
+          icon={Smartphone}
+          iconBg="bg-emerald-500/10 text-emerald-600"
+          title="Mobile Biometric Lock"
+          description="Biometric App Lock (Fingerprint & Face ID) is designed exclusively for your mobile device. On laptops & desktop browsers, your account is secured by your Dream Pocket login."
+        />
+      </SettingsGroup>
+    );
+  }
+
+  // On Mobile Native Application
   return (
     <SettingsGroup title="Security & App Lock">
       <SettingsRow
@@ -39,7 +57,7 @@ export function AppLockSettings() {
             ? isBiometricEnabled
               ? `Protected by ${authenticatorLabel}`
               : `Use ${authenticatorLabel} to lock and protect Dream Pocket`
-            : "Biometric/passkey sensor not detected on this device"
+            : "Biometric sensor not available on this mobile device"
         }
         value={
           <Switch
@@ -63,19 +81,10 @@ export function AppLockSettings() {
             icon={Lock}
             iconBg="bg-rose-500"
             title="Lock App Now"
-            description="Immediately lock Dream Pocket to verify biometric access"
+            description="Immediately lock Dream Pocket to test biometric access"
             onClick={lockNow}
           />
         </>
-      )}
-
-      {!isBiometricSupported && (
-        <div className="mx-4 my-2 p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-2.5 text-xs text-amber-700 dark:text-amber-400">
-          <AlertCircle className="size-4 shrink-0 mt-0.5" />
-          <p>
-            Your current browser or device hardware does not expose a supported platform biometric authenticator (such as Windows Hello, Touch ID, Face ID, or Android Biometrics).
-          </p>
-        </div>
       )}
     </SettingsGroup>
   );

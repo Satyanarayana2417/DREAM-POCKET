@@ -117,86 +117,6 @@ function formatExpenseTime(expense: Expense): string {
   return expense.date || "Today";
 }
 
-const MOCK_HISTORY_EXPENSES: Expense[] = [
-  {
-    id: "mock-1",
-    userId: "mock",
-    title: "Subrahmanyam tifens",
-    amount: 40,
-    category: "Food",
-    date: "2026-11-01",
-    description: "",
-    imageUrl: null,
-    createdAt: null,
-  },
-  {
-    id: "mock-2",
-    userId: "mock",
-    title: "Chodisetti Surya",
-    amount: 40,
-    category: "Transfer",
-    date: "2026-11-01",
-    description: "",
-    imageUrl: null,
-    createdAt: null,
-  },
-  {
-    id: "mock-3",
-    userId: "mock",
-    title: "Nithin Csm",
-    amount: 20,
-    category: "Transfer",
-    date: "2026-10-30",
-    description: "",
-    imageUrl: null,
-    createdAt: null,
-  },
-  {
-    id: "mock-4",
-    userId: "mock",
-    title: "APSRTC",
-    amount: 35,
-    category: "Travel",
-    date: "2026-10-29",
-    description: "",
-    imageUrl: null,
-    createdAt: null,
-  },
-  {
-    id: "mock-5",
-    userId: "mock",
-    title: "Puri",
-    amount: 40,
-    category: "Food",
-    date: "2026-10-04",
-    description: "",
-    imageUrl: null,
-    createdAt: null,
-  },
-  {
-    id: "mock-6",
-    userId: "mock",
-    title: "Mrng tiffins",
-    amount: 130,
-    category: "Food",
-    date: "2026-10-04",
-    description: "",
-    imageUrl: null,
-    createdAt: null,
-  },
-  {
-    id: "mock-7",
-    userId: "mock",
-    title: "Night tififns",
-    amount: 80,
-    category: "Food",
-    date: "2026-10-03",
-    description: "",
-    imageUrl: null,
-    createdAt: null,
-  },
-];
-
 function ExpensesRoute() {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
@@ -221,10 +141,9 @@ function ExpensesRoute() {
 
   const months = monthOptions(joinDate);
 
-  // Use real expenses if any exist; otherwise show mock history items
+  // Strictly user's real expenses
   const sourceExpenses = useMemo(() => {
-    const realNonBudget = expenses.filter((e) => !e.isBudgetExpense);
-    return realNonBudget.length > 0 ? realNonBudget : MOCK_HISTORY_EXPENSES;
+    return expenses.filter((e) => !e.isBudgetExpense);
   }, [expenses]);
 
   const filteredExpenses = useMemo(() => {

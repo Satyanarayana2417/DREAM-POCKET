@@ -53,6 +53,9 @@ export function AppShell({
   const { theme, setTheme } = useTheme();
   const isProfilePage = location.pathname.startsWith("/profile");
   const isBudgetPage = location.pathname.startsWith("/budget");
+  const isSettingsPage = location.pathname.startsWith("/settings");
+  const isEditProfilePage = location.pathname.startsWith("/edit-profile");
+  const isReportsPage = location.pathname.startsWith("/reports");
   const isHomePage = location.pathname === "/";
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -90,7 +93,7 @@ export function AppShell({
   }, [user]);
 
   const showFAB = location.pathname === "/" || location.pathname === "/expenses";
-  const hideBottomNav = location.pathname.startsWith("/settings") || location.pathname.startsWith("/profile");
+  const hideBottomNav = isEditProfilePage || isReportsPage;
 
   if (loading || !user) return <FullPageLoader label="Getting things ready…" />;
 
@@ -114,8 +117,8 @@ export function AppShell({
 
   return (
     <div className="min-h-screen bg-background md:pl-[260px] overflow-x-hidden">
-      {/* Mobile Header (Hidden on budget page) */}
-      {!isBudgetPage && (
+      {/* Mobile Header (Hidden on budget, settings & reports page) */}
+      {!isBudgetPage && !isSettingsPage && !isEditProfilePage && !isReportsPage && (
         <header
           className={cn(
             "flex h-16 items-center justify-between px-4 transition-all duration-300 md:hidden z-40",
@@ -168,14 +171,6 @@ export function AppShell({
                         {item.label}
                       </Link>
                     ))}
-                    
-                    <button
-                      onClick={handleLogout}
-                      className="mt-auto flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:bg-destructive/10 hover:text-destructive"
-                    >
-                      <LogOut className="size-5" />
-                      Logout
-                    </button>
                   </nav>
                 </div>
               </SheetContent>
@@ -278,14 +273,6 @@ export function AppShell({
             </div>
             Notifications
           </Link>
-
-          <button
-            onClick={handleLogout}
-            className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:bg-destructive/10 hover:text-destructive"
-          >
-            <LogOut className="size-5" />
-            Logout
-          </button>
         </nav>
       </aside>
 
@@ -293,7 +280,13 @@ export function AppShell({
       <main
         className={cn(
           "mx-auto w-full max-w-6xl pb-28 sm:px-6 md:pb-12 md:pt-8",
-          isHomePage ? "px-4 pt-0 md:pt-8" : isBudgetPage ? "px-4 pt-2 md:pt-6" : "px-4 pt-6 md:pt-8"
+          isHomePage
+            ? "px-4 pt-0 md:pt-8"
+            : isBudgetPage
+            ? "px-4 pt-2 md:pt-6"
+            : isReportsPage
+            ? "px-0 pt-0 pb-28 md:px-4 md:pt-6"
+            : "px-4 pt-6 md:pt-8"
         )}
       >
         {children}

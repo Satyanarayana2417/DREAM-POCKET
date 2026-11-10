@@ -12,11 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AddExpenseRouteImport } from './routes/add-expense'
 import { Route as BudgetRouteImport } from './routes/budget'
+import { Route as EditProfileRouteImport } from './routes/edit-profile'
 import { Route as ExpensesRouteImport } from './routes/expenses'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as VerifyEmailRouteImport } from './routes/verify-email'
@@ -39,6 +41,11 @@ const AddExpenseRoute = AddExpenseRouteImport.update({
 const BudgetRoute = BudgetRouteImport.update({
   id: '/budget',
   path: '/budget',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EditProfileRoute = EditProfileRouteImport.update({
+  id: '/edit-profile',
+  path: '/edit-profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExpensesRoute = ExpensesRouteImport.update({
@@ -64,6 +71,11 @@ const NotificationsRoute = NotificationsRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRoute = SettingsRouteImport.update({
@@ -112,11 +124,13 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/add-expense': typeof AddExpenseRoute
   '/budget': typeof BudgetRoute
+  '/edit-profile': typeof EditProfileRoute
   '/expenses': typeof ExpensesRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
   '/profile': typeof ProfileRoute
+  '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
@@ -130,11 +144,13 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/add-expense': typeof AddExpenseRoute
   '/budget': typeof BudgetRoute
+  '/edit-profile': typeof EditProfileRoute
   '/expenses': typeof ExpensesRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
   '/profile': typeof ProfileRoute
+  '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
@@ -149,11 +165,13 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/add-expense': typeof AddExpenseRoute
   '/budget': typeof BudgetRoute
+  '/edit-profile': typeof EditProfileRoute
   '/expenses': typeof ExpensesRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
   '/profile': typeof ProfileRoute
+  '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
@@ -169,11 +187,13 @@ export interface FileRouteTypes {
     | '/'
     | '/add-expense'
     | '/budget'
+    | '/edit-profile'
     | '/expenses'
     | '/forgot-password'
     | '/login'
     | '/notifications'
     | '/profile'
+    | '/reports'
     | '/settings'
     | '/signup'
     | '/verify-email'
@@ -187,11 +207,13 @@ export interface FileRouteTypes {
     | '/'
     | '/add-expense'
     | '/budget'
+    | '/edit-profile'
     | '/expenses'
     | '/forgot-password'
     | '/login'
     | '/notifications'
     | '/profile'
+    | '/reports'
     | '/settings'
     | '/signup'
     | '/verify-email'
@@ -205,11 +227,13 @@ export interface FileRouteTypes {
     | '/'
     | '/add-expense'
     | '/budget'
+    | '/edit-profile'
     | '/expenses'
     | '/forgot-password'
     | '/login'
     | '/notifications'
     | '/profile'
+    | '/reports'
     | '/settings'
     | '/signup'
     | '/verify-email'
@@ -224,11 +248,13 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AddExpenseRoute: typeof AddExpenseRoute
   BudgetRoute: typeof BudgetRoute
+  EditProfileRoute: typeof EditProfileRoute
   ExpensesRoute: typeof ExpensesRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   NotificationsRoute: typeof NotificationsRoute
   ProfileRoute: typeof ProfileRoute
+  ReportsRoute: typeof ReportsRoute
   SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
@@ -260,6 +286,13 @@ declare module '@tanstack/react-router' {
       path: '/budget'
       fullPath: '/budget'
       preLoaderRoute: typeof BudgetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/edit-profile': {
+      id: '/edit-profile'
+      path: '/edit-profile'
+      fullPath: '/edit-profile'
+      preLoaderRoute: typeof EditProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/expenses': {
@@ -295,6 +328,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -360,11 +400,13 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AddExpenseRoute: AddExpenseRoute,
   BudgetRoute: BudgetRoute,
+  EditProfileRoute: EditProfileRoute,
   ExpensesRoute: ExpensesRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   NotificationsRoute: NotificationsRoute,
   ProfileRoute: ProfileRoute,
+  ReportsRoute: ReportsRoute,
   SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,
   VerifyEmailRoute: VerifyEmailRoute,
