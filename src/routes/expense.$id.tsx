@@ -244,6 +244,7 @@ function ExpenseDetailPage() {
   }
 
   async function handleShareReceipt() {
+    if (!expense) return;
     setIsSharingReceipt(true);
     try {
       const file = await getReceiptFileToShare(expense, dateTimeStr);

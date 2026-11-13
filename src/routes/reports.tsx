@@ -252,10 +252,10 @@ function ReportsPage() {
     );
     const totalFamilySpent = thisMonthFamilyExpenses.reduce((sum, e) => sum + e.amount, 0);
     const userContribution = thisMonthFamilyExpenses
-      .filter((e) => e.userId === user?.uid)
+      .filter((e) => (e as any).addedBy === user?.uid || (e as any).userId === user?.uid)
       .reduce((sum, e) => sum + e.amount, 0);
 
-    const fBudgetObj = familyBudgets.find((b) => b.month === selectedMonth && b.userId === user?.uid);
+    const fBudgetObj = familyBudgets.find((b) => b.month === selectedMonth && ((b as any).addedBy === user?.uid || (b as any).userId === user?.uid));
     const totalFamilyBudget = fBudgetObj?.budget || 0;
 
     if (totalFamilySpent === 0 && userContribution === 0 && totalFamilyBudget === 0) {
@@ -308,9 +308,9 @@ function ReportsPage() {
         );
         const tfSpent = tfExpenses.reduce((sum, e) => sum + e.amount, 0);
         const tfUserContrib = tfExpenses
-          .filter((e) => e.userId === user?.uid)
+          .filter((e) => (e as any).addedBy === user?.uid || (e as any).userId === user?.uid)
           .reduce((sum, e) => sum + e.amount, 0);
-        const tfBudgetObj = familyBudgets.find((b) => b.month === targetMonth && b.userId === user?.uid);
+        const tfBudgetObj = familyBudgets.find((b) => b.month === targetMonth && ((b as any).addedBy === user?.uid || (b as any).userId === user?.uid));
 
         if (tfSpent > 0 || tfUserContrib > 0 || (tfBudgetObj?.budget || 0) > 0) {
           targetFamilyData = {

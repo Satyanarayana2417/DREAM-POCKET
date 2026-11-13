@@ -2,12 +2,12 @@ import { useAppLock } from './AppLockProvider';
 import { Switch } from '@/components/ui/switch';
 import { SettingsGroup, SettingsRow } from '@/components/SettingsUI';
 import { Fingerprint, Lock, ShieldCheck, Smartphone } from 'lucide-react';
-import { Capacitor } from '@capacitor/core';
+import { isMobileOrTablet } from './AppLockProvider';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
 export function AppLockSettings() {
-  const isNative = Capacitor.isNativePlatform();
+  const isMobile = isMobileOrTablet();
 
   const {
     isBiometricEnabled,
@@ -31,21 +31,21 @@ export function AppLockSettings() {
     }
   };
 
-  // If on desktop / laptop: Biometrics are not used, show informational row
-  if (!isNative) {
+  // If on desktop / laptop: Biometrics are disabled, show informational card
+  if (!isMobile) {
     return (
       <SettingsGroup title="Security & App Lock">
         <SettingsRow
           icon={Smartphone}
           iconBg="bg-emerald-500/10 text-emerald-600"
           title="Mobile Biometric Lock"
-          description="Biometric App Lock (Fingerprint & Face ID) is designed exclusively for your mobile device. On laptops & desktop browsers, your account is secured by your Dream Pocket login."
+          description="Biometric App Lock (Fingerprint & Face ID) is active on your mobile devices. On laptops & desktop browsers, your account is secured by your Dream Pocket password and login."
         />
       </SettingsGroup>
     );
   }
 
-  // On Mobile Native Application
+  // On Mobile Devices (Android, iPhone, iPad, Capacitor Native & Mobile PWA)
   return (
     <SettingsGroup title="Security & App Lock">
       <SettingsRow

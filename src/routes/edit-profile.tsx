@@ -290,10 +290,10 @@ function EditProfilePage() {
       {/* Image Cropper Dialog */}
       {selectedImage && (
         <ImageCropperDialog
-          open={!!selectedImage}
-          imageUrl={selectedImage}
+          isOpen={!!selectedImage}
+          onClose={() => setSelectedImage(null)}
+          imageSrc={selectedImage}
           onCropComplete={handleCropComplete}
-          onCancel={() => setSelectedImage(null)}
         />
       )}
 
